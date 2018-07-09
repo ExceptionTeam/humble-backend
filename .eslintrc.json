@@ -25,10 +25,7 @@
         "no-alert":"off",
         "consistent-return":"off",
         "prefer-promise-reject-errors":"warn",
-        "no-unused-vars": "warn",
-        "no-undef": "warn",
         "eqeqeq": "warn",
-        "no-use-before-define":"warn",
-        "no-param-reassign":"warn"
+        "no-use-before-define":"warn"
     }
 }
