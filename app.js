@@ -24,8 +24,8 @@ const options = {
 };
 
 mongoose.connect(uri, options).then(
-  () => { /** ready to use. The `mongoose.connect()` promise resolves to undefined. */ },
-  err => { /** handle initial connection error */ }
+  () => { /** ready to use. The `mongoose.connect()` promise resolves to undefined. **/ },
+  err => { /** handle initial connection error **/ }
 );
 
 app.get('/', (req, res) => {
@@ -33,16 +33,16 @@ app.get('/', (req, res) => {
 });
 
 app.post('/requestTest', (req, res) => {
-  const userId = req.query.id;
-  const section = req.body;
+  const data = req.body;
 
   let requestTest = new models.Request({ /** create request for teachers **/
     _id: new mongoose.Types.ObjectId(),
-    userId,
-    section,
+    userId: data._id.toString(),
+    section: data.section,
     status: "PENDING"
   });
 
+  /** Save request into DB **/
   /** Send for all teachers requests for approvemt **/
 
   res.statusCode = 200;
