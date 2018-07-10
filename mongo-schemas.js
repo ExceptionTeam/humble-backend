@@ -2,6 +2,16 @@ const mongoose = require('mongoose');
 const uniqueValidator = require('mongoose-unique-validator');
 const { Schema } = mongoose;
 
+const userSchema = new Schema({
+  _id: { type: Schema.Types.ObjectId, required: [true, "error"] },
+  name: { type: String, required: [true, "error"], unique: true },
+  surname: { type:String, required: [true,"error"] },
+  password: { type: String, required: [true, "error"] },
+  role: { type: String, required: [true,"error"] },
+  account: {}
+});
+userSchema.plugin(uniqueValidator, { message: "already exists" });
+
 const questionSchema = new Schema({
   _id: { type: Schema.Types.ObjectId, required: [true, 'error'] },
   section: { type: [], required: [true, 'error'] },
@@ -69,6 +79,7 @@ const submissionSchema = new Schema({
 });
 submissionSchema.plugin(uniqueValidator, { message: 'already exists' });
 
+const User = mongoose.model("User", userSchema);
 const Submission = mongoose.model('Submission', submissionSchema);
 const Assignment = mongoose.model('Assignment', assignmentSchema);
 const Group = mongoose.model('Group', groupSchema);
@@ -78,6 +89,7 @@ const TeacherAssignment = mongoose.model('TeacherAssignment', teacherAssignmentS
 const Question = mongoose.model('Question', questionSchema);
 
 module.exports = {
+  User,
   Request,
   StudentAssignment,
   TeacherAssignment,
