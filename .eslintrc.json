@@ -1,6 +1,7 @@
 {
     "env": {
-        "browser": true
+        "node": true,
+        "es6": true
     },
     "extends": "airbnb-base",
     "rules": {
@@ -14,7 +15,6 @@
         ],
         "no-plusplus": "off",
         "func-names": "off",
-        "no-multi-assign": "off",
         "no-console": "off",
         "class-methods-use-this": "off",
         "no-underscore-dangle": "off",
@@ -22,10 +22,9 @@
         "prefer-template":"off",
         "no-prototype-builtins":"off",
         "no-restricted-globals":"off",
-        "no-alert":"off",
         "consistent-return":"off",
+        "eqeqeq": ["error", "always", {"null": "ignore"}],
         "prefer-promise-reject-errors":"warn",
-        "eqeqeq": "warn",
         "no-use-before-define":"warn"
     }
 }
