@@ -1,8 +1,8 @@
+'use strict'
+
 const mongoose = require('mongoose');
 const uniqueValidator = require('mongoose-unique-validator');
-const {
-    Schema
-} = mongoose;
+const { Schema } = mongoose;
 
 const userSchema = new Schema({
     _id: {
@@ -28,6 +28,7 @@ const userSchema = new Schema({
     },
     account: {}
 });
+
 userSchema.plugin(uniqueValidator, {
     message: "already exists"
 });
@@ -73,6 +74,7 @@ const questionSchema = new Schema({
         required: [true, 'error']
     },
 });
+
 questionSchema.plugin(uniqueValidator, {
     message: 'already exists'
 });
@@ -91,6 +93,7 @@ const studentAssignmentSchema = new Schema({
         required: [true, 'error']
     },
 });
+
 studentAssignmentSchema.plugin(uniqueValidator, {
     message: 'already exists'
 });
@@ -109,6 +112,7 @@ const teacherAssignmentSchema = new Schema({
         required: [true, 'error']
     },
 });
+
 teacherAssignmentSchema.plugin(uniqueValidator, {
     message: 'already exists'
 });
@@ -131,6 +135,7 @@ const groupSchema = new Schema({
         required: [true, 'error']
     },
 });
+
 groupSchema.plugin(uniqueValidator, {
     message: 'already exists'
 });
@@ -150,6 +155,7 @@ const requestSchema = new Schema({
     },
     status: String,
 });
+
 requestSchema.plugin(uniqueValidator, {
     message: 'already exists'
 });
@@ -178,6 +184,7 @@ const assignmentSchema = new Schema({
         required: [true, 'error']
     },
 });
+
 assignmentSchema.plugin(uniqueValidator, {
     message: 'already exists'
 });
@@ -208,6 +215,7 @@ const submissionSchema = new Schema({
         required: [true, 'error']
     },
 });
+
 submissionSchema.plugin(uniqueValidator, {
     message: 'already exists'
 });
