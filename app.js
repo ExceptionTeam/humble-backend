@@ -1,8 +1,6 @@
-'use strict'
-
 const express = require('express');
 const bodyParser = require('body-parser');
-const db = require('./dbInitialization');
+const db = require('./db-initialization');
 
 const app = express();
 const port = process.env.PORT || 3030;
