@@ -4,8 +4,8 @@ const { Schema } = mongoose;
 
 const questionSchema = new Schema({
   _id: { type: Schema.Types.ObjectId, required: true },
-  section: { type: [String], required: true }, // should it be indexed?
-  tags: [String], // should it be indexed?
+  section: { type: [{ type: String, index: true }], required: true },
+  tags: [{ type: String, index: true }],
   type: { type: String, required: true },
   category: { type: String, required: true }, // Should it be enum'ed?
   question: { type: String, required: true }, // Should it be enum'ed?
