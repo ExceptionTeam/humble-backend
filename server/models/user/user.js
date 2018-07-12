@@ -12,7 +12,10 @@ const userSchema = new Schema({
   surname: { type: String, required: true },
   password: { type: String, required: true },
   role: {
-    type: String, required: true, uppercase: true, enum: ['STUDENT', 'ADMIN', 'TEACHER'],
+    type: String,
+    required: true,
+    uppercase: true,
+    enum: [USER_ROLE_STUDENT, USER_ROLE_ADMIN, USER_ROLE_TEACHER],
   },
   account: Schema.Types.Mixed,
 });

@@ -12,15 +12,24 @@ const TYPE_PRIMARY_QUESTION = 'PRIMARY';
 
 const questionSchema = new Schema({
   _id: { type: Schema.Types.ObjectId, required: true },
-  section: { type: [{ type: String, index: true }], required: true },
-  tags: [{ type: String, index: true }],
+  section: { type: [{ type: String }], index: true, required: true },
+  tags: [{ type: String }],
+  index: true,
   type: {
-    type: String, required: true, index: true, enum: ['TRAINING', 'PRIMARY'],
+    type: String,
+    required: true,
+    index: true,
+    enum: [TYPE_TRAINING_QUESTION, TYPE_PRIMARY_QUESTION],
   },
   category: {
     type: String,
     required: true,
-    enum: ['SINGLE_ANSWER', 'MULTIPLE_ANSWERS', 'WORD_ANSWER', 'SENTENCE_ANSWER'],
+    enum: [
+      CATEGORY_SINGLE_ANSWER,
+      CATEGORY_MULTIPLE_ANSWERS,
+      CATEGORY_WORD_ANSWER,
+      CATEGORY_SENTENCE_ANSWER,
+    ],
   },
   question: { type: String, required: true },
   questionAuthorId: { type: Schema.Types.ObjectId, required: true, ref: 'User' },

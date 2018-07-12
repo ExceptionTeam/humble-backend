@@ -7,7 +7,7 @@ const testAssignmentSchema = new Schema({
   groupId: { type: Schema.Types.ObjectId, ref: 'Group', index: true },
   studentId: { type: Schema.Types.ObjectId, ref: 'User', index: true },
   name: { type: String, required: true },
-  tags: { type: [{ type: String, index: true }], required: true },
+  tags: { type: [{ type: String }], index: true, required: true },
   assignDate: { type: Date, required: true },
   teacherId: {
     type: Schema.Types.ObjectId, required: true, ref: 'User', index: true,

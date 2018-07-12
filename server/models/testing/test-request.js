@@ -14,7 +14,10 @@ const requestSchema = new Schema({
   },
   section: { type: String, required: true, index: true },
   status: {
-    type: String, required: true, index: true, enum: ['PENDING', 'APPROVED', 'REJECTED'],
+    type: String,
+    required: true,
+    index: true,
+    enum: [REQUEST_STATUS_PENDING, REQUEST_STATUS_APPROVED, REQUEST_STATUS_REJECTED],
   },
 });
 
