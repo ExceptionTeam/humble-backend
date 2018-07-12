@@ -3,7 +3,6 @@ const mongoose = require('mongoose');
 const { Schema } = mongoose;
 
 const taskSchema = new Schema({
-  _id: { type: Schema.Types.ObjectId, required: true },
   inputFilesId: {
     type: [{ type: Schema.Types.ObjectId, ref: 'File' }],
     index: true,
