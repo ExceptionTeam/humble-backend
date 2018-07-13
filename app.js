@@ -9,6 +9,8 @@ app.use(express.static(`${__dirname}`));
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
 
+const taskApi = require('./server/db-middleware/task-api')(app, db);
+
 app.get('/', (req, res) => {
   res.send('Hello from Artёm!');
 });
