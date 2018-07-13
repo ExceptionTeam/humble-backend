@@ -7,7 +7,6 @@ const USER_ROLE_TEACHER = 'TEACHER';
 const USER_ROLE_ADMIN = 'ADMIN';
 
 const userSchema = new Schema({
-  _id: { type: Schema.Types.ObjectId, required: true },
   name: { type: String, required: true },
   surname: { type: String, required: true },
   password: { type: String, required: true },

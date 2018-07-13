@@ -11,7 +11,6 @@ const TYPE_TRAINING_QUESTION = 'TRAINING';
 const TYPE_PRIMARY_QUESTION = 'PRIMARY';
 
 const questionSchema = new Schema({
-  _id: { type: Schema.Types.ObjectId, required: true },
   section: { type: [{ type: String }], index: true, required: true },
   tags: [{ type: String }],
   index: true,

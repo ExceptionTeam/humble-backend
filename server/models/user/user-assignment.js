@@ -3,7 +3,6 @@ const mongoose = require('mongoose');
 const { Schema } = mongoose;
 
 const userAssignmentSchema = new Schema({
-  _id: { type: Schema.Types.ObjectId, required: true },
   studentId: {
     type: Schema.Types.ObjectId, required: true, index: true, ref: 'User',
   },

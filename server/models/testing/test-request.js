@@ -8,7 +8,6 @@ const REQUEST_STATUS_REJECTED = 'REJECTED';
 
 
 const requestSchema = new Schema({
-  _id: { type: Schema.Types.ObjectId, required: true },
   userId: {
     type: Schema.Types.ObjectId, required: true, index: true, ref: 'User',
   },
