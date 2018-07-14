@@ -14,6 +14,17 @@ app.get('/', (req, res) => {
   res.send('Hello from Artёm!');
 });
 
+app.get('/task/full-info-stud', (req, res) => {
+  taskApi
+    .getAssignmentById(req.query.assId)
+    .then((assignment) => {
+      res.status(200).send(assignment);
+    })
+    .catch((err) => {
+      res.status(400).send(err);
+    });
+});
+
 const server = app.listen(port, () => {
   console.log(`Server on port ${server.address().port}`);
 });
