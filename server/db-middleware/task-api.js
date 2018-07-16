@@ -6,12 +6,12 @@ const { User, USER_ROLE_TEACHER, USER_ROLE_STUDENT } = require('../models/user/u
 module.exports = function (app, db) {
   const module = {};
 
-  module.getAssignmentById = function (assId) {
+  module.getAssignmentById = function (assId, assProj, taskProj, teacProj, studProj) {
     return TaskAssignment
-      .findById(assId)
-      .select('-_id -studentId -__v')
-      .populate('taskId', 'name description weight -_id')
-      .populate('teacherId', 'name surname -_id');
+      .findById(assId, assProj /* '-_id -studentId -__v' */)
+      .populate('taskId', taskProj /* 'name description weight -_id' */)
+      .populate('teacherId', teacProj /* 'name surname -_id' */)
+      .populate('studentId', studProj);
   };
 
 

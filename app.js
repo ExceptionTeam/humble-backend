@@ -14,14 +14,19 @@ app.get('/', (req, res) => {
   res.send('Hello from Artёm!');
 });
 
-app.get('/task/full-info-stud', (req, res) => {
+app.get('/task/stud/full-info', (req, res) => {
   taskApi
-    .getAssignmentById(req.query.assId)
+    .getAssignmentById(
+      req.query.assId,
+      '-_id -studentId -__v',
+      'name description weight -_id',
+      'name surname -_id',
+    )
     .then((assignment) => {
       res.status(200).send(assignment);
     })
     .catch((err) => {
-      res.status(400).send(err);
+      res.status(404 /* 204 */).send(err);
     });
 });
 
