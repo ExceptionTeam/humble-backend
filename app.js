@@ -23,7 +23,7 @@ app.get('/task/teacher/abbreviated-info', (req, res) => {
     });
 });
 
-app.get('/task/stud/full-info', (req, res) => {
+app.get('/task/student/full-info', (req, res) => {
   taskApi
     .getAssignmentById(
       req.query.assId,
@@ -39,9 +39,23 @@ app.get('/task/stud/full-info', (req, res) => {
     });
 });
 
-app.get('/task/teach/students', (req, res) => {
+app.get('/task/teacher/full-info', (req, res) => {
+  taskApi
+    .getTaskById(
+      req.query.taskId,
+      '-successfulAttempts -attempts -__v',
+    )
+    .then((task) => {
+      res.status(200).send(task);
+    })
+    .catch((err) => {
+      res.status(404 /* 204 */).send(err);
+    });
+});
+
+app.get('/gen/teacher/students', (req, res) => {
   generalApi
-    .getStudentsByTeacher(req.query.teachId)
+    .getStudentsByTeacher(req.query.teacherId)
     .then((result) => {
       res.status(200).send(result);
     })
