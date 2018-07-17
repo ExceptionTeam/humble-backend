@@ -1,6 +1,9 @@
 const express = require('express');
 const bodyParser = require('body-parser');
 const db = require('./db-initialization');
+const multer = require('multer');
+
+const upload = multer();
 
 const app = express();
 const port = 3000;
@@ -75,6 +78,12 @@ app.get('/gen/teacher/students', (req, res) => {
       console.log(err);
       res.status(404 /* 204 */).send(err);
     });
+});
+
+app.post('/task/student/fileUpload', upload.fields([]), (req, res) => {
+  const formData = req.body;
+  console.log('form data', formData);
+  res.sendStatus(200);
 });
 
 const server = app.listen(port, () => {
