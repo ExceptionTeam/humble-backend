@@ -13,19 +13,24 @@ module.exports = function (app, db) {
       .lean();
   };
 
-  module.getStudentsByTeacher = async function (teachId) {
+  module.getStudentsByTeacher = async function (teacherId) {
     const result = {
       individualStudents: [],
       groups: [],
     };
-    result.individualStudents = await getIndividualStudents(teachId, 'name surname');
-    result.groups = await this.getGroupsByTeacher(teachId, '-__v');
-    const promises = result.groups.map(elem => this.getStudentsByGroup(elem.groupId._id, 'name surname'));
-    return Promise.all(promises)
-      .then((results) => {
-        for (let i = 0; i < result.groups.length; i++) {
-          result.groups[i].groupStudents = results[i];
-        }
+    return getIndividualStudents(teacherId, 'name surname')
+      .then((individualStudents) => {
+        result.individualStudents = individualStudents.map(el => el.studentId);
+      })
+      .then(() => this.getGroupsByTeacher(teacherId, '-__v'))
+      .then((groups) => {
+        result.groups = groups.map(el => el.groupId);
+      })
+      .then(() => Promise.all(result.groups.map(elem => this.getStudentsByGroup(elem._id, 'name surname'))))
+      .then((studentsGroup) => {
+        studentsGroup.forEach((el, i) => {
+          result.groups[i].groupStudents = el.map(stud => stud.studentId);
+        });
         return result;
       });
   };
