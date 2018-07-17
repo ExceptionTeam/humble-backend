@@ -53,6 +53,18 @@ app.get('/task/teacher/full-info', (req, res) => {
     });
 });
 
+app.post('/task/teacher/assign', (req, res) => {
+  taskApi
+    .assignTask(req.body)
+    .then(() => {
+      res.status(200).end();
+    })
+    .catch((err) => {
+      console.log(err);
+      res.status(404 /* 204 */).end();
+    });
+});
+
 app.get('/gen/teacher/students', (req, res) => {
   generalApi
     .getStudentsByTeacher(req.query.teacherId)
