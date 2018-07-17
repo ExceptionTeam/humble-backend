@@ -27,6 +27,11 @@ module.exports = function (app, db) {
       .populate('studentId', studProj);
   };
 
+  module.assignTask = function (assignmentInfo) {
+    const newAssignment = new TaskAssignment(assignmentInfo);
+    return newAssignment.save();
+  };
+
 
   return module;
 };
