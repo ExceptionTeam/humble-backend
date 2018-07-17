@@ -10,8 +10,6 @@ app.use(bodyParser.json());
 
 const taskApi = require('./server/db-middleware/task-api')(app, db);
 const generalApi = require('./server/db-middleware/general-api')(app, db);
-const { UserAssignment } = require('./server/models/user/user-assignment');
-const { User, USER_ROLE_STUDENT } = require('./server/models/user/user');
 
 app.get('/', (req, res) => {
   res.send('Hello from Artёm!');
