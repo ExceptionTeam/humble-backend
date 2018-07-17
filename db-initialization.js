@@ -7,4 +7,19 @@ const options = {
 };
 
 mongoose.connect(uri, options);
+
+require('./server/models/user/user');
+require('./server/models/user/group');
+require('./server/models/user/user-assignment');
+
+require('./server/models/testing/question');
+require('./server/models/testing/test-assignment');
+require('./server/models/testing/test-submission');
+require('./server/models/testing/test-request');
+
+require('./server/models/tasks/file');
+require('./server/models/tasks/task-assignment');
+require('./server/models/tasks/task-submission');
+require('./server/models/tasks/task');
+
 module.exports = mongoose;
