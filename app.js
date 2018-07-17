@@ -38,6 +38,14 @@ app.get('/task/stud/full-info', (req, res) => {
     });
 });
 
+app.get('/allTasksStud', (req, res) => {
+  taskApi.getAllStudentTasks(req.query.id)
+  .then((task, error) => {
+    if (error) res.status(404).send();
+     res.status(200).send(task);
+  });
+});
+
 const server = app.listen(port, () => {
   console.log(`Server on port ${server.address().port}`);
 });
