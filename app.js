@@ -14,6 +14,14 @@ app.get('/', (req, res) => {
   res.send('Hello from Artёm!');
 });
 
+app.get('/task/teacher/abbreviated-info', (req, res) => {
+  taskApi.getAllTasks()
+    .then((task, error) => {
+      if (error) res.status(404).send();
+      if (!task.length) { res.status(204).send(); } else res.status(200).send(task);
+    });
+});
+
 app.get('/task/stud/full-info', (req, res) => {
   taskApi
     .getAssignmentById(

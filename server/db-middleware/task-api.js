@@ -6,6 +6,13 @@ const { User, USER_ROLE_TEACHER, USER_ROLE_STUDENT } = require('../models/user/u
 module.exports = function (app, db) {
   const module = {};
 
+  module.getAllTasks = function () {
+    return Task
+      .find()
+      .select('-inputFilesId -outputFilesId -tags -successfulAttempts -attempts -description -__v')
+      .exec();
+  };
+
   module.getAssignmentById = function (assId, assProj, taskProj, teacProj, studProj) {
     return TaskAssignment
       .findById(assId, assProj /* '-_id -studentId -__v' */)
