@@ -25,6 +25,9 @@ const taskSchema = new Schema({
   attempts: {
     type: Number, required: true, default: 0, min: 0,
   },
+  active: {
+    type: Boolean, required: true, default: true,
+  },
 });
 
 const Task = mongoose.model('Task', taskSchema);
