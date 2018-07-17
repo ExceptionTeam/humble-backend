@@ -13,7 +13,6 @@ const TYPE_PRIMARY_QUESTION = 'PRIMARY';
 const questionSchema = new Schema({
   section: { type: [{ type: String }], index: true, required: true },
   tags: [{ type: String }],
-  index: true,
   type: {
     type: String,
     required: true,
