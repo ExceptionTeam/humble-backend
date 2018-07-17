@@ -12,9 +12,11 @@ module.exports = function (app, db) {
       .exec();
   };
 
-  module.getTaskById = function (taskId, taskProj) {
+  module.getTaskById = function (taskId, taskProj, fileProj) {
     return Task
-      .findById(taskId, taskProj);
+      .findById(taskId, taskProj)
+      .populate('inputFilesId', fileProj)
+      .populate('outputFilesId', fileProj);
   };
 
   module.getAssignmentById = function (assId, assProj, taskProj, teacProj, studProj) {
