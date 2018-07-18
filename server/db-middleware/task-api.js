@@ -1,49 +1,38 @@
 const { TaskAssignment } = require('../models/tasks/task-assignment');
+const { TaskSubmission } = require('../models/tasks/task-submission');
 const { Task } = require('../models/tasks/task');
 const { UserAssignment } = require('../models/user/user-assignment');
-const { TaskSubmission } = require('../models/tasks/task-submission');
-const { User, USER_ROLE_TEACHER, USER_ROLE_STUDENT } = require('../models/user/user');
-
 
 module.exports = function (app, db) {
   const module = {};
 
-  module.getAllTasks = function () {
+  module.getAllTasks = function (top, skip) {
+    if(top < 0) top = 5;
+    if(skip < 0) skip = 0;
     return Task
-      .find()
-      .select('-inputFilesId -outputFilesId -tags -successfulAttempts -attempts -description -__v')
+      .find({active: true})
+      .skip(+skip)
+      .limit(+top)
+      .select('-inputFilesId -outputFilesId -active -successfulAttempts -attempts -__v')
       .exec();
+  };
+
+  module.getTaskById = function (taskId, taskProj, fileProj) {
+    return Task
+      .findById(taskId, taskProj)
+      .populate('inputFilesId', fileProj)
+      .populate('outputFilesId', fileProj)
+      .lean();
   };
 
   module.getAssignmentById = function (assId, assProj, taskProj, teacProj, studProj) {
     return TaskAssignment
-      .findById(assId, assProj /* '-_id -studentId -__v' */)
-      .populate('taskId', taskProj /* 'name description weight -_id' */)
-      .populate('teacherId', teacProj /* 'name surname -_id' */)
-      .populate('studentId', studProj);
+      .findById(assId, assProj)
+      .populate('taskId', taskProj)
+      .populate('teacherId', teacProj)
+      .populate('studentId', studProj)
+      .lean();
   };
-
-  module.addTask = function(){
-    /* const ass = new User({
-       name: 'Zhanna',
-       surname: 'Vasilenko',
-       password: '123512412',
-       role: 'STUDENT',
-       account: 'a',
-     });*/
-    /*  const ass = new TaskAssignment({
-        taskId: new db.Types.ObjectId,
-        deadline: 1241412,
-        teacherId: new db.Types.ObjectId,
-        studentId: "5b445f245994e12e04b32e46",
-      });*/
-      const ass = new TaskSubmission({
-        assId: "5b4cb4cf4fe573302c8af822",
-        srcFileId: new db.Types.ObjectId,
-        tests: 'a',
-      });
-      ass.save();
-    };
 
     const getAssignmentsByStudent = function(studId){
       return TaskAssignment
@@ -51,29 +40,57 @@ module.exports = function (app, db) {
       .select('-__v -studentId -deadline')
       .populate('taskId', '-inputFilesId -outputFilesId -tags -successfulAttempts -_id -__v -description')
       .populate('teacherId', '-_id -password -role -account -__v')
-      .then((assignments) => {return assignments;})
+      .lean();
     };
 
     const getSubmissionsByAssignments = function(studAssignment){
       return TaskSubmission
       .find({assId: {$in: studAssignment}})
       .select('-__v')
+      .lean();
     };
 
-    module.getAllStudentTasks = async function(studId){
+    const getGroupByStudId = function(studId){
+      return UserAssignment
+       .find({ studentId: studId })
+       .select('-__v -_id -studentId -teacherId')
+       .lean();
+    };
+
+    const getAssignmentByGroup = function(groupsId){
+       return TaskAssignment
+       .find({groupId: {$nin: groupsId}})
+       .select('-__v -studentId -deadline -groupId')
+       .populate('taskId', '-inputFilesId -outputFilesId -tags -successfulAttempts -_id -__v -description')
+       .populate('teacherId', '-_id -password -role -account -__v')
+       .lean();
+    };
+
+    module.getAllStudentTasks = function(studId){
         const result = {
           resolved: [],
-          appointed: [],
+          assignment: [],
         };
-        return getAssignmentsByStudent(studId)
+
+        let groupsId = [];
+
+       return getAssignmentsByStudent(studId)
           .then((assignments) => {
-            result.resolved = assignments;
+            result.assignment = assignments;
           })
-          .then(() => getSubmissionsByAssignments(result.resolved))
+          .then(() => getGroupByStudId(studId))
+          .then((groupId) => {
+             groupsId = groupId.map(x=>{_id:x.groupId});
+         })
+        .then(() => getAssignmentByGroup(groupsId))
+          .then((assignments) => {
+              result.assignment = result.assignment.concat(assignments);
+          })
+          .then(() => getSubmissionsByAssignments(result.assignment))
           .then((submissions) => {
-            result.appointed = submissions;
+            result.resolved = submissions;
           })
-          .then(()=> result);
+          .then(() => result);
   };
 
   return module;

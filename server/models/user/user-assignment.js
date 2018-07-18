@@ -4,13 +4,13 @@ const { Schema } = mongoose;
 
 const userAssignmentSchema = new Schema({
   studentId: {
-    type: Schema.Types.ObjectId, required: true, index: true, ref: 'User',
+    type: Schema.Types.ObjectId, index: true, ref: 'User',
   },
   groupId: {
-    type: Schema.Types.ObjectId, required: true, index: true, ref: 'Group',
+    type: Schema.Types.ObjectId, index: true, ref: 'Group',
   },
   teacherId: {
-    type: Schema.Types.ObjectId, required: true, index: true, ref: 'User',
+    type: Schema.Types.ObjectId, index: true, ref: 'User',
   },
 });
 

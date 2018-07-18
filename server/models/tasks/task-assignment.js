@@ -11,7 +11,10 @@ const taskAssignmentSchema = new Schema({
     type: Schema.Types.ObjectId, required: true, index: true, ref: 'User',
   },
   studentId: {
-    type: Schema.Types.ObjectId, required: true, index: true, ref: 'User',
+    type: Schema.Types.ObjectId, index: true, ref: 'User',
+  },
+  groupId: {
+    type: Schema.Types.ObjectId, index: true, ref: 'Group',
   },
 });
 
