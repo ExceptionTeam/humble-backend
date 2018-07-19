@@ -38,16 +38,18 @@ const getAssignmentByGroup = function (groupsId) {
     .populate('teacherId', '-_id -password -role -account -__v')
     .lean();
 };
+
 /**
 function to delete uneed assignments
 const setNewResult = function (result) {
 
-}; * */
+};
+* */
 
 apiModule.getAllTasks = function () {
   return Task
     .find({ active: true })
-    .select('-inputFilesId -outputFilesId -tags -successfulAttempts -attempts -description -__v')
+    .select('-inputFilesId -outputFilesId -tags -successfulAttempts -attempts -description -__v -active')
     .exec();
 };
 
