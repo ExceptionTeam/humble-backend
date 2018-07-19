@@ -11,12 +11,7 @@ app.use(bodyParser.json());
 
 const router = require('./server/routes/index');
 
-app.use('/', (req, res) => {
-  res.send('Hello from Artёm!');
-});
-
 app.use(router);
-
 
 const server = app.listen(port, () => {
   console.log(`Server on port ${server.address().port}`);
