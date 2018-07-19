@@ -28,6 +28,18 @@ route.post('/assign', (req, res) => {
     });
 });
 
+route.delete('/delete', (req, res) => {
+  taskApi
+    .deleteTask(req.query.taskId)
+    .then(() => {
+      res.status(200).send(true);
+    })
+    .catch((err) => {
+      console.log(err);
+      res.status(409).send(false);
+    });
+});
+
 route.get('/abbreviated-info', (req, res) => {
   taskApi.getAllTasks()
     .then((task, error) => {
