@@ -26,10 +26,12 @@ route.post('/fileUpload', upload.fields([]), (req, res) => {
   res.sendStatus(200);
 });
 
-route.get('/my-tasks', (req, res) => {
+route.get('/tasks-list', (req, res) => {
   taskApi.getAllStudentTasks(req.query.id)
     .then((task, error) => {
-      if (error) res.status(404).send();
+      if (error) {
+        res.status(404).send();
+      }
       res.status(200).send(task);
     });
 });

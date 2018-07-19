@@ -42,7 +42,6 @@ const getAssignmentByGroup = function (groupsId) {
 /**
 function to delete uneed assignments
 const setNewResult = function (result) {
-
 };
 * */
 
@@ -74,17 +73,12 @@ apiModule.getAllStudentTasks = function (studId) {
     assignment: [],
   };
 
-  let groupsId = [];
-
   return getAssignmentsByStudent(studId)
     .then((assignments) => {
       result.assignment = assignments;
     })
     .then(() => getGroupByStudId(studId))
-    .then((groupId) => {
-      groupsId = groupId;
-    })
-    .then(() => getAssignmentByGroup(groupsId))
+    .then(groupId => getAssignmentByGroup(groupId))
     .then((assignments) => {
       result.assignment = result.assignment.concat(assignments);
     })
