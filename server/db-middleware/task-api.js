@@ -45,9 +45,11 @@ const setNewResult = function (result) {
 };
 * */
 
-apiModule.getAllTasks = function () {
+apiModule.getAllTasks = function (skip = 0, top = 5) {
   return Task
     .find({ active: true })
+    .skip(+skip < 0 ? 0 : +skip)
+    .limit(+top <= 0 ? 5 : +top)
     .select('-inputFilesId -outputFilesId -tags -successfulAttempts -attempts -description -__v -active')
     .exec();
 };

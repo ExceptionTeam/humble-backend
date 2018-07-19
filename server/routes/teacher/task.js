@@ -29,7 +29,7 @@ route.post('/assign', (req, res) => {
 
 route.get('/abbreviated-info', (req, res) => {
   taskApi
-    .getAllTasks()
+    .getAllTasks(req.query.skip, req.query.top)
     .then((task) => {
       res.status(200).send(task);
     })
