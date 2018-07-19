@@ -33,8 +33,7 @@ apiModule.assignTask = function (assignmentInfo) {
 
 apiModule.deleteTask = function (taskId) {
   return TaskAssignment
-    .find({ taskId })
-    .where('this.deadline > new Date().getMilliseconds()')
+    .find({ taskId, deadline: { $gt: new Date().getTime() } })
     .countDocuments()
     .then((count) => {
       if (count <= 0) {

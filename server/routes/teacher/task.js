@@ -28,9 +28,9 @@ route.post('/assign', (req, res) => {
     });
 });
 
-route.delete('/delete', (req, res) => {
+route.delete('/delete/:taskId', (req, res) => {
   taskApi
-    .deleteTask(req.query.taskId)
+    .deleteTask(req.params.taskId)
     .then(() => {
       res.status(200).send(true);
     })
