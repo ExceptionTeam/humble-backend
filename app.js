@@ -11,10 +11,6 @@ app.use(bodyParser.json());
 
 const router = require('./server/routes/index');
 
-app.use('/', (req, res) => {
-  res.send('Hello from Artёm!');
-});
-
 app.use(router);
 
 
