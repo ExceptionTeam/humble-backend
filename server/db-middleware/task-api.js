@@ -91,4 +91,16 @@ apiModule.assignTask = function (assignmentInfo) {
   return newAssignment.save();
 };
 
+apiModule.deleteTask = function (taskId) {
+  return TaskAssignment
+    .find({ taskId, deadline: { $gt: new Date().getTime() } })
+    .countDocuments()
+    .then((count) => {
+      if (count <= 0) {
+        throw new Error('The task is in use right now');
+      }
+    })
+    .then(() => Task.findByIdAndUpdate(taskId, { active: false }));
+};
+
 module.exports = apiModule;
