@@ -12,7 +12,7 @@ route.get('/full-info', (req, res) => {
       res.status(200).send(task);
     })
     .catch((err) => {
-      res.status(404 /* 204 */).send(err);
+      res.status(404).send(err);
     });
 });
 
@@ -23,19 +23,18 @@ route.post('/assign', (req, res) => {
       res.status(200).end();
     })
     .catch((err) => {
-      console.log(err);
-      res.status(404 /* 204 */).end();
+      res.status(404).send(err);
     });
 });
 
 route.get('/abbreviated-info', (req, res) => {
-  taskApi.getAllTasks()
-    .then((task, error) => {
-      if (error) {
-        res.status(404).send();
-      } else if (!task.length) {
-        res.status(204).send();
-      } else res.status(200).send(task);
+  taskApi
+    .getAllTasks()
+    .then((task) => {
+      res.status(200).send(task);
+    })
+    .catch((err) => {
+      res.status(404).send(err);
     });
 });
 

@@ -16,7 +16,7 @@ route.get('/full-info', (req, res) => {
       res.status(200).send(assignment);
     })
     .catch((err) => {
-      res.status(404 /* 204 */).send(err);
+      res.status(404).send(err);
     });
 });
 
@@ -27,12 +27,13 @@ route.post('/fileUpload', upload.fields([]), (req, res) => {
 });
 
 route.get('/tasks-list', (req, res) => {
-  taskApi.getAllStudentTasks(req.query.id)
-    .then((task, error) => {
-      if (error) {
-        res.status(404).send();
-      }
+  taskApi
+    .getAllStudentTasks(req.query.id)
+    .then((task) => {
       res.status(200).send(task);
+    })
+    .catch((err) => {
+      res.status(404).send(err);
     });
 });
 

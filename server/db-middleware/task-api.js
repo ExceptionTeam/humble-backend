@@ -68,10 +68,7 @@ apiModule.getAssignmentById = function (assId, assProj, taskProj, teacProj, stud
 };
 
 apiModule.getAllStudentTasks = function (studId) {
-  const result = {
-    resolved: [],
-    assignment: [],
-  };
+  const result = {};
 
   return getAssignmentsByStudent(studId)
     .then((assignments) => {
