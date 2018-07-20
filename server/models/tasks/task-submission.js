@@ -9,6 +9,9 @@ const taskSubmissionSchema = new Schema({
   srcFileId: {
     type: Schema.Types.ObjectId, required: true, ref: 'File',
   },
+  mark: {
+    type: Number, required: true, min: 0, max: 10,
+  },
   submitTime: {
     type: Number, required: true, min: 0,
   },
