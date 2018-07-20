@@ -4,10 +4,10 @@ const taskApi = require('../../db-middleware/task-api');
 
 const upload = multer();
 
-route.get('/full-info', (req, res) => {
+route.get('/full-info/:assignId', (req, res) => {
   taskApi
     .getAssignmentById(
-      req.query.assId,
+      req.params.assignId,
       '-_id -studentId -__v',
       'name description weight -_id',
       'name surname -_id',
@@ -20,15 +20,15 @@ route.get('/full-info', (req, res) => {
     });
 });
 
-route.post('/fileUpload', upload.fields([]), (req, res) => {
+route.post('/file-upload', upload.fields([]), (req, res) => {
   const formData = req.body;
   console.log('form data', formData);
   res.sendStatus(200);
 });
 
-route.get('/tasks-list', (req, res) => {
+route.get('/tasks-list/:id', (req, res) => {
   taskApi
-    .getAllStudentTasks(req.query.id)
+    .getAllStudentTasks(req.params.id)
     .then((task) => {
       res.status(200).send(task);
     })

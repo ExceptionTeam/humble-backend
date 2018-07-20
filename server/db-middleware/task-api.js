@@ -9,7 +9,7 @@ const getAssignmentsByStudent = function (studId) {
   return TaskAssignment
     .find({ studentId: studId })
     .select('-__v -studentId -deadline')
-    .populate('taskId', '-inputFilesId -outputFilesId -tags -successfulAttempts -_id -__v -description -active')
+    .populate('taskId', '-inputFilesId -outputFilesId -tags -active -successfulAttempts -_id -__v -description')
     .populate('teacherId', '-_id -password -role -account -__v')
     .lean();
 };
@@ -17,7 +17,7 @@ const getAssignmentsByStudent = function (studId) {
 const getSubmissionsByAssignments = function (studAssignment) {
   const submission = studAssignment.map(el => el._id);
   return TaskSubmission
-    .find({ assId: { $in: submission } })
+    .find({ assignId: { $in: submission } })
     .select('-__v')
     .lean();
 };
@@ -45,9 +45,11 @@ const setNewResult = function (result) {
 };
 * */
 
-apiModule.getAllTasks = function () {
+apiModule.getAllTasks = function (skip = 0, top = 5) {
   return Task
     .find({ active: true })
+    .skip(+skip < 0 ? 0 : +skip)
+    .limit(+top <= 0 ? 5 : +top)
     .select('-inputFilesId -outputFilesId -tags -successfulAttempts -attempts -description -__v -active')
     .exec();
 };
@@ -59,9 +61,9 @@ apiModule.getTaskById = function (taskId, taskProj, fileProj) {
     .populate('outputFilesId', fileProj);
 };
 
-apiModule.getAssignmentById = function (assId, assProj, taskProj, teacProj, studProj) {
+apiModule.getAssignmentById = function (assignId, assignProj, taskProj, teacProj, studProj) {
   return TaskAssignment
-    .findById(assId, assProj)
+    .findById(assignId, assignProj)
     .populate('taskId', taskProj)
     .populate('teacherId', teacProj)
     .populate('studentId', studProj);
