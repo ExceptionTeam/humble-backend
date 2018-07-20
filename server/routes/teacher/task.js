@@ -2,10 +2,10 @@ const route = require('express').Router();
 const taskApi = require('../../db-middleware/task-api');
 
 
-route.get('/full-info', (req, res) => {
+route.get('/full-info/:taskId', (req, res) => {
   taskApi
     .getTaskById(
-      req.query.taskId,
+      req.params.taskId,
       '-successfulAttempts -attempts -__v',
     )
     .then((task) => {
@@ -34,7 +34,6 @@ route.delete('/delete/:taskId', (req, res) => {
       res.status(200).send(true);
     })
     .catch((err) => {
-      console.log(err);
       res.status(409).send(false);
     });
 });

@@ -9,7 +9,7 @@ const getAssignmentsByStudent = function (studId) {
   return TaskAssignment
     .find({ studentId: studId })
     .select('-__v -studentId -deadline')
-    .populate('taskId', '-inputFilesId -outputFilesId -tags -successfulAttempts -_id -__v -description')
+    .populate('taskId', '-inputFilesId -outputFilesId -tags -active -successfulAttempts -_id -__v -description')
     .populate('teacherId', '-_id -password -role -account -__v')
     .lean();
 };
@@ -34,7 +34,7 @@ const getAssignmentByGroup = function (groupsId) {
   return TaskAssignment
     .find({ groupId: { $in: group } })
     .select('-__v -studentId -deadline -groupId')
-    .populate('taskId', '-inputFilesId -outputFilesId -tags -successfulAttempts -_id -__v -description')
+    .populate('taskId', '-inputFilesId -outputFilesId -tags -successfulAttempts -_id -__v -description -active')
     .populate('teacherId', '-_id -password -role -account -__v')
     .lean();
 };
