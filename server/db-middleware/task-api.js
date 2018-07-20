@@ -17,7 +17,7 @@ const getAssignmentsByStudent = function (studId) {
 const getSubmissionsByAssignments = function (studAssignment) {
   const submission = studAssignment.map(el => el._id);
   return TaskSubmission
-    .find({ assId: { $in: submission } })
+    .find({ assignId: { $in: submission } })
     .select('-__v')
     .lean();
 };
@@ -61,9 +61,9 @@ apiModule.getTaskById = function (taskId, taskProj, fileProj) {
     .populate('outputFilesId', fileProj);
 };
 
-apiModule.getAssignmentById = function (assId, assProj, taskProj, teacProj, studProj) {
+apiModule.getAssignmentById = function (assignId, assignProj, taskProj, teacProj, studProj) {
   return TaskAssignment
-    .findById(assId, assProj)
+    .findById(assignId, assignProj)
     .populate('taskId', taskProj)
     .populate('teacherId', teacProj)
     .populate('studentId', studProj);

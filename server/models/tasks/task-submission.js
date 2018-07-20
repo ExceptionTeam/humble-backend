@@ -3,7 +3,7 @@ const mongoose = require('mongoose');
 const { Schema } = mongoose;
 
 const taskSubmissionSchema = new Schema({
-  assId: {
+  assignId: {
     type: Schema.Types.ObjectId, required: true, index: true, ref: 'TaskAssignment',
   },
   srcFileId: {

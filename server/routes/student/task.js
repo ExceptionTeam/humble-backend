@@ -4,10 +4,10 @@ const taskApi = require('../../db-middleware/task-api');
 
 const upload = multer();
 
-route.get('/full-info/:assId', (req, res) => {
+route.get('/full-info/:assignId', (req, res) => {
   taskApi
     .getAssignmentById(
-      req.params.assId,
+      req.params.assignId,
       '-_id -studentId -__v',
       'name description weight -_id',
       'name surname -_id',
