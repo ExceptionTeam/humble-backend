@@ -1,49 +1,36 @@
 const { TaskAssignment } = require('../models/tasks/task-assignment');
 const { TaskSubmission } = require('../models/tasks/task-submission');
 const { Task } = require('../models/tasks/task');
-const { UserAssignment } = require('../models/user/user-assignment');
+
+const generalApi = require('./general-api');
 
 const apiModule = {};
 
-const getAssignmentsByStudent = function (studId) {
+const getAssignmentsByStudent = function (studentId) {
   return TaskAssignment
-    .find({ studentId: studId })
+    .find({ studentId })
     .select('-__v -studentId -deadline')
-    .populate('taskId', '-inputFilesId -outputFilesId -tags -active -successfulAttempts -_id -__v -description')
+    .populate(
+      'taskId',
+      '-inputFilesId -outputFilesId -tags -active -successfulAttempts -attempts -weight -_id -__v -description',
+    )
     .populate('teacherId', '-_id -password -role -account -__v')
     .lean();
 };
 
-const getSubmissionsByAssignments = function (studAssignment) {
-  const submission = studAssignment.map(el => el._id);
+const getSubmissionsByAssignmentId = function (assignId, submissionProj) {
   return TaskSubmission
-    .find({ assignId: { $in: submission } })
-    .select('-__v')
-    .lean();
+    .find({ assignId }, submissionProj);
 };
 
-const getGroupByStudId = function (studId) {
-  return UserAssignment
-    .find({ studentId: studId })
-    .select('-__v -_id -studentId -teacherId')
-    .lean();
-};
-
-const getAssignmentByGroup = function (groupsId) {
-  const group = groupsId.map(el => el.groupId);
+const getAssignmentsByGroupId = function (groupId) {
   return TaskAssignment
-    .find({ groupId: { $in: group } })
+    .find({ groupId })
     .select('-__v -studentId -deadline -groupId')
     .populate('taskId', '-inputFilesId -outputFilesId -tags -successfulAttempts -_id -__v -description -active')
     .populate('teacherId', '-_id -password -role -account -__v')
     .lean();
 };
-
-/**
-function to delete uneed assignments
-const setNewResult = function (result) {
-};
-* */
 
 apiModule.getAllTasks = function (skip = 0, top = 5) {
   return Task
@@ -76,16 +63,31 @@ apiModule.getAllStudentTasks = function (studId) {
     .then((assignments) => {
       result.assignment = assignments;
     })
-    .then(() => getGroupByStudId(studId))
-    .then(groupId => getAssignmentByGroup(groupId))
+    .then(() => generalApi.getStudentsByGroup(studId, '-__v -_id -studentId'))
+    .then((groupIds) => {
+      if (groupIds.length) {
+        return Promise.all(groupIds.map(el => getAssignmentsByGroupId(el.groupId)));
+      }
+      return null;
+    })
     .then((assignments) => {
-      result.assignment = result.assignment.concat(assignments);
+      if (assignments && assignments.length && assignments[0].length) {
+        result.assignment = result.assignment.concat(assignments);
+      }
     })
-    .then(() => getSubmissionsByAssignments(result.assignment))
+    .then(() => Promise
+      .all(result.assignment.map(el => getSubmissionsByAssignmentId(el._id, '-_id -submitTime')
+        .sort('-mark')
+        .limit(1))))
     .then((submissions) => {
-      result.resolved = submissions;
+      const submitted = submissions.map(el => el[0]);
+      const map = {};
+      result.assignment.forEach((el) => { map[el._id] = el; });
+      submitted.forEach((el) => {
+        if (el) map[el.assignId].submission = el;
+      });
     })
-    .then(() => /* setNewResult() */result);
+    .then(() => result.assignment);
 };
 
 apiModule.assignTask = function (assignmentInfo) {
