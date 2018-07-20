@@ -105,4 +105,8 @@ apiModule.deleteTask = function (taskId) {
     .then(() => Task.findByIdAndUpdate(taskId, { active: false }));
 };
 
+apiModule.activateTask = function (taskId) {
+  return Task.findByIdAndUpdate(taskId, { active: true });
+};
+
 module.exports = apiModule;
