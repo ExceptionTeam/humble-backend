@@ -38,4 +38,16 @@ route.get('/tasks-list/:id', (req, res) => {
     });
 });
 
+route.get('/submissions/:assignId', (req, res) => {
+  taskApi
+    .getSubmissionsByAssignment(req.params.assignId)
+    .then((submissions) => {
+      res.status(200).send(submissions);
+    })
+    .catch((err) => {
+      console.log(err);
+      res.status(404).send(err);
+    });
+});
+
 module.exports = route;
