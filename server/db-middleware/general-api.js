@@ -43,6 +43,15 @@ apiModule.getGroupsByTeacher = function (teacherId, groupProj) {
     .lean();
 };
 
+apiModule.getGroupsByStudent = function (studentId, groupProj) {
+  return UserAssignment
+    .find({ studentId })
+    .exists('groupId')
+    .select('-_id -studentId -__v')
+    .populate('groupId', groupProj)
+    .lean();
+};
+
 apiModule.getStudentsByGroup = function (groupId, studProj) {
   return UserAssignment
     .find({ groupId })
