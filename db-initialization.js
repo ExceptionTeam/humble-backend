@@ -13,6 +13,9 @@ require('./server/models/user/group');
 require('./server/models/user/user-assignment');
 
 require('./server/models/testing/question');
+require('./server/models/testing/section');
+require('./server/models/testing/section-relation');
+require('./server/models/testing/tag-attachment');
 require('./server/models/testing/test-assignment');
 require('./server/models/testing/test-submission');
 require('./server/models/testing/test-request');

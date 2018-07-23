@@ -5,14 +5,20 @@
 ### Tasks
 
 #### Teacher
-* `GET /teacher/task/abbreviated-info` - provides shortened information for all `active` tasks
+* `GET /teacher/task/abbreviated-info?skip=...&top=...` - provides shortened information for all `active` tasks
+
+Receives in query:
+
+`skip`: String - how much to skip. Default: 0
+
+`top`: String - how much to get. Default: 5
 
 Sends:
  ```javaScript
  {
-  _id,
-  name,
-  weight
+  _id: String,
+  name: String,
+  weight: Number
  }
  ```
 * `POST /teacher/task/assign` - assigns task to student
@@ -20,85 +26,94 @@ Sends:
  Receives in body:
  ```javaScript
  {
-  taskId,
-  studentId, /** or groupId **/
-  teacherId,                         
-  deadline (Number of miliseconds)
+  taskId: String,
+  studentId: String, /** or groupId **/
+  teacherId: String,                 
+  deadline: (Number of miliseconds)
  }
  ```
- * `GET /teacher/task/full-info?taskId=...` - gets full information about task:
+ * `GET /teacher/task/full-info/taskId` - gets full information about task:
 
- Receives in query:
+ Receives in params:
 
  `taskId`: String - id of a task  
 
  Sends:
  ```javaScript
  {
-  name, 
-  description, 
-  weight,
-  tags[]
-  inpFiles: [ { link, name } ]
-  outFiles: [ { link, name } ]
+  name: String,
+  description: String,
+  weight: Number,
+  tags: Object[String, ...]
+  inpFiles: Object[ { link, name } ]
+  outFiles: Object[ { link, name } ]
  }
  ```
+ * `DELETE /teacher/task/delete/taskId` - finds task if active and make not active
+
+ Receives in params:
+
+ `taskId`: String - id of a task  
+
+ Sends:
+
+ `true` - if task is found
+ `false` - else
 
 #### Student
-* `GET /student/task/full-info?assId=...` - gets full informaton about task assignment:
+* `GET /student/task/full-info/assId` - gets full information about task assignment:
 
-Receives in query:
+Receives in params:
 
- `assId`: String - id of a assignment 
+`assId`: String - id of a assignment
 
 Sends:
  ```javaScript
  {
   taskId:
   {
-   name,
-   description,
-   weight
+   name: String,
+   description: String,
+   weight: Number
   },
-  deadline,
-  teacherId: 
+  deadline: Number,
+  teacherId:
   {
-   name,
-   surname
+   name: String,
+   surname: String
   }
  }
  ```
- * `GET /student/task/tasks-list?id=...` - gets array of all tasks of certain student. 
+ * `GET /student/task/tasks-list/id` - gets array of all tasks of certain student.
 
- Receives in query:
+ Receives in params:
 
- `id`: String - id of a student 
+ `id`: String - id of a student
 
  Sends:
  ```javaScript
  {
-  _id,
-  taskId: 
+  _id: String
+  taskId:
   {
-   attempts,
-   name,
-   weight,
-   active
+   attempts: Number,
+   name: String,
+   weight: Number
   },
   teacherId:
   {
-   name,
-   surname
+   name: String,
+   surname: String
   }
   submission:
   {
-   _id,
-   srcFileId,
-   submitTime,
-   tests: []
+   _id: String,
+   srcFileId: String,
+   submitTime: Number
+   tests: Object[Boolean, ...]
   }
  }
  ```
- Array is sorted: first comes task `without` submissions and only then `with` submissions. If student has more than one submission for one assignment,than request sends only `one best` submission.
+ Array is sorted: first comes task `without` submissions and only then `with` submissions. If student has more than one submission for one assignment, than request sends only `one best` submission.
 
  #### Admin

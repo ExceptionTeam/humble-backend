@@ -1,67 +1,81 @@
 const { TaskAssignment } = require('../models/tasks/task-assignment');
 const { TaskSubmission } = require('../models/tasks/task-submission');
 const { Task } = require('../models/tasks/task');
-const { UserAssignment } = require('../models/user/user-assignment');
+
+const generalApi = require('./general-api');
 
 const apiModule = {};
 
-const getAssignmentsByStudent = function (studId) {
+const getAssignmentsByStudent = function (studentId) {
   return TaskAssignment
-    .find({ studentId: studId })
+    .find({ studentId })
     .select('-__v -studentId -deadline')
-    .populate('taskId', '-inputFilesId -outputFilesId -tags -successfulAttempts -_id -__v -description')
+    .populate(
+      'taskId',
+      '-inputFilesId -outputFilesId -tags -active -successfulAttempts -attempts -weight -_id -__v -description',
+    )
     .populate('teacherId', '-_id -password -role -account -__v')
     .lean();
 };
 
-const getSubmissionsByAssignments = function (studAssignment) {
-  const submission = studAssignment.map(el => el._id);
+apiModule.getSubmissionsByAssignment = function (assignId, submissionProj) {
   return TaskSubmission
-    .find({ assId: { $in: submission } })
-    .select('-__v')
-    .lean();
+    .find({ assignId }, submissionProj);
 };
 
-const getGroupByStudId = function (studId) {
-  return UserAssignment
-    .find({ studentId: studId })
-    .select('-__v -_id -studentId -teacherId')
-    .lean();
-};
-
-const getAssignmentByGroup = function (groupsId) {
-  const group = groupsId.map(el => el.groupId);
+const getAssignmentsByGroup = function (groupId) {
   return TaskAssignment
-    .find({ groupId: { $in: group } })
+    .find({ groupId })
     .select('-__v -studentId -deadline -groupId')
-    .populate('taskId', '-inputFilesId -outputFilesId -tags -successfulAttempts -_id -__v -description')
+    .populate('taskId', '-inputFilesId -outputFilesId -tags -successfulAttempts -_id -__v -description -active')
     .populate('teacherId', '-_id -password -role -account -__v')
     .lean();
 };
 
-/**
-function to delete uneed assignments
-const setNewResult = function (result) {
-};
-* */
-
-apiModule.getAllTasks = function () {
+apiModule.getAllTasks = function (skip = 0, top = 5) {
+  const resTasks = {};
   return Task
     .find({ active: true })
+    .skip(skip < 0 ? 0 : skip)
+    .limit(top <= 0 ? 5 : top)
     .select('-inputFilesId -outputFilesId -tags -successfulAttempts -attempts -description -__v -active')
-    .exec();
+    .then((tasks) => {
+      resTasks.data = tasks;
+      return Task.find({ active: true }).countDocuments();
+    })
+    .then((total) => {
+      resTasks.pagination = { total };
+      return resTasks;
+    });
 };
 
-apiModule.getTaskById = function (taskId, taskProj, fileProj) {
+apiModule.getTaskById = function (taskId, taskProj, fileProj, validate = false) {
+  let resTask;
   return Task
     .findById(taskId, taskProj)
     .populate('inputFilesId', fileProj)
-    .populate('outputFilesId', fileProj);
+    .populate('outputFilesId', fileProj)
+    .lean()
+    .then((task) => {
+      resTask = task;
+      if (validate) {
+        return validateTaskEditability(taskId);
+      }
+      return Promise.resolve(true);
+    })
+    .then((validated) => {
+      if (validated) {
+        resTask.editable = true;
+      } else {
+        resTask.editable = false;
+      }
+      return resTask;
+    });
 };
 
-apiModule.getAssignmentById = function (assId, assProj, taskProj, teacProj, studProj) {
+apiModule.getAssignmentById = function (assignId, assignProj, taskProj, teacProj, studProj) {
   return TaskAssignment
-    .findById(assId, assProj)
+    .findById(assignId, assignProj)
     .populate('taskId', taskProj)
     .populate('teacherId', teacProj)
     .populate('studentId', studProj);
@@ -74,16 +88,31 @@ apiModule.getAllStudentTasks = function (studId) {
     .then((assignments) => {
       result.assignment = assignments;
     })
-    .then(() => getGroupByStudId(studId))
-    .then(groupId => getAssignmentByGroup(groupId))
+    .then(() => generalApi.getGroupsByStudent(studId))
+    .then((groupIds) => {
+      if (groupIds.length) {
+        return Promise.all(groupIds.map(el => getAssignmentsByGroup(el.groupId)));
+      }
+      return null;
+    })
     .then((assignments) => {
-      result.assignment = result.assignment.concat(assignments);
+      if (assignments && assignments.length && assignments[0].length) {
+        result.assignment = result.assignment.concat(assignments);
+      }
     })
-    .then(() => getSubmissionsByAssignments(result.assignment))
+    .then(() => Promise
+      .all(result.assignment.map(el => apiModule.getSubmissionsByAssignment(el._id, '-_id -submitTime')
+        .sort('-mark')
+        .limit(1))))
     .then((submissions) => {
-      result.resolved = submissions;
+      const submitted = submissions.map(el => el[0]);
+      const map = {};
+      result.assignment.forEach((el) => { map[el._id] = el; });
+      submitted.forEach((el) => {
+        if (el) map[el.assignId].submission = el;
+      });
     })
-    .then(() => /* setNewResult() */result);
+    .then(() => result.assignment);
 };
 
 apiModule.assignTask = function (assignmentInfo) {
@@ -91,16 +120,30 @@ apiModule.assignTask = function (assignmentInfo) {
   return newAssignment.save();
 };
 
-apiModule.deleteTask = function (taskId) {
+const validateTaskEditability = function (taskId) {
   return TaskAssignment
     .find({ taskId, deadline: { $gt: new Date().getTime() } })
     .countDocuments()
     .then((count) => {
       if (count <= 0) {
-        throw new Error('The task is in use right now');
+        return true;
       }
-    })
-    .then(() => Task.findByIdAndUpdate(taskId, { active: false }));
+      return false;
+    });
+};
+
+apiModule.deleteTask = function (taskId) {
+  return validateTaskEditability(taskId)
+    .then((validated) => {
+      if (validated) {
+        return Task.findByIdAndUpdate(taskId, { active: false });
+      }
+      throw new Error('Validation failure');
+    });
+};
+
+apiModule.activateTask = function (taskId) {
+  return Task.findByIdAndUpdate(taskId, { active: true });
 };
 
 module.exports = apiModule;
