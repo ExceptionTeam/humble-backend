@@ -18,12 +18,12 @@ const getAssignmentsByStudent = function (studentId) {
     .lean();
 };
 
-const getSubmissionsByAssignmentId = function (assignId, submissionProj) {
+apiModule.getSubmissionsByAssignment = function (assignId, submissionProj) {
   return TaskSubmission
     .find({ assignId }, submissionProj);
 };
 
-const getAssignmentsByGroupId = function (groupId) {
+const getAssignmentsByGroup = function (groupId) {
   return TaskAssignment
     .find({ groupId })
     .select('-__v -studentId -deadline -groupId')
@@ -66,7 +66,7 @@ apiModule.getAllStudentTasks = function (studId) {
     .then(() => generalApi.getStudentsByGroup(studId, '-__v -_id -studentId'))
     .then((groupIds) => {
       if (groupIds.length) {
-        return Promise.all(groupIds.map(el => getAssignmentsByGroupId(el.groupId)));
+        return Promise.all(groupIds.map(el => getAssignmentsByGroup(el.groupId)));
       }
       return null;
     })
@@ -76,7 +76,7 @@ apiModule.getAllStudentTasks = function (studId) {
       }
     })
     .then(() => Promise
-      .all(result.assignment.map(el => getSubmissionsByAssignmentId(el._id, '-_id -submitTime')
+      .all(result.assignment.map(el => apiModule.getSubmissionsByAssignment(el._id, '-_id -submitTime')
         .sort('-mark')
         .limit(1))))
     .then((submissions) => {
