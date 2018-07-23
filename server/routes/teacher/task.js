@@ -7,6 +7,8 @@ route.get('/full-info/:taskId', (req, res) => {
     .getTaskById(
       req.params.taskId,
       '-successfulAttempts -attempts -__v',
+      null,
+      true,
     )
     .then((task) => {
       res.status(200).send(task);

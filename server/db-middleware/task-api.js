@@ -41,11 +41,28 @@ apiModule.getAllTasks = function (skip = 0, top = 5) {
     .exec();
 };
 
-apiModule.getTaskById = function (taskId, taskProj, fileProj) {
+apiModule.getTaskById = function (taskId, taskProj, fileProj, validate = false) {
+  let resTask;
   return Task
     .findById(taskId, taskProj)
     .populate('inputFilesId', fileProj)
-    .populate('outputFilesId', fileProj);
+    .populate('outputFilesId', fileProj)
+    .lean()
+    .then((task) => {
+      resTask = task;
+      if (validate) {
+        return validateTaskEditability(taskId);
+      }
+      return Promise.resolve(true);
+    })
+    .then((validated) => {
+      if (validated) {
+        resTask.editable = true;
+      } else {
+        resTask.editable = false;
+      }
+      return resTask;
+    });
 };
 
 apiModule.getAssignmentById = function (assignId, assignProj, taskProj, teacProj, studProj) {
@@ -95,16 +112,26 @@ apiModule.assignTask = function (assignmentInfo) {
   return newAssignment.save();
 };
 
-apiModule.deleteTask = function (taskId) {
+const validateTaskEditability = function (taskId) {
   return TaskAssignment
     .find({ taskId, deadline: { $gt: new Date().getTime() } })
     .countDocuments()
     .then((count) => {
       if (count <= 0) {
-        throw new Error('The task is in use right now');
+        return true;
       }
-    })
-    .then(() => Task.findByIdAndUpdate(taskId, { active: false }));
+      return false;
+    });
+};
+
+apiModule.deleteTask = function (taskId) {
+  return validateTaskEditability(taskId)
+    .then((validated) => {
+      if (validated) {
+        return Task.findByIdAndUpdate(taskId, { active: false });
+      }
+      throw new Error('Validation failure');
+    });
 };
 
 apiModule.activateTask = function (taskId) {
