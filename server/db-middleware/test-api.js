@@ -11,26 +11,19 @@ const {
 const sectionApi = require('./section-api');
 
 const apiModule = {};
-
+/*
 apiModule.getAllStudentRequests = function (userId) {
   return Request
-    .findById( userId )
-    .populate( 
-      'requestId',
-      'userId section status' );
-};
+    .find({ userId })
+};*/
 
 apiModule.getStudentRequestsWithStatus = function (userId, statusesToFind) {
   return Request
     .find({ userId, status: { $in:statusesToFind }})
-    .populate(
-      'requestId',
-      'userId section status' );  
 };
 
 apiModule.getSectionByRequest = function (request) {
-  return Section = sectionApi.getSectionById(request.sectionId)
-    .populate('name','-_id');
+  return sectionApi.getSectionById(request.sectionId)
 };
 
 apiModule.acceptableSectionsToRequest = function (userId) {
@@ -39,18 +32,24 @@ apiModule.acceptableSectionsToRequest = function (userId) {
 
   return sectionApi.getAllSections()
     .then((section) => {
-      result = section
-    })
-    .then(() => {
-      return getStudentRequestsWithStatus({REQUEST_STATUS_APPROVED, REQUEST_STATUS_PENDING})
+      result = section;
+      return getStudentRequestsWithStatus([REQUEST_STATUS_APPROVED, REQUEST_STATUS_PENDING])
     })
     .then((allUnacceptableRequests) => {
-      for (var i = 0; i < allUnacceptableRequests.length; i++) {
-        checking[i] = getSectionByRequest(allUnacceptableRequests[i]);
-      }
+      Promise.all(arr.map((el) => this.getSectionByRequest(el)));
     })
-    .then(() => {
+    .then((arr) => {
+      checking = arr;
       result.filter(function (object) {
+        checking.forEach(function(element) {
+          if (element === object) {
+            return true;
+          }
+        })
+      })
+    })
+
+     /* result.filter(function (object) {
         for (var i = 0; i < checking.length; i++) {
           if (checking[i].id === object.id) {
             return true;
@@ -58,7 +57,7 @@ apiModule.acceptableSectionsToRequest = function (userId) {
         }
         return false;
       });
-    })
+    })*/
 };
 
 module.exports = apiModule;
