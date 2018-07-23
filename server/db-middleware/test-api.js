@@ -48,16 +48,6 @@ apiModule.acceptableSectionsToRequest = function (userId) {
         })
       })
     })
-
-     /* result.filter(function (object) {
-        for (var i = 0; i < checking.length; i++) {
-          if (checking[i].id === object.id) {
-            return true;
-          }
-        }
-        return false;
-      });
-    })*/
 };
 
 module.exports = apiModule;
