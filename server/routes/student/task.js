@@ -26,9 +26,9 @@ route.post('/file-upload', upload.fields([]), (req, res) => {
   res.sendStatus(200);
 });
 
-route.get('/tasks-list/:id', (req, res) => {
+route.get('/tasks-list/:studentId', (req, res) => {
   taskApi
-    .getAllStudentTasks(req.params.id)
+    .getAllStudentTasks(req.params.studentId)
     .then((task) => {
       res.status(200).send(task);
     })

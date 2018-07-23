@@ -80,7 +80,7 @@ apiModule.getAllStudentTasks = function (studId) {
     .then((assignments) => {
       result.assignment = assignments;
     })
-    .then(() => generalApi.getStudentsByGroup(studId, '-__v -_id -studentId'))
+    .then(() => generalApi.getGroupsByStudent(studId))
     .then((groupIds) => {
       if (groupIds.length) {
         return Promise.all(groupIds.map(el => getAssignmentsByGroup(el.groupId)));
