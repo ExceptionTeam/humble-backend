@@ -1,5 +1,6 @@
-const fs = require('fs');
 const { EventEmitter } = require('events');
+
+const compilationModule = require('./compilation-module');
 
 
 module.exports = function (CONTAINERS_AMOUNT) {
@@ -13,13 +14,19 @@ module.exports = function (CONTAINERS_AMOUNT) {
   };
 
   distributionModule.dequeueSubmission = function () {
-    semaphore--;
-    return submissionQueue.shift();
+    if (submissionQueue.length) {
+      semaphore--;
+      return submissionQueue.shift();
+    }
+    return null;
   };
 
   distributionModule.tryEnterCompilationModule = function () {
     if (semaphore) {
-      containerStatus.indexOf(true);
+      const submission = distributionModule.dequeueSubmission();
+      if (submission) {
+        compilationModule.prepareData(containerStatus.indexOf(true), submission);
+      }
     }
   };
 
