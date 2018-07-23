@@ -40,9 +40,9 @@ route.delete('/delete/:taskId', (req, res) => {
     });
 });
 
-route.get('/abbreviated-info', (req, res) => {
+route.post('/abbreviated-info', (req, res) => {
   taskApi
-    .getAllTasks(req.query.skip, req.query.top)
+    .getAllTasks(req.query.skip, req.query.top, req.body)
     .then((task) => {
       res.status(200).send(task);
     })

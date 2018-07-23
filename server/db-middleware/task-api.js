@@ -46,8 +46,15 @@ apiModule.getSubmissionsByAssignment = function (assignId, submissionProj) {
 
 apiModule.getAllTasks = function (skip = 0, top = 5, filterConfig, active = true) {
   const resTasks = {};
+  const configString = filterConfig.length ? filterConfig.reduce((container, el, i) => {
+    if (i === 0) {
+      return container + el;
+    }
+    return container + '|' + el;
+  }) : '';
   return Task
     .find(active ? { active } : {})
+    .find({ $or: [{ name: { $regex: configString, $options: 'i' } }, { tags: { $in: filterConfig } }] })
     .skip(skip < 0 ? 0 : skip)
     .limit(top <= 0 ? 5 : top)
     .select('-inputFilesId -outputFilesId -tags -successfulAttempts -attempts -description -__v -active')
