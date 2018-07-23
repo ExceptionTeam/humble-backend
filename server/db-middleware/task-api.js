@@ -33,12 +33,20 @@ const getAssignmentsByGroup = function (groupId) {
 };
 
 apiModule.getAllTasks = function (skip = 0, top = 5) {
+  const resTasks = {};
   return Task
     .find({ active: true })
-    .skip(+skip < 0 ? 0 : +skip)
-    .limit(+top <= 0 ? 5 : +top)
+    .skip(skip < 0 ? 0 : skip)
+    .limit(top <= 0 ? 5 : top)
     .select('-inputFilesId -outputFilesId -tags -successfulAttempts -attempts -description -__v -active')
-    .exec();
+    .then((tasks) => {
+      resTasks.data = tasks;
+      return Task.find({ active: true }).countDocuments();
+    })
+    .then((total) => {
+      resTasks.pagination = { total };
+      return resTasks;
+    });
 };
 
 apiModule.getTaskById = function (taskId, taskProj, fileProj, validate = false) {
