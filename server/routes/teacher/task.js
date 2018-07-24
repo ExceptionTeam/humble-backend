@@ -6,7 +6,7 @@ route.get('/full-info/:taskId', (req, res) => {
   taskApi
     .getTaskById(
       req.params.taskId,
-      '-successfulAttempts -attempts -__v',
+      '-successfulAttempts -attempts -__v -active',
       null,
       true,
     )
@@ -42,7 +42,12 @@ route.delete('/delete/:taskId', (req, res) => {
 
 route.post('/abbreviated-info', (req, res) => {
   taskApi
-    .getAllTasks(req.query.skip, req.query.top, req.body)
+    .getAllTasks(
+      req.query.skip,
+      req.query.top,
+      '-inputFilesId -outputFilesId -tags -successfulAttempts -attempts -description -__v -active',
+      req.body,
+    )
     .then((task) => {
       res.status(200).send(task);
     })

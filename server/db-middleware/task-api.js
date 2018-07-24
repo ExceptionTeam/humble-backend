@@ -45,7 +45,7 @@ const getAssignmentsByGroup = function (groupId) {
     .lean();
 };
 
-apiModule.getAllTasks = function (skip = 0, top = 5, filterConfig, active = true) {
+apiModule.getAllTasks = function (skip = 0, top = 5, taskProj, filterConfig, active = true) {
   const resTasks = {};
   const configString = filterConfig.length ? filterConfig.reduce((container, el, i) => {
     if (i === 0) {
@@ -58,7 +58,7 @@ apiModule.getAllTasks = function (skip = 0, top = 5, filterConfig, active = true
     .find({ $or: [{ name: { $regex: configString, $options: 'i' } }, { tags: { $in: filterConfig } }] })
     .skip(skip < 0 ? 0 : skip)
     .limit(top <= 0 ? 5 : top)
-    .select('-inputFilesId -outputFilesId -tags -successfulAttempts -attempts -description -__v -active')
+    .select(taskProj)
     .then((tasks) => {
       resTasks.data = tasks;
       return Task.find({ active: true }).countDocuments();
