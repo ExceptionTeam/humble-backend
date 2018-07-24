@@ -1,5 +1,3 @@
-// const { TestAssignment } = require('../models/testing/test-assignment');
-// const { TestSubmission } = require('../models/testing/test-submission');
 const { Section } = require('../models/testing/section');
 const {
   Request,
@@ -32,18 +30,10 @@ apiModule.acceptableSectionsToRequest = function (userId) {
       return apiModule.getStudentRequestsWithStatus(userId, [REQUEST_STATUS_APPROVED, REQUEST_STATUS_PENDING]);
     })
     .then(allUnacceptableRequests => Promise.all(allUnacceptableRequests.map(el => this.getSectionByRequestId(el))))
-    .then((checking) => {
-      console.log(result);
-      console.log(checking);
-      console.log(0);
-      return result.filter(object => checking.every((element) => {
-        console.log(element.id);
-        console.log(object.id);
-        if (element.id === object.id) { console.log(1); return false; }
-        console.log(2);
-        return true;
-      }));
-    });
+    .then(checking => result.filter(object => checking.every((element) => {
+      if (element.id === object.id) { return false; }
+      return true;
+    })));
 };
 
 module.exports = apiModule;
