@@ -18,6 +18,18 @@ const getAssignmentsByStudent = function (studentId) {
     .lean();
 };
 
+const validateTaskEditability = function (taskId) {
+  return TaskAssignment
+    .find({ taskId, deadline: { $gt: new Date().getTime() } })
+    .countDocuments()
+    .then((count) => {
+      if (count <= 0) {
+        return true;
+      }
+      return false;
+    });
+};
+
 apiModule.getSubmissionsByAssignment = function (assignId, submissionProj, fileProj) {
   return TaskSubmission
     .find({ assignId }, submissionProj)
@@ -33,10 +45,17 @@ const getAssignmentsByGroup = function (groupId) {
     .lean();
 };
 
-apiModule.getAllTasks = function (skip = 0, top = 5) {
+apiModule.getAllTasks = function (skip = 0, top = 5, filterConfig, active = true) {
   const resTasks = {};
+  const configString = filterConfig.length ? filterConfig.reduce((container, el, i) => {
+    if (i === 0) {
+      return container + el;
+    }
+    return container + '|' + el;
+  }) : '';
   return Task
-    .find({ active: true })
+    .find(active ? { active } : {})
+    .find({ $or: [{ name: { $regex: configString, $options: 'i' } }, { tags: { $in: filterConfig } }] })
     .skip(skip < 0 ? 0 : skip)
     .limit(top <= 0 ? 5 : top)
     .select('-inputFilesId -outputFilesId -tags -successfulAttempts -attempts -description -__v -active')
@@ -119,18 +138,6 @@ apiModule.getAllStudentTasks = function (studId) {
 apiModule.assignTask = function (assignmentInfo) {
   const newAssignment = new TaskAssignment(assignmentInfo);
   return newAssignment.save();
-};
-
-const validateTaskEditability = function (taskId) {
-  return TaskAssignment
-    .find({ taskId, deadline: { $gt: new Date().getTime() } })
-    .countDocuments()
-    .then((count) => {
-      if (count <= 0) {
-        return true;
-      }
-      return false;
-    });
 };
 
 apiModule.deleteTask = function (taskId) {
