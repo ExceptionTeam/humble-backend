@@ -3,10 +3,10 @@ const mongoose = require('mongoose');
 const { Schema } = mongoose;
 
 const sectionRelationSchema = new Schema({
-  sectionId: {
+  section1Id: {
     type: Schema.Types.ObjectId, index: true, ref: 'Section',
   },
-  sectionId: {
+  section2Id: {
     type: Schema.Types.ObjectId, index: true, ref: 'Section',
   },
 });

@@ -3,18 +3,18 @@ const { Section } = require('../models/testing/section');
 const apiModule = {};
 
 apiModule.getAllSections = function () {
-  return Section 
-  .find()
+  return Section
+    .find();
 };
 
 apiModule.getSectionByName = function (name) {
   return Section
-  .find({ name })
+    .find({ name });
 };
 
 apiModule.getSectionById = function (sectionId) {
   return Section
-  .findById(sectionId)
+    .findById(sectionId);
 };
 
 module.exports = apiModule;
