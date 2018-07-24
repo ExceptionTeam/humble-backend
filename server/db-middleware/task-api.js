@@ -30,6 +30,12 @@ const validateTaskEditability = function (taskId) {
     });
 };
 
+apiModule.getSubmissionsByAssignment = function (assignId, submissionProj, fileProj) {
+  return TaskSubmission
+    .find({ assignId }, submissionProj)
+    .populate('srcFileId', fileProj);
+};
+
 const getAssignmentsByGroup = function (groupId) {
   return TaskAssignment
     .find({ groupId })
@@ -37,11 +43,6 @@ const getAssignmentsByGroup = function (groupId) {
     .populate('taskId', '-inputFilesId -outputFilesId -tags -successfulAttempts -_id -__v -description -active')
     .populate('teacherId', '-_id -password -role -account -__v')
     .lean();
-};
-
-apiModule.getSubmissionsByAssignment = function (assignId, submissionProj) {
-  return TaskSubmission
-    .find({ assignId }, submissionProj);
 };
 
 apiModule.getAllTasks = function (skip = 0, top = 5, filterConfig, active = true) {
