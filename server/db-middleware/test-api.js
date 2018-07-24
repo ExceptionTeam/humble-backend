@@ -16,30 +16,31 @@ apiModule.getStudentRequestsWithStatus = function (userId, statusesToFind) {
     .find({ userId, status: { $in: statusesToFind } });
 };
 
-apiModule.getSectionByRequest = function (request) {
-  return sectionApi.getSectionById(request.sectionId);
+apiModule.getSectionByRequestId = function (requestId) {
+  return Request
+    .findById(requestId)
+    .populate('sectionId')
+    .then(request => request.sectionId);
 };
 
 apiModule.acceptableSectionsToRequest = function (userId) {
   let result = [Section];
-  let checking = [Section];
 
   return sectionApi.getAllSections()
     .then((section) => {
       result = section;
-      return apiModule.getStudentRequestsWithStatus(
-        userId,
-        [REQUEST_STATUS_APPROVED, REQUEST_STATUS_PENDING],
-      );
+      return apiModule.getStudentRequestsWithStatus(userId, [REQUEST_STATUS_APPROVED, REQUEST_STATUS_PENDING]);
     })
-    .then(allUnacceptableRequests =>
-      Promise.all(allUnacceptableRequests.map(el => this.getSectionByRequest(el))))
-    .then((arr) => {
-      checking = arr;
-      return result.filter(object => checking.forEach((element) => {
-        if (element === object) {
-          return false;
-        }
+    .then(allUnacceptableRequests => Promise.all(allUnacceptableRequests.map(el => this.getSectionByRequestId(el))))
+    .then((checking) => {
+      console.log(result);
+      console.log(checking);
+      console.log(0);
+      return result.filter(object => checking.every((element) => {
+        console.log(element.id);
+        console.log(object.id);
+        if (element.id === object.id) { console.log(1); return false; }
+        console.log(2);
         return true;
       }));
     });

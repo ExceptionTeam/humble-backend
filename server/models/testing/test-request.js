@@ -11,7 +11,7 @@ const requestSchema = new Schema({
   userId: {
     type: Schema.Types.ObjectId, required: true, index: true, ref: 'User',
   },
-  sectionId: { type: Schema.Types.ObjectId, index: true },
+  sectionId: { type: Schema.Types.ObjectId, index: true, ref: 'Section' },
   status: {
     type: String,
     required: true,

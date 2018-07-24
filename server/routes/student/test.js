@@ -4,12 +4,11 @@ const testApi = require('../../db-middleware/test-api');
 route.get('/AvailableSections/:userId', (req, res) => {
   testApi
     .acceptableSectionsToRequest(req.params.userId)
-    .then(() => {
-      res.status(200).end();
+    .then((sections) => {
+      res.status(200).send(sections);
     })
     .catch((err) => {
-      console.log(err);
-      res.status(404).end();
+      res.status(404).send(err);
     });
 });
 
