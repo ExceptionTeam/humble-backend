@@ -18,9 +18,10 @@ const getAssignmentsByStudent = function (studentId) {
     .lean();
 };
 
-apiModule.getSubmissionsByAssignment = function (assignId, submissionProj) {
+apiModule.getSubmissionsByAssignment = function (assignId, submissionProj, fileProj) {
   return TaskSubmission
-    .find({ assignId }, submissionProj);
+    .find({ assignId }, submissionProj)
+    .populate('srcFileId', fileProj);
 };
 
 const getAssignmentsByGroup = function (groupId) {

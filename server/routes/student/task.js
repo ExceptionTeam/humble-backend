@@ -40,7 +40,7 @@ route.get('/tasks-list/:studentId', (req, res) => {
 
 route.get('/submissions/:assignId', (req, res) => {
   taskApi
-    .getSubmissionsByAssignment(req.params.assignId)
+    .getSubmissionsByAssignment(req.params.assignId, '-assignId', '-_id -__v')
     .then((submissions) => {
       res.status(200).send(submissions);
     })
