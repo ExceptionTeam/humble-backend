@@ -12,4 +12,37 @@ route.post('/activate/:taskId', (req, res) => {
     });
 });
 
+route.post('/abbreviated-info', (req, res) => {
+  taskApi
+    .getAllTasks(
+      req.query.skip,
+      req.query.top,
+      '-inputFilesId -outputFilesId -tags -successfulAttempts -attempts -description -__v',
+      req.body,
+      false,
+    )
+    .then((task) => {
+      res.status(200).send(task);
+    })
+    .catch((err) => {
+      res.status(404).send(err);
+    });
+});
+
+route.get('/full-info/:taskId', (req, res) => {
+  taskApi
+    .getTaskById(
+      req.params.taskId,
+      '-__v',
+      null,
+      true,
+    )
+    .then((task) => {
+      res.status(200).send(task);
+    })
+    .catch((err) => {
+      res.status(404).send(err);
+    });
+});
+
 module.exports = route;
