@@ -1,13 +1,17 @@
 const express = require('express');
 const bodyParser = require('body-parser');
+const busboy = require('connect-busboy');
+const busboyBodyParser = require('busboy-body-parser');
 
-require('./db-initialization');
+require('./server/initialization/db');
 
 const app = express();
 const port = 3000;
 
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
+app.use(busboy());
+app.use(busboyBodyParser());
 
 app.use((req, res, next) => {
   res.setHeader('Access-Control-Allow-Origin', 'http://localhost:4200');

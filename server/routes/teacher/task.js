@@ -1,5 +1,7 @@
 const route = require('express').Router();
 const taskApi = require('../../db-middleware/task-api');
+const fileApi = require('../../aws-middleware/file-api');
+const Busboy = require('busboy');
 
 
 route.get('/full-info/:taskId', (req, res) => {
@@ -55,5 +57,19 @@ route.post('/abbreviated-info', (req, res) => {
       res.status(404).send(err);
     });
 });
+
+route.post('/upload-task', (req, res, next) => {
+  const busboy = new Busboy({ headers: req.headers });
+  busboy.on('finish', () => {
+    try {
+      fileApi.createTask(req.files, req.body, req.query.length);
+      res.status(200).end();
+    } catch (err) {
+      res.status(404).end();
+    }
+  });
+  req.pipe(busboy);
+});
+
 
 module.exports = route;
