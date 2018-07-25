@@ -21,7 +21,6 @@ apiModule.getSectionByRequestId = function (requestId) {
 
 apiModule.acceptableSectionsToRequest = function (userId) {
   let result = [];
-
   return Section
     .find()
     .then((sections) => {
@@ -33,6 +32,14 @@ apiModule.acceptableSectionsToRequest = function (userId) {
       if (element.id === object.id) { return false; }
       return true;
     })));
+};
+
+apiModule.newTestRequest = function (user, section) {
+  return Request.create({
+    userId: user,
+    sectionId: section,
+    status: REQUEST_STATUS_PENDING,
+  });
 };
 
 module.exports = apiModule;
