@@ -35,7 +35,6 @@ apiModule.acceptableSectionsToRequest = function (userId) {
 };
 
 apiModule.newTestRequest = function (user, section) {
-  if (section === 'null') {section = null}
   return Request.create({
     userId: user,
     sectionId: section,

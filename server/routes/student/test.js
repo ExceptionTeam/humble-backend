@@ -12,9 +12,9 @@ route.get('/available-sections/:userId', (req, res) => {
     });
 });
 
-route.post('/new-request/:userid/:sectionid', (req, res) => {
+route.post('/new-request/:userid', (req, res) => {
   testApi
-    .newTestRequest(req.params.userid, req.params.sectionid)
+    .newTestRequest(req.params.userid, req.query.sectionid)
     .then(() => {
       res.status(200).send();
     })
