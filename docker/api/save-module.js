@@ -1,6 +1,6 @@
 const { TaskSubmission } = require('../../server/models/tasks/task-submission');
 
-module.exports = function () {
+module.exports = function (emmiter) {
   const saveModule = {};
 
   const markCalculationAlgorithm = function (tests) {
@@ -9,15 +9,14 @@ module.exports = function () {
   };
 
   saveModule.save = function (submission) {
-    const result = new TaskSubmission({
+    emmiter.emit('submission-save');
+    TaskSubmission.create({
       assignId: submission.assignId,
       srcFileId: submission.srcFileId,
       mark: markCalculationAlgorithm(submission.tests),
       submitTime: submission.submitTime,
       tests: submission.tests,
     });
-    result.save();
-    saveModule.leave();
   };
 
   return saveModule;

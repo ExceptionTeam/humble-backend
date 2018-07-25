@@ -1,33 +1,29 @@
 // const Docker = require('dockerode');
 const { EventEmitter } = require('events');
+const fs = require('fs');
 
 const myEmmiter = new EventEmitter();
 
 const CONTAINERS_AMOUNT = 5;
 
-const saveModule = require('./save-module')();
-const compilationModule = require('./compilation-module')(CONTAINERS_AMOUNT, saveModule.save);
-const distributionModule = require('./distribution-module')(compilationModule.enter);
+(function initContainersFolder() {
+  fs.mkdir('./docker/containers', (err) => {
+    if (!err) {
+      for (let i = 0; i < CONTAINERS_AMOUNT; i++) {
+        fs.mkdir('./docker/containers/volume-' + i, () => {});
+      }
+    }
+  });
+}());
 
-const semaphore = function () {
-  let count = CONTAINERS_AMOUNT;
-  return {
-    wait() {
-      if (count) {
-        --count;
-        distributionModule.tryEnterCompilationModule();
-      }
-    },
-    signal() {
-      if (!distributionModule.tryEnterCompilationModule()) {
-        ++count;
-      }
-    },
-  };
-};
+
+const saveModule = require('./save-module')(myEmmiter);
+const compilationModule = require('./compilation-module')(CONTAINERS_AMOUNT, saveModule.save);
+const distributionModule = require('./distribution-module')(compilationModule.enter, CONTAINERS_AMOUNT, myEmmiter);
+
+myEmmiter.on('submission-new', distributionModule.semaphore.wait);
+myEmmiter.on('submission-save', distributionModule.semaphore.signal);
 
 // const docker = new Docker();
 
-module.exports = function () {
-
-};
+module.exports = { enqueueSubmission: distributionModule.submissionQueue.enqueueSubmission };

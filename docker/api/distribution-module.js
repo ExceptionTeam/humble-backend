@@ -1,5 +1,5 @@
 
-module.exports = function (next) {
+module.exports = function (next, CONTAINERS_AMOUNT, emmiter) {
   const distributionModule = {};
 
   const submissionQueue = (function () {
@@ -9,6 +9,7 @@ module.exports = function (next) {
       enqueueSubmission(submission) {
         queue.push(submission);
         this.length++;
+        emmiter.emit('submission-new');
       },
       dequeueSubmission() {
         if (queue.length) {
@@ -20,9 +21,7 @@ module.exports = function (next) {
     };
   }());
 
-  distributionModule.submissionQueue = submissionQueue;
-
-  distributionModule.tryEnterCompilationModule = function () {
+  const tryEnterCompilationModule = function () {
     const submission = submissionQueue.dequeueSubmission();
     if (submission) {
       setTimeout(() => next(submission), 0);
@@ -30,6 +29,25 @@ module.exports = function (next) {
     }
     return false;
   };
+
+  distributionModule.semaphore = (function () {
+    let count = CONTAINERS_AMOUNT;
+    return {
+      wait() {
+        if (count) {
+          --count;
+          tryEnterCompilationModule();
+        }
+      },
+      signal() {
+        if (!tryEnterCompilationModule()) {
+          ++count;
+        }
+      },
+    };
+  }());
+
+  distributionModule.submissionQueue = submissionQueue;
 
   return distributionModule;
 };

@@ -2,7 +2,7 @@ const express = require('express');
 const bodyParser = require('body-parser');
 
 require('./db-initialization');
-require('./docker-initialization');
+require('./docker/api/');
 
 const app = express();
 const port = 3000;
