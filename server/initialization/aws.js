@@ -1,7 +1,7 @@
 const AWS = require('aws-sdk');
 
-const credentials = new AWS.SharedIniFileCredentials({ profile: 'artem' });
+const credentials = new AWS.SharedIniFileCredentials();
 AWS.config.credentials = credentials;
-const s3bucket = new AWS.S3();
+const s3 = new AWS.S3();
 
-module.exports = s3bucket;
+module.exports = s3;

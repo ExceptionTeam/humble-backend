@@ -1,6 +1,6 @@
 const route = require('express').Router();
 const taskApi = require('../../db-middleware/task-api');
-const fileApi = require('../../aws-middleware/file-api');
+const fileApi = require('../../storage-service/file-api');
 const Busboy = require('busboy');
 
 
@@ -58,7 +58,7 @@ route.post('/abbreviated-info', (req, res) => {
     });
 });
 
-route.post('/upload-task', (req, res, next) => {
+route.post('/upload-task', (req, res) => {
   const busboy = new Busboy({ headers: req.headers });
   busboy.on('finish', () => {
     try {
