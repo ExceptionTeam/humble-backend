@@ -35,7 +35,7 @@ route.delete('/delete/:taskId', (req, res) => {
     .then(() => {
       res.status(200).send(true);
     })
-    .catch((err) => {
+    .catch(() => {
       res.status(409).send(false);
     });
 });

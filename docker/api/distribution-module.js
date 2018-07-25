@@ -1,33 +1,33 @@
-const { EventEmitter } = require('events');
 
-const compilationModule = require('./compilation-module');
-
-
-module.exports = function (CONTAINERS_AMOUNT) {
+module.exports = function (next) {
   const distributionModule = {};
-  const submissionQueue = [];
-  const containerStatus = new Array(CONTAINERS_AMOUNT).fill(true);
-  let semaphore = CONTAINERS_AMOUNT;
 
-  distributionModule.enqueueSubmission = function (submission) {
-    submissionQueue.push(submission);
-  };
+  const submissionQueue = (function () {
+    const queue = [];
+    return {
+      length: 0,
+      enqueueSubmission(submission) {
+        queue.push(submission);
+        this.length++;
+      },
+      dequeueSubmission() {
+        if (queue.length) {
+          this.length--;
+          return queue.shift();
+        }
+        return null;
+      },
+    };
+  }());
 
-  distributionModule.dequeueSubmission = function () {
-    if (submissionQueue.length) {
-      semaphore--;
-      return submissionQueue.shift();
-    }
-    return null;
-  };
+  distributionModule.submissionQueue = submissionQueue;
 
   distributionModule.tryEnterCompilationModule = function () {
-    if (semaphore) {
-      const submission = distributionModule.dequeueSubmission();
-      if (submission) {
-        compilationModule.prepareData(containerStatus.indexOf(true), submission);
-      }
+    const submission = submissionQueue.dequeueSubmission();
+    if (submission) {
+      next(submission);
     }
+    return null;
   };
 
   return distributionModule;
