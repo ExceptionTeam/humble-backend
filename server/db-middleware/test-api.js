@@ -20,12 +20,12 @@ apiModule.getSectionByRequestId = function (requestId) {
 };
 
 apiModule.acceptableSectionsToRequest = function (userId) {
-  let result = [Section];
+  let result = [];
 
   return Section
     .find()
-    .then((section) => {
-      result = section;
+    .then((sections) => {
+      result = sections;
       return apiModule.getStudentRequestsWithStatus(userId, [REQUEST_STATUS_APPROVED, REQUEST_STATUS_PENDING]);
     })
     .then(allUnacceptableRequests => Promise.all(allUnacceptableRequests.map(el => this.getSectionByRequestId(el))))
