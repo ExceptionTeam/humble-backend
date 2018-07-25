@@ -56,8 +56,8 @@ apiModule.getAllTasks = function (skip = 0, top = 5, taskProj, filterConfig, act
   return Task
     .find(active ? { active } : {})
     .find({ $or: [{ name: { $regex: configString, $options: 'i' } }, { tags: { $in: filterConfig } }] })
-    .skip(skip < 0 ? 0 : skip)
-    .limit(top <= 0 ? 5 : top)
+    .skip(+skip < 0 ? 0 : +skip)
+    .limit(+top <= 0 ? 5 : +top)
     .select(taskProj)
     .then((tasks) => {
       resTasks.data = tasks;
