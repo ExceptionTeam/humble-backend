@@ -25,9 +25,10 @@ module.exports = function (next) {
   distributionModule.tryEnterCompilationModule = function () {
     const submission = submissionQueue.dequeueSubmission();
     if (submission) {
-      next(submission);
+      setTimeout(() => next(submission), 0);
+      return true;
     }
-    return null;
+    return false;
   };
 
   return distributionModule;

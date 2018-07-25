@@ -49,7 +49,7 @@ module.exports = function (CONTAINERS_AMOUNT, next) {
     const { submission } = containerCondition[containerIndex];
     containerCondition[containerIndex].submission = null;
     unloadBasicData();
-    next(submission);
+    setTimeout(() => next(submission), 0);
   };
 
   return compilationModule;

@@ -11,20 +11,15 @@ const distributionModule = require('./distribution-module')(compilationModule.en
 
 const semaphore = function () {
   let count = CONTAINERS_AMOUNT;
-  const queue = distributionModule.submissionQueue;
   return {
-    wait(submission) {
+    wait() {
       if (count) {
         --count;
         distributionModule.tryEnterCompilationModule();
-      } else {
-        queue.enqueueSubmission(submission);
       }
     },
     signal() {
-      if (queue.length) {
-        distributionModule.tryEnterCompilationModule();
-      } else {
+      if (!distributionModule.tryEnterCompilationModule()) {
         ++count;
       }
     },
