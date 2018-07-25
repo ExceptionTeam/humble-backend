@@ -1,7 +1,7 @@
 const route = require('express').Router();
 const testApi = require('../../db-middleware/test-api');
 
-route.get('/AvailableSections/:userId', (req, res) => {
+route.get('/available_sections/:userId', (req, res) => {
   testApi
     .acceptableSectionsToRequest(req.params.userId)
     .then((sections) => {

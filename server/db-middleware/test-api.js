@@ -5,8 +5,6 @@ const {
   REQUEST_STATUS_PENDING,
 } = require('../models/testing/test-request');
 
-const sectionApi = require('./section-api');
-
 const apiModule = {};
 
 apiModule.getStudentRequestsWithStatus = function (userId, statusesToFind) {
@@ -24,7 +22,8 @@ apiModule.getSectionByRequestId = function (requestId) {
 apiModule.acceptableSectionsToRequest = function (userId) {
   let result = [Section];
 
-  return sectionApi.getAllSections()
+  return Section
+    .find()
     .then((section) => {
       result = section;
       return apiModule.getStudentRequestsWithStatus(userId, [REQUEST_STATUS_APPROVED, REQUEST_STATUS_PENDING]);
