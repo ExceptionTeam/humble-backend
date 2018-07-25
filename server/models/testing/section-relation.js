@@ -3,10 +3,10 @@ const mongoose = require('mongoose');
 const { Schema } = mongoose;
 
 const sectionRelationSchema = new Schema({
-  sectionId: {
+  child: {
     type: Schema.Types.ObjectId, index: true, ref: 'Section',
   },
-  sectionId: {
+  parent: {
     type: Schema.Types.ObjectId, index: true, ref: 'Section',
   },
 });
