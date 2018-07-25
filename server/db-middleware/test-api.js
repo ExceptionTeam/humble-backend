@@ -21,7 +21,6 @@ apiModule.getSectionByRequestId = function (requestId) {
 
 apiModule.acceptableSectionsToRequest = function (userId) {
   let result = [];
-  console.log(userId);
   return Section
     .find()
     .then((sections) => {
@@ -36,16 +35,12 @@ apiModule.acceptableSectionsToRequest = function (userId) {
 };
 
 apiModule.newTestRequest = function (user, section) {
+  if (section === 'null') {section = null}
   return Request.create({
     userId: user,
     sectionId: section,
     status: REQUEST_STATUS_PENDING,
   });
 };
-
-apiModule.newTestRequest('5b56e7c15497f52b806a923e', '5b56e5a453117a3188102754');
-apiModule.newTestRequest('5b56e7c15497f52b806a923e', null);
-
-// apiModule.newTestRequest('5b56e7c15497f52b806a923e', '5b56e5a453117a3188102754');
 
 module.exports = apiModule;
