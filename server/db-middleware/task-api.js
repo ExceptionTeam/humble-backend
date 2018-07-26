@@ -61,10 +61,19 @@ apiModule.getAllTasks = function (skip = 0, top = 5, taskProj, filterConfig, act
     .select(taskProj)
     .then((tasks) => {
       resTasks.data = tasks;
-      return Task.find({ active: true }).countDocuments();
+      return Task
+        .find(active ? { active } : {})
+        .countDocuments();
     })
     .then((total) => {
       resTasks.pagination = { total };
+      return Task
+        .find(active ? { active } : {})
+        .find({ $or: [{ name: { $regex: configString, $options: 'i' } }, { tags: { $in: filterConfig } }] })
+        .countDocuments();
+    })
+    .then((filtered) => {
+      resTasks.pagination.filtered = filtered;
       return resTasks;
     });
 };
