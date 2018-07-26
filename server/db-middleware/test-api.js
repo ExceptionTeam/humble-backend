@@ -4,6 +4,7 @@ const {
   REQUEST_STATUS_APPROVED,
   REQUEST_STATUS_PENDING,
 } = require('../models/testing/test-request');
+const generalApi = require('./general-api');
 
 const apiModule = {};
 
@@ -42,6 +43,12 @@ apiModule.newTestRequest = function (user, section) {
   });
 };
 
-apiModule.get;
+apiModule.allPendingRequestsByMyPupils = function (teacherId) {
+  return generalApi.getFilteredStudentsByTeacher(teacherId)
+    .then(allStdIds => Request
+      .find({ userId: { $in: allStdIds }, status: REQUEST_STATUS_PENDING })
+      .populate('userId', 'name, surname')
+      .populate('sectionId', 'name'));
+};
 
 module.exports = apiModule;

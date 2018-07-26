@@ -79,7 +79,4 @@ apiModule.getFilteredStudentsByTeacher = function (teacherId) {
     .then(() => Object.keys(allKeys));
 };
 
-console.log('\n \n \n');
-console.log(apiModule.getFilteredStudentsByTeacher('5b56e7c15497f52b806a9246'));
-
 module.exports = apiModule;
