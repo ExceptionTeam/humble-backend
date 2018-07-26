@@ -1,8 +1,7 @@
 const route = require('express').Router();
 const taskApi = require('../../db-middleware/task-api');
-const fileApi = require('../../storage-service/file-api');
+const controller = require('../../controllers/storage-controller');
 const Busboy = require('busboy');
-
 
 route.get('/full-info/:taskId', (req, res) => {
   taskApi
@@ -61,12 +60,11 @@ route.post('/abbreviated-info', (req, res) => {
 route.post('/upload-task', (req, res) => {
   const busboy = new Busboy({ headers: req.headers });
   busboy.on('finish', () => {
-    try {
-      fileApi.createTask(req.files, req.body, req.query.length);
-      res.status(200).end();
-    } catch (err) {
-      res.status(404).end();
-    }
+    controller.createTask(req.files, req.body, req.query.length)
+      .then(() => res.status(200).end())
+      .catch((err) => {
+        res.status(404).end();
+      });
   });
   req.pipe(busboy);
 });

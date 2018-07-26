@@ -166,4 +166,17 @@ apiModule.activateTask = function (taskId) {
   return Task.findByIdAndUpdate(taskId, { active: true });
 };
 
+apiModule.saveFiles = function (number, idFiles, taskId, names) {
+  return this.addFile({
+    _id: idFiles.input,
+    name: names.input,
+    url: names.inputUrl,
+  })
+    .then(() => this.addFile({
+      _id: idFiles.output,
+      name: names.output,
+      url: names.outputUrl,
+    }));
+};
+
 module.exports = apiModule;
