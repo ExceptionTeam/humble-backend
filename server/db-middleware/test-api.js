@@ -42,4 +42,6 @@ apiModule.newTestRequest = function (user, section) {
   });
 };
 
+apiModule.get;
+
 module.exports = apiModule;
