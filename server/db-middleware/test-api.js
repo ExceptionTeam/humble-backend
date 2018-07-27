@@ -3,6 +3,7 @@ const {
   Request,
   REQUEST_STATUS_APPROVED,
   REQUEST_STATUS_PENDING,
+  REQUEST_STATUS_REJECTED,
 } = require('../models/testing/test-request');
 
 const apiModule = {};
@@ -19,19 +20,27 @@ apiModule.getSectionByRequestId = function (requestId) {
     .then(request => request.sectionId);
 };
 
-apiModule.acceptableSectionsToRequest = function (userId) {
-  let result = [];
+const checkRequestsForSections = function (sectId, studentId) {
+  return Request
+    .countDocuments({
+      userId: studentId,
+      sectionId: sectId,
+      status: { $in: [REQUEST_STATUS_APPROVED, REQUEST_STATUS_PENDING] },
+    })
+    .then((count) => {
+      if (!count) {
+        return Section.findById(sectId);
+      }
+    });
+};
+
+apiModule.acceptableSectionsToRequest = function (studentId) {
   return Section
     .find()
+    .then(sections => romise.all(sections.map(el => checkRequestsForSections(el.id, studentId))))
     .then((sections) => {
-      result = sections;
-      return apiModule.getStudentRequestsWithStatus(userId, [REQUEST_STATUS_APPROVED, REQUEST_STATUS_PENDING]);
-    })
-    .then(allUnacceptableRequests => Promise.all(allUnacceptableRequests.map(el => this.getSectionByRequestId(el))))
-    .then(checking => result.filter(object => checking.every((element) => {
-      if (element.id === object.id) { return false; }
-      return true;
-    })));
+
+    });
 };
 
 apiModule.newTestRequest = function (user, section) {
@@ -40,6 +49,22 @@ apiModule.newTestRequest = function (user, section) {
     sectionId: section,
     status: REQUEST_STATUS_PENDING,
   });
+};
+
+apiModule.rejectRequest = function (requestId) {
+  return Request
+    .findById(requestId, (err, request) => {
+      request.status = REQUEST_STATUS_REJECTED;
+      request.save();
+    });
+};
+
+apiModule.approveRequest = function (requestId) {
+  return Request
+    .findById(requestId, (err, request) => {
+      request.status = REQUEST_STATUS_REJECTED;
+      request.save();
+    });
 };
 
 module.exports = apiModule;
