@@ -24,7 +24,7 @@ const checkRequestsForSections = function (sectId, studentId) {
     });
 };
 
-apiModule.acceptableSectionsToRequest = function (studentId) {
+apiModule.getAcceptableSectionsToRequest = function (studentId) {
   return Section
     .find()
     .then(sections => Promise.all(sections.map(el => checkRequestsForSections(el.id, studentId))))
@@ -44,10 +44,7 @@ apiModule.newTestRequest = function (user, section) {
 
 apiModule.rejectRequest = function (requestId) {
   return Request
-    .findById(requestId, (err, request) => {
-      request.status = REQUEST_STATUS_REJECTED;
-      request.save();
-    });
+    .findByIdAndUpdate(requestId, { $set: { status: REQUEST_STATUS_REJECTED } });
 };
 
 const getAllTags = function (sectId) {
@@ -60,10 +57,7 @@ apiModule.approveRequest = function (requestId, teachId) {
   let requestToRemember;
   let sectionName;
   return Request
-    .findById(requestId, (err, request) => {
-      request.status = REQUEST_STATUS_APPROVED;
-      request.save();
-    })
+    .findByIdAndUpdate(requestId, { $set: { status: REQUEST_STATUS_APPROVED } })
     .then((request) => {
       requestToRemember = request;
     })
@@ -76,7 +70,6 @@ apiModule.approveRequest = function (requestId, teachId) {
     .then(allTags => TestAssignment.create({
       name: sectionName,
       studentId: requestToRemember.userId,
-      sectionId: requestToRemember.sectionId,
       teacherId: teachId,
       assignDate: Date.now(),
       tags: allTags,
