@@ -76,6 +76,7 @@ apiModule.approveRequest = function (requestId, teachId) {
     .then(allTags => TestAssignment.create({
       name: sectionName,
       studentId: requestToRemember.userId,
+      sectionId: requestToRemember.sectionId,
       teacherId: teachId,
       assignDate: Date.now(),
       tags: allTags,
