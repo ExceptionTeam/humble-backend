@@ -4,7 +4,7 @@ const testApi = require('../../db-middleware/test-api');
 
 route.get('/get-students/:teacherId', (req, res) => {
   generalApi
-    .getFilteredStudentsByTeacher(req.params.teacherId)
+    .getStudentsByTeacherFlat(req.params.teacherId)
     .then((studId) => {
       res.status(200).send(studId);
     })
@@ -13,11 +13,11 @@ route.get('/get-students/:teacherId', (req, res) => {
     });
 });
 
-route.get('/pending-requests/:teacherId', (req, res) => {
+route.get('/get-pending-requests/:teacherId', (req, res) => {
   testApi
-    .allPendingRequestsByMyPupils(req.params.teacherId)
-    .then((studId) => {
-      res.status(200).send(studId);
+    .getPendingRequestByTeacher(req.params.teacherId)
+    .then((requests) => {
+      res.status(200).send(requests);
     })
     .catch((err) => {
       res.status(404).send(err);

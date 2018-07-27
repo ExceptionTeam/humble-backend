@@ -61,7 +61,7 @@ apiModule.getStudentsByGroup = function (groupId, studProj) {
     .lean();
 };
 
-apiModule.getFilteredStudentsByTeacher = function (teacherId) {
+apiModule.getStudentsByTeacherFlat = function (teacherId) {
   let allids = [];
   const allKeys = {};
   return apiModule.getStudentsByTeacher(teacherId)
