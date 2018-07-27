@@ -12,7 +12,7 @@ const getAssignmentsByStudent = function (studentId) {
     .select('-__v -studentId -deadline')
     .populate(
       'taskId',
-      '-inputFilesId -outputFilesId -tags -active -successfulAttempts -attempts -weight -_id -__v -description',
+      '-inputFilesId -outputFilesId -tags -active -successfulAttempts -attempts -_id -__v -description',
     )
     .populate('teacherId', '-_id -password -role -account -__v')
     .lean();
