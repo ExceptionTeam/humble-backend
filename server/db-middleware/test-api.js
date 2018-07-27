@@ -8,18 +8,6 @@ const {
 
 const apiModule = {};
 
-apiModule.getStudentRequestsWithStatus = function (userId, statusesToFind) {
-  return Request
-    .find({ userId, status: { $in: statusesToFind } });
-};
-
-apiModule.getSectionByRequestId = function (requestId) {
-  return Request
-    .findById(requestId)
-    .populate('sectionId')
-    .then(request => request.sectionId);
-};
-
 const checkRequestsForSections = function (sectId, studentId) {
   return Request
     .countDocuments({
@@ -37,10 +25,11 @@ const checkRequestsForSections = function (sectId, studentId) {
 apiModule.acceptableSectionsToRequest = function (studentId) {
   return Section
     .find()
-    .then(sections => romise.all(sections.map(el => checkRequestsForSections(el.id, studentId))))
-    .then((sections) => {
-
-    });
+    .then(sections => Promise.all(sections.map(el => checkRequestsForSections(el.id, studentId))))
+    .then(sections => sections.filter((object) => {
+      if (object == null) return false;
+      return true;
+    }));
 };
 
 apiModule.newTestRequest = function (user, section) {
