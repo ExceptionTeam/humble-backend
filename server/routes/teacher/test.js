@@ -2,9 +2,9 @@ const route = require('express').Router();
 const teskApi = require('../../db-middleware/test-api');
 
 
-route.post('/approve/:requestid', (req, res) => {
+route.post('/approve/:requestid/:teacherid', (req, res) => {
   teskApi
-    .approveRequest(req.params.requestid)
+    .approveRequest(req.params.requestid, req.params.teacherid)
     .then(() => {
       res.status(200).end();
     })

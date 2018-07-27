@@ -5,6 +5,8 @@ const {
   REQUEST_STATUS_PENDING,
   REQUEST_STATUS_REJECTED,
 } = require('../models/testing/test-request');
+const { TestAssignment } = require('../models/testing/test-assignment');
+const { TagAttachment } = require('../models/testing/tag-attachment');
 
 const apiModule = {};
 
@@ -48,12 +50,36 @@ apiModule.rejectRequest = function (requestId) {
     });
 };
 
-apiModule.approveRequest = function (requestId) {
+const getAllTags = function (sectId) {
+  return TagAttachment
+    .find({ sectionId: sectId })
+    .then(tags => Promise.all(tags.map(el => el.tag)));
+};
+
+apiModule.approveRequest = function (requestId, teachId) {
+  let requestToRemember;
+  let sectionName;
   return Request
     .findById(requestId, (err, request) => {
-      request.status = REQUEST_STATUS_REJECTED;
+      request.status = REQUEST_STATUS_APPROVED;
       request.save();
-    });
+    })
+    .then((request) => {
+      requestToRemember = request;
+    })
+    .then(() => Section
+      .findById(requestToRemember.sectionId))
+    .then((section) => {
+      sectionName = 'Проверочный тест по секции: "' + section.name + '"';
+    })
+    .then(() => getAllTags(requestToRemember.sectionId))
+    .then(allTags => TestAssignment.create({
+      name: sectionName,
+      studentId: requestToRemember.userId,
+      teacherId: teachId,
+      assignDate: Date.now(),
+      tags: allTags,
+    }));
 };
 
 module.exports = apiModule;
