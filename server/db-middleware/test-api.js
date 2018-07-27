@@ -29,7 +29,10 @@ apiModule.getAcceptableSectionsToRequest = function (studentId) {
     .find()
     .then(sections => Promise.all(sections.map(el => checkRequestsForSections(el.id, studentId))))
     .then(sections => sections.filter((object) => {
-      if (object == null) return false;
+      if (!object) {
+        console.log(object);
+        return false;
+      }
       return true;
     }));
 };
