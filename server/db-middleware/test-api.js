@@ -43,7 +43,7 @@ apiModule.newTestRequest = function (user, section) {
   });
 };
 
-apiModule.getPendingRequestByTeacher = function (teacherId) {
+apiModule.getPendingRequestsByTeacher = function (teacherId) {
   return generalApi.getStudentsByTeacherFlat(teacherId)
     .then(allStdIds => Request
       .find({ userId: { $in: allStdIds }, status: REQUEST_STATUS_PENDING })

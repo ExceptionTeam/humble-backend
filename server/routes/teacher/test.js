@@ -13,9 +13,9 @@ route.get('/get-students/:teacherId', (req, res) => {
     });
 });
 
-route.get('/get-pending-requests/:teacherId', (req, res) => {
+route.get('/pending-requests/:teacherId', (req, res) => {
   testApi
-    .getPendingRequestByTeacher(req.params.teacherId)
+    .getPendingRequestsByTeacher(req.params.teacherId)
     .then((requests) => {
       res.status(200).send(requests);
     })
