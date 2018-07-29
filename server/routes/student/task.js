@@ -1,5 +1,7 @@
 const route = require('express').Router();
 const taskApi = require('../../db-middleware/task-api');
+const controller = require('../../controllers/storage-controller');
+const Busboy = require('busboy');
 
 route.get('/full-info/:assignId', (req, res) => {
   taskApi
@@ -40,5 +42,36 @@ route.get('/submissions/:assignId', (req, res) => {
       res.status(404).send(err);
     });
 });
+
+route.post('/submit/:assignId', (req, res) => {
+  const busboy = new Busboy({ headers: req.headers });
+  busboy.on('finish', () => {
+    controller.createSubmission(req.files, req.params.assignId)
+      .then((result) => {
+        const submission = {
+          _id: result.submissionId,
+          assignId: req.params.assignId,
+          srcFileId: result.fileId,
+          tests: [],
+        };
+        console.log(submission); /** First part of submission Object * */
+      })
+      .catch((err) => {
+        res.status(404).end();
+      });
+  });
+  req.pipe(busboy);
+});
+
+/* route.get('/submissions/load/:fileId',(req, res) => {
+  controller.downloadFile(req.params.fileId)
+  .then((data) =>  {
+    console.log(1);
+        var file = fs.createWriteStream(data);
+        console.log(file);
+        res.pipe(file);
+  })
+  .catch((err) => res.status(404).end());
+}); */
 
 module.exports = route;
