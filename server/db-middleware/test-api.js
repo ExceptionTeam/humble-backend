@@ -3,36 +3,38 @@ const {
   Request,
   REQUEST_STATUS_APPROVED,
   REQUEST_STATUS_PENDING,
+  REQUEST_STATUS_REJECTED,
 } = require('../models/testing/test-request');
+const { TestAssignment } = require('../models/testing/test-assignment');
+const { TagAttachment } = require('../models/testing/tag-attachment');
 const generalApi = require('./general-api');
 
 const apiModule = {};
 
-apiModule.getStudentRequestsWithStatus = function (userId, statusesToFind) {
+const checkRequestsForSections = function (sectId, studentId) {
   return Request
-    .find({ userId, status: { $in: statusesToFind } });
+    .countDocuments({
+      userId: studentId,
+      sectionId: sectId,
+      status: { $in: [REQUEST_STATUS_APPROVED, REQUEST_STATUS_PENDING] },
+    })
+    .then((count) => {
+      if (!count) {
+        return Section.findById(sectId);
+      }
+    });
 };
 
-apiModule.getSectionByRequestId = function (requestId) {
-  return Request
-    .findById(requestId)
-    .populate('sectionId')
-    .then(request => request.sectionId);
-};
-
-apiModule.acceptableSectionsToRequest = function (userId) {
-  let result = [];
+apiModule.getAcceptableSectionsToRequest = function (studentId) {
   return Section
     .find()
-    .then((sections) => {
-      result = sections;
-      return apiModule.getStudentRequestsWithStatus(userId, [REQUEST_STATUS_APPROVED, REQUEST_STATUS_PENDING]);
-    })
-    .then(allUnacceptableRequests => Promise.all(allUnacceptableRequests.map(el => this.getSectionByRequestId(el))))
-    .then(checking => result.filter(object => checking.every((element) => {
-      if (element.id === object.id) { return false; }
+    .then(sections => Promise.all(sections.map(el => checkRequestsForSections(el.id, studentId))))
+    .then(sections => sections.filter((object) => {
+      if (!object) {
+        return false;
+      }
       return true;
-    })));
+    }));
 };
 
 apiModule.newTestRequest = function (user, section) {
@@ -41,6 +43,40 @@ apiModule.newTestRequest = function (user, section) {
     sectionId: section,
     status: REQUEST_STATUS_PENDING,
   });
+};
+
+apiModule.rejectRequest = function (requestId) {
+  return Request
+    .findByIdAndUpdate(requestId, { $set: { status: REQUEST_STATUS_REJECTED } });
+};
+
+const getAllTags = function (sectId) {
+  return TagAttachment
+    .find({ sectionId: sectId })
+    .then(tags => Promise.all(tags.map(el => el.tag)));
+};
+
+apiModule.approveRequest = function (requestId, teachId) {
+  let requestToRemember;
+  let sectionName;
+  return Request
+    .findByIdAndUpdate(requestId, { $set: { status: REQUEST_STATUS_APPROVED } })
+    .then((request) => {
+      requestToRemember = request;
+    })
+    .then(() => Section
+      .findById(requestToRemember.sectionId))
+    .then((section) => {
+      sectionName = 'Проверочный тест по секции: "' + section.name + '"';
+    })
+    .then(() => getAllTags(requestToRemember.sectionId))
+    .then(allTags => TestAssignment.create({
+      name: sectionName,
+      studentId: requestToRemember.userId,
+      teacherId: teachId,
+      assignDate: Date.now(),
+      tags: allTags,
+    }));
 };
 
 apiModule.getPendingRequestsByTeacher = function (teacherId) {

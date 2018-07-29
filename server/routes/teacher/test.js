@@ -2,11 +2,33 @@ const route = require('express').Router();
 const generalApi = require('../../db-middleware/general-api');
 const testApi = require('../../db-middleware/test-api');
 
+route.post('/approve/:requestid/:teacherid', (req, res) => {
+  teskApi
+    .approveRequest(req.params.requestid, req.params.teacherid)
+    .then(() => {
+      res.status(200).end();
+    })
+    .catch((err) => {
+      res.status(404).send(err);
+    });
+});
+
 route.get('/get-students/:teacherId', (req, res) => {
   generalApi
     .getStudentsByTeacherFlat(req.params.teacherId)
     .then((studId) => {
       res.status(200).send(studId);
+    })
+    .catch((err) => {
+      res.status(404).send(err);
+    });
+});
+
+route.post('/reject/:requestid', (req, res) => {
+  testApi
+    .rejectRequest(req.params.requestid)
+    .then(() => {
+      res.status(200).end();
     })
     .catch((err) => {
       res.status(404).send(err);

@@ -3,7 +3,7 @@ const testApi = require('../../db-middleware/test-api');
 
 route.get('/available-sections/:userId', (req, res) => {
   testApi
-    .acceptableSectionsToRequest(req.params.userId)
+    .getAcceptableSectionsToRequest(req.params.userId)
     .then((sections) => {
       res.status(200).send(sections);
     })
