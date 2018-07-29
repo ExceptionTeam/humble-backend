@@ -1,6 +1,6 @@
 const route = require('express').Router();
-const teskApi = require('../../db-middleware/test-api');
-
+const generalApi = require('../../db-middleware/general-api');
+const testApi = require('../../db-middleware/test-api');
 
 route.post('/approve/:requestid/:teacherid', (req, res) => {
   teskApi
@@ -13,11 +13,33 @@ route.post('/approve/:requestid/:teacherid', (req, res) => {
     });
 });
 
+route.get('/get-students/:teacherId', (req, res) => {
+  generalApi
+    .getStudentsByTeacherFlat(req.params.teacherId)
+    .then((studId) => {
+      res.status(200).send(studId);
+    })
+    .catch((err) => {
+      res.status(404).send(err);
+    });
+});
+
 route.post('/reject/:requestid', (req, res) => {
-  teskApi
+  testApi
     .rejectRequest(req.params.requestid)
     .then(() => {
       res.status(200).end();
+    })
+    .catch((err) => {
+      res.status(404).send(err);
+    });
+});
+
+route.get('/pending-requests/:teacherId', (req, res) => {
+  testApi
+    .getPendingRequestsByTeacher(req.params.teacherId)
+    .then((requests) => {
+      res.status(200).send(requests);
     })
     .catch((err) => {
       res.status(404).send(err);

@@ -7,6 +7,7 @@ const {
 } = require('../models/testing/test-request');
 const { TestAssignment } = require('../models/testing/test-assignment');
 const { TagAttachment } = require('../models/testing/tag-attachment');
+const generalApi = require('./general-api');
 
 const apiModule = {};
 
@@ -76,6 +77,14 @@ apiModule.approveRequest = function (requestId, teachId) {
       assignDate: Date.now(),
       tags: allTags,
     }));
+};
+
+apiModule.getPendingRequestsByTeacher = function (teacherId) {
+  return generalApi.getStudentsByTeacherFlat(teacherId)
+    .then(allStdIds => Request
+      .find({ userId: { $in: allStdIds }, status: REQUEST_STATUS_PENDING })
+      .populate('userId', 'name, surname')
+      .populate('sectionId', 'name'));
 };
 
 module.exports = apiModule;

@@ -1,6 +1,7 @@
 const { TaskAssignment } = require('../models/tasks/task-assignment');
 const { TaskSubmission } = require('../models/tasks/task-submission');
 const { Task } = require('../models/tasks/task');
+const { File } = require('../models/tasks/file');
 
 const generalApi = require('./general-api');
 
@@ -12,7 +13,7 @@ const getAssignmentsByStudent = function (studentId) {
     .select('-__v -studentId -deadline')
     .populate(
       'taskId',
-      '-inputFilesId -outputFilesId -tags -active -successfulAttempts -attempts -weight -_id -__v -description',
+      '-inputFilesId -outputFilesId -tags -active -successfulAttempts -attempts -_id -__v -description',
     )
     .populate('teacherId', '-_id -password -role -account -__v')
     .lean();
@@ -61,10 +62,19 @@ apiModule.getAllTasks = function (skip = 0, top = 5, taskProj, filterConfig, act
     .select(taskProj)
     .then((tasks) => {
       resTasks.data = tasks;
-      return Task.find({ active: true }).countDocuments();
+      return Task
+        .find(active ? { active } : {})
+        .countDocuments();
     })
     .then((total) => {
       resTasks.pagination = { total };
+      return Task
+        .find(active ? { active } : {})
+        .find({ $or: [{ name: { $regex: configString, $options: 'i' } }, { tags: { $in: filterConfig } }] })
+        .countDocuments();
+    })
+    .then((filtered) => {
+      resTasks.pagination.filtered = filtered;
       return resTasks;
     });
 };
@@ -140,6 +150,17 @@ apiModule.assignTask = function (assignmentInfo) {
   return newAssignment.save();
 };
 
+apiModule.addTask = function (taskInfo) {
+  const newTask = new Task(taskInfo);
+  return newTask.save();
+};
+
+apiModule.addFile = function (fileInfo) {
+  const newFile = new File(fileInfo);
+  return newFile.save();
+};
+
+
 apiModule.deleteTask = function (taskId) {
   return validateTaskEditability(taskId)
     .then((validated) => {
@@ -152,6 +173,19 @@ apiModule.deleteTask = function (taskId) {
 
 apiModule.activateTask = function (taskId) {
   return Task.findByIdAndUpdate(taskId, { active: true });
+};
+
+apiModule.saveFiles = function (number, idFiles, taskId, names) {
+  return this.addFile({
+    _id: idFiles.input,
+    name: names.input,
+    url: names.inputUrl,
+  })
+    .then(() => this.addFile({
+      _id: idFiles.output,
+      name: names.output,
+      url: names.outputUrl,
+    }));
 };
 
 module.exports = apiModule;

@@ -1,8 +1,5 @@
 const route = require('express').Router();
-const multer = require('multer');
 const taskApi = require('../../db-middleware/task-api');
-
-const upload = multer();
 
 route.get('/full-info/:assignId', (req, res) => {
   taskApi
@@ -18,12 +15,6 @@ route.get('/full-info/:assignId', (req, res) => {
     .catch((err) => {
       res.status(404).send(err);
     });
-});
-
-route.post('/file-upload', upload.fields([]), (req, res) => {
-  const formData = req.body;
-  console.log('form data', formData);
-  res.sendStatus(200);
 });
 
 route.get('/tasks-list/:studentId', (req, res) => {
