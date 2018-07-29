@@ -13,7 +13,7 @@ const getAssignmentsByStudent = function (studentId) {
     .select('-__v -studentId -deadline')
     .populate(
       'taskId',
-      '-inputFilesId -outputFilesId -tags -active -successfulAttempts -attempts -_id -__v -description',
+      '-inputFilesId -outputFilesId -tags -active -successfulAttempts -attempts -weight -_id -__v -description',
     )
     .populate('teacherId', '-_id -password -role -account -__v')
     .lean();
@@ -62,19 +62,10 @@ apiModule.getAllTasks = function (skip = 0, top = 5, taskProj, filterConfig, act
     .select(taskProj)
     .then((tasks) => {
       resTasks.data = tasks;
-      return Task
-        .find(active ? { active } : {})
-        .countDocuments();
+      return Task.find({ active: true }).countDocuments();
     })
     .then((total) => {
       resTasks.pagination = { total };
-      return Task
-        .find(active ? { active } : {})
-        .find({ $or: [{ name: { $regex: configString, $options: 'i' } }, { tags: { $in: filterConfig } }] })
-        .countDocuments();
-    })
-    .then((filtered) => {
-      resTasks.pagination.filtered = filtered;
       return resTasks;
     });
 };
@@ -109,6 +100,11 @@ apiModule.getAssignmentById = function (assignId, assignProj, taskProj, teacProj
     .populate('taskId', taskProj)
     .populate('teacherId', teacProj)
     .populate('studentId', studProj);
+};
+
+apiModule.getAssignmentByIdNonPopulate = function (assignId) {
+  return TaskAssignment
+    .findById(assignId);
 };
 
 apiModule.getAllStudentTasks = function (studId) {
@@ -186,6 +182,10 @@ apiModule.saveFiles = function (number, idFiles, taskId, names) {
       name: names.output,
       url: names.outputUrl,
     }));
+};
+
+apiModule.getFileById = function (fileId) {
+  return File.findById(fileId, '-_id -name');
 };
 
 module.exports = apiModule;
