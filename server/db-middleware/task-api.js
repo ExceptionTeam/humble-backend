@@ -1,6 +1,7 @@
 const { TaskAssignment } = require('../models/tasks/task-assignment');
 const { TaskSubmission } = require('../models/tasks/task-submission');
 const { Task } = require('../models/tasks/task');
+const { File } = require('../models/tasks/file');
 
 const generalApi = require('./general-api');
 
@@ -149,6 +150,17 @@ apiModule.assignTask = function (assignmentInfo) {
   return newAssignment.save();
 };
 
+apiModule.addTask = function (taskInfo) {
+  const newTask = new Task(taskInfo);
+  return newTask.save();
+};
+
+apiModule.addFile = function (fileInfo) {
+  const newFile = new File(fileInfo);
+  return newFile.save();
+};
+
+
 apiModule.deleteTask = function (taskId) {
   return validateTaskEditability(taskId)
     .then((validated) => {
@@ -161,6 +173,19 @@ apiModule.deleteTask = function (taskId) {
 
 apiModule.activateTask = function (taskId) {
   return Task.findByIdAndUpdate(taskId, { active: true });
+};
+
+apiModule.saveFiles = function (number, idFiles, taskId, names) {
+  return this.addFile({
+    _id: idFiles.input,
+    name: names.input,
+    url: names.inputUrl,
+  })
+    .then(() => this.addFile({
+      _id: idFiles.output,
+      name: names.output,
+      url: names.outputUrl,
+    }));
 };
 
 module.exports = apiModule;

@@ -14,4 +14,3 @@ const sectionRelationSchema = new Schema({
 const SectionRelation = mongoose.model('SectionRelation', sectionRelationSchema);
 
 module.exports = { SectionRelation };
-
