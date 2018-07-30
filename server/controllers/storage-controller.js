@@ -27,6 +27,20 @@ controller.fileValidation = function (file) {
   });
 };
 
+controller.toEditValidation = function (file, body, length) {
+  return new Promise((resolve, reject) => {
+    for (let i = 1; i <= length; i++) {
+      if (!file[bucketStructure.generateNameInput(i)]
+      || !file[bucketStructure.generateNameOutput(i)]
+      || !body[bucketStructure.generateNameInput(i)]
+      || !body[bucketStructure.generateNameOutput(i)]) {
+        reject(new Error());
+      }
+    }
+    resolve();
+  });
+};
+
 controller.createTask = function (file, input, length) {
   const idTask = new mongoose.Types.ObjectId();
   const idInputs = [];
@@ -86,10 +100,15 @@ controller.createSubmission = function (file, assignId) {
     }));
 };
 
-controller.downloadSubmission = function (fileId) {
+controller.downloadSubmission = function (submissionId) {
   return taskApi
-    .getFileById(fileId)
+    .getSubmissionById(submissionId)
     .then(file => fileApi.getFile(file.url));
+};
+
+controller.editTask = function (files, body, taskId, length) {
+  return this.toEditValidation(files, body, length)
+    .then(() => {});
 };
 
 module.exports = controller;

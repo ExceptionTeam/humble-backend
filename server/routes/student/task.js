@@ -63,9 +63,9 @@ route.post('/submit/:assignId', (req, res) => {
   req.pipe(busboy);
 });
 
-route.post('/download/:fileId', (req, res) => {
+route.post('/download/:submissionId', (req, res) => {
   controller
-    .downloadSubmission(req.params.fileId)
+    .downloadSubmission(req.params.submissionId)
     .then((file) => {
       file.pipe(res);
     })
