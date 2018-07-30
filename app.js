@@ -10,7 +10,6 @@ const port = 3000;
 
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
-app.use(busboy());
 app.use(busboyBodyParser());
 
 app.use((req, res, next) => {
