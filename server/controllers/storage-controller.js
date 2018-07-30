@@ -5,7 +5,7 @@ const bucketStructure = require('../storage-service/bucket-structure');
 
 const controller = {};
 
-controller.fileValidation = function (file, length) {
+controller.filesValidation = function (file, length) {
   return new Promise((resolve, reject) => {
     for (let i = 1; i <= length; i++) {
       if (!file[bucketStructure.generateNameInput(i)]
@@ -17,13 +17,23 @@ controller.fileValidation = function (file, length) {
   });
 };
 
+controller.fileValidation = function (file) {
+  return new Promise((resolve, reject) => {
+    if (file.srcFile) {
+      resolve();
+    } else {
+      reject(new Error('Bad request!'));
+    }
+  });
+};
+
 controller.createTask = function (file, input, length) {
   const idTask = new mongoose.Types.ObjectId();
   const idInputs = [];
   const idOutputs = [];
   const promises = new Array(+length).fill(0);
 
-  return this.fileValidation(file, length)
+  return this.filesValidation(file, length)
     .then(() => Promise.all(promises.map((el, i) => fileApi.uploadTogether(file, idTask, i + 1))))
     .then(arr =>
       Promise.all(arr.map((el, i) => {
@@ -48,6 +58,31 @@ controller.createTask = function (file, input, length) {
       name: input.name,
       description: input.description,
       weight: input.weight,
+    }));
+};
+
+controller.createSubmission = function (file, assignId) {
+  let taskId;
+  const submissionId = new mongoose.Types.ObjectId();
+  const fileId = new mongoose.Types.ObjectId();
+
+  return this.fileValidation(file)
+    .then(() => taskApi.getAssignmentByIdNonPopulate(assignId))
+    .then((data) => {
+      taskId = data.taskId;
+    })
+    .then(() => fileApi.uploadBasisSubmission(file, taskId, submissionId, fileId))
+    .then(() => {
+      const fileInfo = {
+        _id: fileId,
+        url: bucketStructure.generatePathSubmission(taskId, submissionId, fileId),
+        name: bucketStructure.generateNameSubmission(fileId),
+      };
+      taskApi.addFile(fileInfo);
+    })
+    .then(result => ({
+      fileId,
+      submissionId,
     }));
 };
 

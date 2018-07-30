@@ -31,12 +31,6 @@ const validateTaskEditability = function (taskId) {
     });
 };
 
-apiModule.getSubmissionsByAssignment = function (assignId, submissionProj, fileProj) {
-  return TaskSubmission
-    .find({ assignId }, submissionProj)
-    .populate('srcFileId', fileProj);
-};
-
 const getAssignmentsByGroup = function (groupId) {
   return TaskAssignment
     .find({ groupId })
@@ -44,6 +38,12 @@ const getAssignmentsByGroup = function (groupId) {
     .populate('taskId', '-inputFilesId -outputFilesId -tags -successfulAttempts -_id -__v -description -active')
     .populate('teacherId', '-_id -password -role -account -__v')
     .lean();
+};
+
+apiModule.getSubmissionsByAssignment = function (assignId, submissionProj, fileProj) {
+  return TaskSubmission
+    .find({ assignId }, submissionProj)
+    .populate('srcFileId', fileProj);
 };
 
 apiModule.getAllTasks = function (skip = 0, top = 5, taskProj, filterConfig, active = true) {
@@ -111,6 +111,11 @@ apiModule.getAssignmentById = function (assignId, assignProj, taskProj, teacProj
     .populate('studentId', studProj);
 };
 
+apiModule.getAssignmentByIdNonPopulate = function (assignId) {
+  return TaskAssignment
+    .findById(assignId);
+};
+
 apiModule.getAllStudentTasks = function (studId) {
   const result = {};
 
@@ -160,6 +165,11 @@ apiModule.addFile = function (fileInfo) {
   return newFile.save();
 };
 
+apiModule.addFile = function (fileInfo) {
+  const newFile = new File(fileInfo);
+  return newFile.save();
+};
+
 
 apiModule.deleteTask = function (taskId) {
   return validateTaskEditability(taskId)
@@ -186,6 +196,10 @@ apiModule.saveFiles = function (number, idFiles, taskId, names) {
       name: names.output,
       url: names.outputUrl,
     }));
+};
+
+apiModule.getFileById = function (fileId) {
+  return File.findById(fileId, '-_id -name');
 };
 
 module.exports = apiModule;

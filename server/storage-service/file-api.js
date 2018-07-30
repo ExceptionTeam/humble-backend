@@ -1,6 +1,6 @@
-const bucketStructure = require('./bucket-structure');
 const s3 = require('../initialization/aws');
 const { BUCKET_NAME } = require('../../config');
+const bucketStructure = require('./bucket-structure');
 
 const awsModule = {};
 
@@ -31,6 +31,15 @@ const uploadOutput = function (file, taskId, number) {
         Key: bucketStructure.generatePathOutputs(taskId, number),
         Body: file[bucketStructure.generateNameOutput(number)].data,
       }));
+};
+
+awsModule.uploadBasisSubmission = function (file, taskId, submissionId, fileId) {
+  const params = {
+    Bucket: BUCKET_NAME,
+    Key: bucketStructure.generatePathSubmission(taskId, submissionId, fileId),
+    Body: file.srcFile.data,
+  };
+  return awsModule.upload(params);
 };
 
 awsModule.uploadTogether = function (files, taskId, number) {
