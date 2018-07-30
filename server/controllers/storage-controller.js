@@ -86,4 +86,10 @@ controller.createSubmission = function (file, assignId) {
     }));
 };
 
+controller.downloadSubmission = function (fileId) {
+  return taskApi
+    .getFileById(fileId)
+    .then(file => fileApi.getFile(file.url));
+};
+
 module.exports = controller;
