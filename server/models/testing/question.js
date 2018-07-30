@@ -11,13 +11,16 @@ const TYPE_TRAINING_QUESTION = 'TRAINING';
 const TYPE_PRIMARY_QUESTION = 'PRIMARY';
 
 const questionSchema = new Schema({
-  section: { type: [{ type: String }], index: true, required: true },
+  section: { type: [{ type: String }], index: true },
   tags: [{ type: String }],
   type: {
     type: String,
     required: true,
     index: true,
     enum: [TYPE_TRAINING_QUESTION, TYPE_PRIMARY_QUESTION],
+  },
+  active: {
+    type: Boolean, required: true, index: true, default: true,
   },
   category: {
     type: String,
