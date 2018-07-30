@@ -55,4 +55,11 @@ awsModule.upload = function (params) {
   }).promise();
 };
 
+awsModule.getFile = function (key) {
+  return s3.getObject({
+    Bucket: BUCKET_NAME,
+    Key: key,
+  }).createReadStream();
+};
+
 module.exports = awsModule;

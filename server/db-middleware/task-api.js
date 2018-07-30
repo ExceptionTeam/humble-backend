@@ -202,4 +202,9 @@ apiModule.getFileById = function (fileId) {
   return File.findById(fileId, '-_id -name');
 };
 
+apiModule.getSubmissionById = function (submissionId) {
+  return TaskSubmission.findById(submissionId, '-assignId -mark -submitTime -tests -__v')
+    .then(data => this.getFileById(data.srcFileId));
+};
+
 module.exports = apiModule;

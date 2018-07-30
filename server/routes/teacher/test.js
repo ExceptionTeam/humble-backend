@@ -3,7 +3,7 @@ const generalApi = require('../../db-middleware/general-api');
 const testApi = require('../../db-middleware/test-api');
 
 route.post('/approve/:requestid/:teacherid', (req, res) => {
-  teskApi
+  testApi
     .approveRequest(req.params.requestid, req.params.teacherid)
     .then(() => {
       res.status(200).end();

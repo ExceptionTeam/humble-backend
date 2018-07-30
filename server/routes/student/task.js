@@ -63,4 +63,15 @@ route.post('/submit/:assignId', (req, res) => {
   req.pipe(busboy);
 });
 
+route.post('/download/:submissionId', (req, res) => {
+  controller
+    .downloadSubmission(req.params.submissionId)
+    .then((file) => {
+      file.pipe(res);
+    })
+    .catch((err) => {
+      res.status(404).end();
+    });
+});
+
 module.exports = route;
