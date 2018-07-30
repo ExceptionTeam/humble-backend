@@ -2,7 +2,7 @@ const { UserAssignment } = require('../models/user/user-assignment');
 
 const apiModule = {};
 
-const getIndividualStudents = function (teachId, studProj) {
+apiModule.getIndividualStudents = function (teachId, studProj) {
   return UserAssignment
     .find({ teacherId: teachId })
     .exists('studentId')
@@ -16,7 +16,7 @@ apiModule.getStudentsByTeacher = function (teacherId) {
     individualStudents: [],
     groups: [],
   };
-  return getIndividualStudents(teacherId, 'name surname')
+  return apiModule.getIndividualStudents(teacherId, 'name surname')
     .then((individualStudents) => {
       result.individualStudents = individualStudents.map(el => el.studentId);
     })
@@ -61,5 +61,22 @@ apiModule.getStudentsByGroup = function (groupId, studProj) {
     .lean();
 };
 
+apiModule.getStudentsByTeacherFlat = function (teacherId) {
+  let allids = [];
+  const allKeys = {};
+  return apiModule.getStudentsByTeacher(teacherId)
+    .then((userId) => {
+      allids = userId.individualStudents;
+      return userId.groups;
+    })
+    .then(allGroups => allGroups.forEach(group => group.groupStudents.forEach((id) => {
+      allids.push(id);
+    })))
+    .then(() => allids.forEach((stdId) => {
+      const str = stdId._id;
+      allKeys[str] = true;
+    }))
+    .then(() => Object.keys(allKeys));
+};
 
 module.exports = apiModule;
