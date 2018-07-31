@@ -199,7 +199,7 @@ apiModule.saveFiles = function (number, idFiles, taskId, names) {
 };
 
 apiModule.getFileById = function (fileId) {
-  return File.findById(fileId, '-_id -name');
+  return File.findById(fileId, '-_id -name -__v');
 };
 
 apiModule.getSubmissionById = function (submissionId) {

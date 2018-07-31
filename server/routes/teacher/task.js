@@ -69,17 +69,16 @@ route.post('/upload-task', (req, res) => {
   req.pipe(busboy);
 });
 
-/* route.post('/edit-task/:taskId/:length', (req, res) => {
+route.post('/edit-task/:taskId/:length', (req, res) => {
   const busboy = new Busboy({ headers: req.headers });
   busboy.on('finish', () => {
     controller.editTask(req.files, req.body, req.params.taskId, req.params.length)
-      .then(rez => console.log(rez))
+      .then(() => res.status(200).end())
       .catch((err) => {
         res.status(404).end();
       });
   });
   req.pipe(busboy);
-}); */
-
+});
 
 module.exports = route;

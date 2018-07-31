@@ -29,11 +29,13 @@ controller.fileValidation = function (file) {
 
 controller.toEditValidation = function (file, body, length) {
   return new Promise((resolve, reject) => {
-    for (let i = 1; i <= length; i++) {
-      if (!file[bucketStructure.generateNameInput(i)]
-      || !file[bucketStructure.generateNameOutput(i)]
-      || !body[bucketStructure.generateNameInput(i)]
-      || !body[bucketStructure.generateNameOutput(i)]) {
+    for (let i = 0; i < length; i++) {
+      if (!file[bucketStructure.generateNameInput(i + 1)]
+       && !body[bucketStructure.generateNameInput(i + 1)]) {
+        reject(new Error());
+      }
+      if (!file[bucketStructure.generateNameOutput(i + 1)]
+       && !body[bucketStructure.generateNameOutput(i + 1)]) {
         reject(new Error());
       }
     }
@@ -106,9 +108,34 @@ controller.downloadSubmission = function (submissionId) {
     .then(file => fileApi.getFile(file.url));
 };
 
+controller.getFileById = function (id, name) {
+  return taskApi.getFileById(id)
+    .then(file => fileApi.getFile(file.url))
+    .then(data => ({
+      data,
+      name,
+    }));
+};
+
 controller.editTask = function (files, body, taskId, length) {
+  let lengthInput;
+  let filesArray = [];
+
   return this.toEditValidation(files, body, length)
-    .then(() => {});
+    .then(() => taskApi.getTaskById(taskId))
+    .then((data) => {
+      lengthInput = data.inputFilesId.length;
+    })
+    .then(() => Promise.all(Object.keys(body).map(el => ({
+      file: body[el],
+      name: el,
+    })).map(el => this.getFileById(el.file, el.name))))
+    .then((filesToSave) => {
+      filesArray = filesToSave;
+    })
+    .then(() => fileApi.deleteFilesByName(bucketStructure.generateArrayNames(taskId, lengthInput)))
+    .then(() => fileApi.uploadOldTests(filesArray, taskId))
+    .then(() => fileApi.uploadNewTests(files, taskId));
 };
 
 module.exports = controller;
