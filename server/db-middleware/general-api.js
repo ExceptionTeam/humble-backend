@@ -1,4 +1,11 @@
 const { UserAssignment } = require('../models/user/user-assignment');
+const {
+  User,
+  USER_ROLE_ADMIN,
+  USER_ROLE_STUDENT,
+  USER_ROLE_TEACHER,
+  USER_ROLE_PENDING,
+} = require('../models/user/user');
 
 const apiModule = {};
 
@@ -33,6 +40,12 @@ apiModule.getStudentsByTeacher = function (teacherId) {
     });
 };
 
+apiModule.getPendingTeacher = function (skip = 0, top = 10, userProj) {
+  return User.find({ role: USER_ROLE_PENDING }, userProj)
+    .skip(+skip < 0 ? 0 : +skip)
+    .limit(+top <= 0 ? 5 : +top)
+    .lean();
+};
 
 apiModule.getGroupsByTeacher = function (teacherId, groupProj) {
   return UserAssignment
