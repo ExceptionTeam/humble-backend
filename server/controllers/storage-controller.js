@@ -108,7 +108,7 @@ controller.createSubmission = function (file, assignId) {
 controller.downloadSubmission = function (submissionId) {
   return taskApi
     .getSubmissionById(submissionId)
-    .then(file => fileApi.getFile(file.url));
+    .then(file => fileApi.getFileStream(file.url));
 };
 
 controller.getFileById = function (id, name) {

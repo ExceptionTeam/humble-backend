@@ -63,6 +63,14 @@ awsModule.getFile = function (key) {
   return s3.getObject(params).promise();
 };
 
+awsModule.getFileStream = function (key) {
+  const params = {
+    Bucket: BUCKET_NAME,
+    Key: key,
+  };
+  return s3.getObject(params).createReadStream();
+};
+
 awsModule.deleteFilesByName = function (keys) {
   const params = {
     Bucket: BUCKET_NAME,
