@@ -21,7 +21,7 @@ bucketStructure.generatePathOutputs = function (taskId, number) {
 };
 
 bucketStructure.generatePathSubmission = function (taskId, submissionId, fileId) {
-  return `Task_${taskId}/Submissions/Submissions_${submissionId}/submis${fileId}.txt`;
+  return `Task_${taskId}/Submissions/Submissions_${submissionId}/submis${fileId}.java`;
 };
 
 bucketStructure.generatePathTests = function (test, taskId) {
