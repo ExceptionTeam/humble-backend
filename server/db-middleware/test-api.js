@@ -7,9 +7,6 @@ const {
 } = require('../models/testing/test-request');
 const {
   TestAssignment,
-  // ASSIGNMENT_STATUS_PENDING,
-  // ASSIGNMENT_STATUS_PASSED,
-  // ASSIGNMENT_STATUS_EXPIRED,
 } = require('../models/testing/test-assignment');
 const { TagAttachment } = require('../models/testing/tag-attachment');
 const generalApi = require('./general-api');
