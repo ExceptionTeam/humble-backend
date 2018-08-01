@@ -5,6 +5,7 @@ const { Schema } = mongoose;
 const USER_ROLE_STUDENT = 'STUDENT';
 const USER_ROLE_TEACHER = 'TEACHER';
 const USER_ROLE_ADMIN = 'ADMIN';
+const USER_ROLE_PENDING = 'PENDING';
 
 const userSchema = new Schema({
   name: { type: String, required: true },
@@ -14,7 +15,7 @@ const userSchema = new Schema({
     type: String,
     required: true,
     uppercase: true,
-    enum: [USER_ROLE_STUDENT, USER_ROLE_ADMIN, USER_ROLE_TEACHER],
+    enum: [USER_ROLE_STUDENT, USER_ROLE_ADMIN, USER_ROLE_TEACHER, USER_ROLE_PENDING],
   },
   account: Schema.Types.Mixed,
 });
@@ -26,4 +27,5 @@ module.exports = {
   USER_ROLE_ADMIN,
   USER_ROLE_STUDENT,
   USER_ROLE_TEACHER,
+  USER_ROLE_PENDING,
 };

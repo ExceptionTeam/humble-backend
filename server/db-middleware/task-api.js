@@ -103,6 +103,28 @@ apiModule.getTaskById = function (taskId, taskProj, fileProj, validate = false) 
     });
 };
 
+apiModule.getTaskByIdAndUpdate = function (taskId, update, validate = false) {
+  let resTask;
+  return Task
+    .findByIdAndUpdate(taskId, update)
+    .lean()
+    .then((task) => {
+      resTask = task;
+      if (validate) {
+        return validateTaskEditability(taskId);
+      }
+      return Promise.resolve(true);
+    })
+    .then((validated) => {
+      if (validated) {
+        resTask.editable = true;
+      } else {
+        resTask.editable = false;
+      }
+      return resTask;
+    });
+};
+
 apiModule.getAssignmentById = function (assignId, assignProj, taskProj, teacProj, studProj) {
   return TaskAssignment
     .findById(assignId, assignProj)
@@ -170,6 +192,9 @@ apiModule.addFile = function (fileInfo) {
   return newFile.save();
 };
 
+apiModule.deleteFile = function (fileId) {
+  return File.findByIdAndRemove(fileId);
+};
 
 apiModule.deleteTask = function (taskId) {
   return validateTaskEditability(taskId)
@@ -205,6 +230,10 @@ apiModule.getFileById = function (fileId) {
 apiModule.getSubmissionById = function (submissionId) {
   return TaskSubmission.findById(submissionId, '-assignId -mark -submitTime -tests -__v')
     .then(data => this.getFileById(data.srcFileId));
+};
+
+apiModule.getPendingTeacher = function (skip, top) {
+  return generalApi.getPendingTeacher(skip, top, '-password -role -__v');
 };
 
 module.exports = apiModule;

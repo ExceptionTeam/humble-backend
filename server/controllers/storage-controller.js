@@ -39,6 +39,9 @@ controller.toEditValidation = function (file, body, length) {
         reject(new Error());
       }
     }
+    if (!body.name || !body.description || !body.tags || !body.weight) {
+      reject(new Error());
+    }
     resolve();
   });
 };
@@ -120,22 +123,62 @@ controller.getFileById = function (id, name) {
 controller.editTask = function (files, body, taskId, length) {
   let lengthInput;
   let filesArray = [];
+  const inputsId = [];
+  const outputsId = [];
+
+  for (let i = 0; i < length; i++) {
+    inputsId.push(new mongoose.Types.ObjectId());
+    outputsId.push(new mongoose.Types.ObjectId());
+  }
 
   return this.toEditValidation(files, body, length)
-    .then(() => taskApi.getTaskById(taskId))
-    .then((data) => {
-      lengthInput = data.inputFilesId.length;
-    })
-    .then(() => Promise.all(Object.keys(body).map(el => ({
-      file: body[el],
-      name: el,
-    })).map(el => this.getFileById(el.file, el.name))))
+    .then(() => Promise.all(Object.keys(body).filter((el) => {
+      if (el.startsWith('input') || el.startsWith('output')) {
+        return true;
+      }
+      return false;
+    }).map(el => this.getFileById(body[el], el))))
     .then((filesToSave) => {
       filesArray = filesToSave;
     })
+    .then(() => taskApi.getTaskByIdAndUpdate(
+      taskId,
+      {
+        name: body.name,
+        description: body.description,
+        tags: body.tags.split(','),
+        weight: body.weight,
+      },
+    ))
+    .then((data) => {
+      lengthInput = data.inputFilesId.length;
+      return Promise.all(data.inputFilesId.map(el => taskApi.deleteFile(el)))
+        .then(() => Promise.all(data.outputFilesId.map(el => taskApi.deleteFile(el))));
+    })
     .then(() => fileApi.deleteFilesByName(bucketStructure.generateArrayNames(taskId, lengthInput)))
     .then(() => fileApi.uploadOldTests(filesArray, taskId))
-    .then(() => fileApi.uploadNewTests(files, taskId));
+    .then(() => fileApi.uploadNewTests(files, taskId))
+    .then(() => Promise.all(inputsId.map((el, i) => {
+      taskApi.addFile({
+        _id: el,
+        name: bucketStructure.generateNameInput(i + 1),
+        url: bucketStructure.generatePathInputs(taskId, i + 1),
+      });
+    })))
+    .then(() => Promise.all(outputsId.map((el, i) => {
+      taskApi.addFile({
+        _id: el,
+        name: bucketStructure.generateNameOutput(i + 1),
+        url: bucketStructure.generatePathOutputs(taskId, i + 1),
+      });
+    })))
+    .then(() => taskApi.getTaskByIdAndUpdate(
+      taskId,
+      {
+        inputFilesId: inputsId,
+        outputFilesId: outputsId,
+      },
+    ));
 };
 
 module.exports = controller;
