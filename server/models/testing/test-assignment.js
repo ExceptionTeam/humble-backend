@@ -17,6 +17,7 @@ const testAssignmentSchema = new Schema({
   assignDate: { type: Date, required: true },
   timeToPass: { type: Number, required: true, default: 1200000 },
   deadline: { type: Date },
+  testSize: { type: Number, required: true, default: 20 },
   teacherId: {
     type: Schema.Types.ObjectId, required: true, ref: 'User', index: true,
   },

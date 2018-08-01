@@ -8,7 +8,7 @@ const { Schema } = mongoose;
 
 const testSubmissionSchema = new Schema({
   questionsId: { type: [{ type: Schema.Types.ObjectId, ref: 'Question' }], index: true, required: true },
-  answeres: { type: Schema.Types.Mixed, required: true },
+  answeres: { type: Schema.Types.Mixed },
   creationDate: { type: Date, required: true },
   completeDate: { type: Date },
   timeToPass: { type: Number, required: true, default: 1200000 },

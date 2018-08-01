@@ -1,5 +1,6 @@
 const route = require('express').Router();
 const testApi = require('../../db-middleware/test-api');
+const submissionApi = require('../../db-middleware/submission-api');
 
 route.get('/available-sections/:userId', (req, res) => {
   testApi
@@ -17,6 +18,17 @@ route.post('/new-request/:userid', (req, res) => {
     .newTestRequest(req.params.userid, req.query.sectionid)
     .then(() => {
       res.status(200).send();
+    })
+    .catch((err) => {
+      res.status(404).send(err);
+    });
+});
+
+route.get('/test-submission/:assignmentId/:studentId', (req, res) => {
+  submissionApi
+    .makeTestSubmission(req.params.assignmentId, req.params.studentId)
+    .then((submission) => {
+      res.status(200).send(submission);
     })
     .catch((err) => {
       res.status(404).send(err);

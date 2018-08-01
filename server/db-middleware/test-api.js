@@ -7,22 +7,12 @@ const {
 } = require('../models/testing/test-request');
 const {
   TestAssignment,
-  ASSIGNMENT_STATUS_PENDING,
-  ASSIGNMENT_STATUS_PASSED,
-  ASSIGNMENT_STATUS_EXPIRED,
+  // ASSIGNMENT_STATUS_PENDING,
+  // ASSIGNMENT_STATUS_PASSED,
+  // ASSIGNMENT_STATUS_EXPIRED,
 } = require('../models/testing/test-assignment');
-const { TestSubmission } = require('../models/testing/test-submission');
 const { TagAttachment } = require('../models/testing/tag-attachment');
 const generalApi = require('./general-api');
-const {
-  Question,
-  CATEGORY_SINGLE_ANSWER,
-  CATEGORY_MULTIPLE_ANSWERS,
-  CATEGORY_WORD_ANSWER,
-  CATEGORY_SENTENCE_ANSWER,
-  TYPE_TRAINING_QUESTION,
-  TYPE_PRIMARY_QUESTION,
-} = require('../models/testing/question');
 
 const apiModule = {};
 
