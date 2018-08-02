@@ -1,6 +1,110 @@
-const { UserAssignment } = require('../models/user/user-assignment');
+const UserAssignment = require('mongoose').model('UserAssignment');
+const {
+  User, USER_ROLE_PENDING, USER_ROLE_STUDENT, USER_ROLE_ADMIN, USER_ROLE_TEACHER,
+} = require('../models/user/user');
+const generatePassword = require('password-generator');
+const mailer = require('../controllers/mailer');
 
 const apiModule = {};
+
+apiModule.isTeacher = function (user) {
+  return user.role.toUpperCase() === USER_ROLE_TEACHER;
+};
+
+apiModule.isStudent = function (user) {
+  return user.role.toUpperCase() === USER_ROLE_STUDENT ||
+    user.role.toUpperCase() === USER_ROLE_PENDING;
+};
+
+apiModule.isAdmin = function (user) {
+  return user.role.toUpperCase() === USER_ROLE_ADMIN;
+};
+
+function addUser(userData) {
+  const newUser = new User(userData);
+  const password = generatePassword(8, false);
+  newUser.setPassword(password);
+  return newUser
+    .save()
+    .then(() => {
+      mailer.sendMail(
+        userData.email,
+        'Добро пожаловать на портал Exception',
+        `Вы были успешно зарегестрированы на портале Exception.\nВаши данные для входа:\n
+        \tЛогин: ${userData.email}\n
+        \tПароль: ${password}`,
+      );
+    });
+}
+
+apiModule.changePassword = function (userId, newPassword) {
+  return User
+    .findById(userId)
+    .then((user) => {
+      const { email } = user;
+      mailer.sendMail(
+        email,
+        'Сброс пароля',
+        'Здравствуйте, ваш пароль был успешно изменен.',
+      );
+      user.setPassword(newPassword);
+    });
+};
+
+apiModule.resetPassword = function (userId) {
+  return User
+    .findById(userId)
+    .then((user) => {
+      const { email } = user;
+      const password = generatePassword(8, false);
+      mailer.sendMail(
+        email,
+        'Сброс пароля',
+        `Здравствуйте, на вашем аккаунте была задействована функция сброса пароля.\nНовый пароль: ${password}`,
+      );
+      user.setPassword(password);
+    });
+};
+
+apiModule.addNewStudent = function (userData) {
+  const {
+    name, surname, email, account, primarySkill,
+  } = userData;
+  return addUser({
+    name, surname, email, account, primarySkill, role: USER_ROLE_STUDENT,
+  });
+};
+
+apiModule.addNewTeacher = function (userData) {
+  const {
+    name, surname, email, account, primarySkill,
+  } = userData;
+  return addUser({
+    name, surname, email, account, primarySkill, role: USER_ROLE_PENDING,
+  });
+};
+
+function validateRole(role, withPending = false) {
+  if (role === USER_ROLE_STUDENT ||
+    role === USER_ROLE_TEACHER ||
+    role === USER_ROLE_ADMIN ||
+    (withPending ? role === USER_ROLE_PENDING : false)) {
+    return true;
+  }
+  return false;
+}
+
+apiModule.changeUserRole = function (userId, oldRole, newRole) {
+  if (validateRole(oldRole, true) && validateRole(newRole)) {
+    const newRoleLevel = (newRole === USER_ROLE_ADMIN || newRole === USER_ROLE_TEACHER) ? 2 : 1;
+    const oldRoleLevel = (oldRole === USER_ROLE_ADMIN || oldRole === USER_ROLE_TEACHER) ? 2 : 1;
+    if (oldRoleLevel !== newRoleLevel) {
+      return User.findByIdAndUpdate(userId, { role: newRole, account: {} });
+    }
+    return User.findByIdAndUpdate(userId, { role: newRole });
+  }
+  return Promise.reject(new Error('Incorrect role'));
+};
 
 apiModule.getIndividualStudents = function (teachId, studProj) {
   return UserAssignment

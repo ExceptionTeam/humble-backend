@@ -7,7 +7,7 @@ route.post('/activate/:taskId', (req, res) => {
     .then(() => {
       res.status(200).end();
     })
-    .catch((err) => {
+    .catch(() => {
       res.status(404).end();
     });
 });
