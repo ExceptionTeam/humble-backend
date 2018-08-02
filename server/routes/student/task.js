@@ -67,6 +67,11 @@ route.get('/download/:submissionId', (req, res) => {
   controller
     .downloadSubmission(req.params.submissionId)
     .then((file) => {
+      res.setHeader('Content-type', 'text/plain');
+      res.setHeader('Content-Disposition', 'attachment; filename="filename.doc');
+      return file;
+    })
+    .then((file) => {
       file.pipe(res);
     })
     .catch((err) => {
