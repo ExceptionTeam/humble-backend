@@ -41,7 +41,6 @@ apiModule.getQuestionsAndSort = function (questionTags, questionType) {
     })
     .select('_id difficulty category type')
     .then((questionsUnsorted) => {
-      console.log(questionsUnsorted);
       const compareRandom = function (a, b) {
         return Math.random() - 0.5;
       };
@@ -124,10 +123,7 @@ apiModule.getQuestionsAndSort = function (questionTags, questionType) {
         }
       });
     })
-    .then(() => {
-      console.log(questions);
-      return questions;
-    });
+    .then(() => questions);
 };
 
 const getCaseNumber = function (
@@ -205,8 +201,6 @@ const getCaseNumber = function (
   else if (caseAvailable[2]) caseNumber = 2;
   else if (caseAvailable[1]) caseNumber = 1;
   else if (caseAvailable[0]) caseNumber = 0;
-  console.log('caseNumber');
-  console.log(caseNumber);
 
   return caseNumber;
 };
@@ -301,12 +295,8 @@ apiModule.getQuestionsToSubmit = function (questionTags, testType, questionAmoun
     })
     .then(() => Object.keys(availableQuestions))
     .then((keys) => {
-      console.log(keys);
       keys.forEach((key, index) => {
         if (availableQuestions[key].length === 0) {
-          console.log(availableQuestions[key]);
-          console.log(availableQuestions[key].length);
-          console.log(key);
           caseAvailable[index] = false;
         }
       });
@@ -326,12 +316,6 @@ apiModule.getQuestionsToSubmit = function (questionTags, testType, questionAmoun
           catBool,
           typeBool,
         );
-        console.log(caseAvailable);
-        console.log(availableQuestions);
-        console.log('left to get');
-        console.log(questLeftToAdd);
-        console.log('last one');
-        console.log(questionIdToSub[questionIdToSub.length - 1]);
 
         if (questLeftToAdd <= 0) {
           flag = false;
@@ -563,7 +547,6 @@ apiModule.getQuestionsToSubmit = function (questionTags, testType, questionAmoun
           }
         }
       }
-      console.log(questionIdToSub);
       if (completed) {
         questionIdToSub.push(questionsInTheEnd);
         return questionIdToSub;
@@ -577,7 +560,6 @@ apiModule.makeTestSubmission = function (testAssignmentId, studentId) {
   return TestAssignment
     .findById(testAssignmentId)
     .then((assignment) => {
-      console.log(1);
       assignmentToSubmit = assignment;
     })
     .then(() => apiModule.getQuestionsToSubmit(
@@ -587,7 +569,6 @@ apiModule.makeTestSubmission = function (testAssignmentId, studentId) {
       assignmentToSubmit.trainingPercentage,
     ))
     .then((questionsInSub) => {
-      console.log(questionsInSub);
       if (questionsInSub) {
         return TestSubmission.create({
           userId: studentId,
@@ -598,7 +579,6 @@ apiModule.makeTestSubmission = function (testAssignmentId, studentId) {
           questionsId: questionsInSub,
         });
       }
-      console.log(1);
       throw new Error('Not enough questions');
     })
     .then((submission) => {
@@ -614,7 +594,6 @@ apiModule.makeTestSubmission = function (testAssignmentId, studentId) {
       } else if (submission === undefined) {
         throw new Error('Can not create test submission');
       }
-      console.log(2);
     });
 };
 

@@ -24,7 +24,6 @@ route.get('/tasks-list/:studentId', (req, res) => {
       res.status(200).send(task);
     })
     .catch((err) => {
-      console.log(err);
       res.status(404).send(err);
     });
 });
@@ -36,7 +35,6 @@ route.get('/submissions/:assignId', (req, res) => {
       res.status(200).send(submissions);
     })
     .catch((err) => {
-      console.log(err);
       res.status(404).send(err);
     });
 });
