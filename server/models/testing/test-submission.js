@@ -9,8 +9,8 @@ const { Schema } = mongoose;
 const testSubmissionSchema = new Schema({
   questionsId: { type: [{ type: Schema.Types.ObjectId, ref: 'Question' }], index: true, required: true },
   answeres: { type: Schema.Types.Mixed },
-  creationDate: { type: Date, required: true },
-  completeDate: { type: Date },
+  creationDate: { type: Number, required: true, min: 0 },
+  completeDate: { type: Number, min: 0 },
   timeToPass: { type: Number, required: true, default: 1200000 },
   assignmentId: {
     type: Schema.Types.ObjectId, required: true, index: true, ref: 'TestAssignment',

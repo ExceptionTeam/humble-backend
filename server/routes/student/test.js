@@ -24,7 +24,7 @@ route.post('/new-request/:userid', (req, res) => {
     });
 });
 
-route.get('/test-submission/:assignmentId/:studentId', (req, res) => {
+route.get('/submission/:assignmentId/:studentId', (req, res) => {
   submissionApi
     .makeTestSubmission(req.params.assignmentId, req.params.studentId)
     .then((submission) => {

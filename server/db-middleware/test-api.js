@@ -76,7 +76,7 @@ apiModule.approveRequest = function (requestId, teachId) {
       name: sectionName,
       studentId: requestToRemember.userId,
       teacherId: teachId,
-      assignDate: Date.now(),
+      assignDate: new Date().getTime(),
       tags: allTags,
     }));
 };
@@ -85,7 +85,7 @@ apiModule.getPendingRequestsByTeacher = function (teacherId) {
   return generalApi.getStudentsByTeacherFlat(teacherId)
     .then(allStdIds => Request
       .find({ userId: { $in: allStdIds }, status: REQUEST_STATUS_PENDING })
-      .populate('userId', '_id name surname __v')
+      .populate('userId', '_id name surname')
       .populate('sectionId', '_id name')
       .lean());
 };

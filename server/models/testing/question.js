@@ -36,7 +36,9 @@ const questionSchema = new Schema({
   questionAuthorId: { type: Schema.Types.ObjectId, required: true, ref: 'User' },
   answerOptions: Schema.Types.Mixed,
   correctOptions: Schema.Types.Mixed,
-  difficulty: { type: Number, required: true, enum: [1, 2, 3, 4] },
+  difficulty: {
+    type: Number, required: true, min: 1, max: 4,
+  },
   peopleTested: { type: Number, required: true, default: 0 },
   peopleAnswered: { type: Number, required: true, default: 0 },
 });

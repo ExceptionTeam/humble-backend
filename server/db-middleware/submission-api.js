@@ -572,7 +572,7 @@ apiModule.makeTestSubmission = function (testAssignmentId, studentId) {
       if (questionsInSub) {
         return TestSubmission.create({
           userId: studentId,
-          creationDate: Date.now(),
+          creationDate: new Date().getTime(),
           timeToPass: assignmentToSubmit.timeToPass,
           status: SUBMISSION_STATUS_PENDING,
           assignmentId: assignmentToSubmit._id,
