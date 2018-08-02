@@ -68,7 +68,7 @@ route.get('/download/:submissionId', (req, res) => {
     .downloadSubmission(req.params.submissionId)
     .then((file) => {
       res.setHeader('Content-type', 'text/plain');
-      res.setHeader('Content-Disposition', 'attachment; filename="filename.doc');
+      res.setHeader('Content-Disposition', 'attachment; filename="solution.java');
       return file;
     })
     .then((file) => {
