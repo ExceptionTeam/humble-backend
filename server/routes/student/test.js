@@ -28,10 +28,13 @@ route.get('/test-submission/:assignmentId/:studentId', (req, res) => {
   submissionApi
     .makeTestSubmission(req.params.assignmentId, req.params.studentId)
     .then((submission) => {
+      console.log(111111);
       res.status(200).send(submission);
     })
     .catch((err) => {
-      res.status(404).send(err);
+      if (err.message === 'Not enough questions') {
+        res.status(404).send(err.message);
+      } else res.status(404).send(err);
     });
 });
 

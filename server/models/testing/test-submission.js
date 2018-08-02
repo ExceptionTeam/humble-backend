@@ -24,6 +24,7 @@ const testSubmissionSchema = new Schema({
     index: true,
     enum: [SUBMISSION_STATUS_PENDING, SUBMISSION_STATUS_ANSWERED, SUBMISSION_STATUS_CHECKED],
   },
+  mark: { type: Number },
 });
 
 const TestSubmission = mongoose.model('TestSubmission', testSubmissionSchema);

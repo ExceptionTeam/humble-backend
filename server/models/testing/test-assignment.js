@@ -21,6 +21,9 @@ const testAssignmentSchema = new Schema({
   teacherId: {
     type: Schema.Types.ObjectId, required: true, ref: 'User', index: true,
   },
+  trainingPercentage: {
+    type: Number, required: true, default: 0.5, min: 0, max: 1,
+  },
   type: {
     type: String,
     required: true,
