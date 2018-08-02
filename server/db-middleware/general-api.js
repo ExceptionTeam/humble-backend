@@ -28,7 +28,7 @@ function addUser(userData) {
   return newUser
     .save()
     .then(() => {
-      console.log(
+      mailer.sendMail(
         userData.email,
         'Добро пожаловать на портал Exception',
         `Вы были успешно зарегистрированы на портале Exception.\nВаши данные для входа:\n
