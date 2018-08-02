@@ -7,7 +7,7 @@ route.post('/activate/:taskId', (req, res) => {
     .then(() => {
       res.status(200).end();
     })
-    .catch((err) => {
+    .catch(() => {
       res.status(404).end();
     });
 });
@@ -26,6 +26,16 @@ route.post('/abbreviated-info', (req, res) => {
     })
     .catch((err) => {
       res.status(404).send(err);
+    });
+});
+
+route.get('/pending-teacher', (req, res) => {
+  taskApi.getPendingTeacher(req.query.skip, req.query.top)
+    .then((data) => {
+      res.status(200).send(data);
+    })
+    .catch((err) => {
+      res.status(404).end();
     });
 });
 
