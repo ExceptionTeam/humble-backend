@@ -99,7 +99,7 @@ controller.createSubmission = function (file, assignId) {
       };
       taskApi.addFile(fileInfo);
     })
-    .then(result => ({
+    .then(() => ({
       fileId,
       submissionId,
     }));

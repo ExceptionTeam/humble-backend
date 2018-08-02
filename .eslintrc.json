@@ -22,6 +22,7 @@
         "consistent-return":"off",
         "eqeqeq": ["error", "always", {"null": "ignore"}],
         "prefer-promise-reject-errors":"warn",
-        "no-use-before-define":"warn"
+        "no-use-before-define":"warn",
+        "prefer-destructuring":"warn"
     }
 }
