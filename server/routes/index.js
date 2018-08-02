@@ -21,7 +21,10 @@ route.use('/teacher', teacherRoute);
 route.use('/admin', adminRoute);
 
 route.use('/info', (req, res) => {
-  res.status(200).send(req.user);
+  res.status(200).send({
+    id: req.user.id,
+    role: req.user.role,
+  });
 });
 
 route.use('/logout', (req, res) => {
