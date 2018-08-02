@@ -1,6 +1,6 @@
-const bucketStructure = require('./bucket-structure');
 const s3 = require('../initialization/aws');
 const { BUCKET_NAME } = require('../../config');
+const bucketStructure = require('./bucket-structure');
 
 const awsModule = {};
 
@@ -33,6 +33,15 @@ const uploadOutput = function (file, taskId, number) {
       }));
 };
 
+awsModule.uploadBasisSubmission = function (file, taskId, submissionId, fileId) {
+  const params = {
+    Bucket: BUCKET_NAME,
+    Key: bucketStructure.generatePathSubmission(taskId, submissionId, fileId),
+    Body: file.srcFile.data,
+  };
+  return awsModule.upload(params);
+};
+
 awsModule.uploadTogether = function (files, taskId, number) {
   return uploadInput(files, taskId, number)
     .then(() => uploadOutput(files, taskId, number));
@@ -44,6 +53,49 @@ awsModule.upload = function (params) {
       throw new Error(err);
     }
   }).promise();
+};
+
+awsModule.getFile = function (key) {
+  const params = {
+    Bucket: BUCKET_NAME,
+    Key: key,
+  };
+  return s3.getObject(params).promise();
+};
+
+awsModule.getFileStream = function (key) {
+  const params = {
+    Bucket: BUCKET_NAME,
+    Key: key,
+  };
+  return s3.getObject(params).createReadStream();
+};
+
+awsModule.deleteFilesByName = function (keys) {
+  const params = {
+    Bucket: BUCKET_NAME,
+    Delete: {
+      Objects: keys,
+      Quiet: false,
+    },
+  };
+  return s3.deleteObjects(params).promise();
+};
+
+awsModule.uploadOldTests = function (tests, taskId) {
+  return Promise.all(tests.map(el => this.upload({
+    Bucket: BUCKET_NAME,
+    Key: bucketStructure.generatePathTests(el.name, taskId),
+    Body: el.data.Body,
+  })));
+};
+
+awsModule.uploadNewTests = function (tests, taskId) {
+  return Promise.all(Object.keys(tests).map(el => this.upload({
+    Bucket: BUCKET_NAME,
+    Key: bucketStructure.generatePathTests(el, taskId),
+    Body: tests[el].data,
+  })));
 };
 
 module.exports = awsModule;
