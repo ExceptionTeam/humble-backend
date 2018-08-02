@@ -55,4 +55,47 @@ awsModule.upload = function (params) {
   }).promise();
 };
 
+awsModule.getFile = function (key) {
+  const params = {
+    Bucket: BUCKET_NAME,
+    Key: key,
+  };
+  return s3.getObject(params).promise();
+};
+
+awsModule.getFileStream = function (key) {
+  const params = {
+    Bucket: BUCKET_NAME,
+    Key: key,
+  };
+  return s3.getObject(params).createReadStream();
+};
+
+awsModule.deleteFilesByName = function (keys) {
+  const params = {
+    Bucket: BUCKET_NAME,
+    Delete: {
+      Objects: keys,
+      Quiet: false,
+    },
+  };
+  return s3.deleteObjects(params).promise();
+};
+
+awsModule.uploadOldTests = function (tests, taskId) {
+  return Promise.all(tests.map(el => this.upload({
+    Bucket: BUCKET_NAME,
+    Key: bucketStructure.generatePathTests(el.name, taskId),
+    Body: el.data.Body,
+  })));
+};
+
+awsModule.uploadNewTests = function (tests, taskId) {
+  return Promise.all(Object.keys(tests).map(el => this.upload({
+    Bucket: BUCKET_NAME,
+    Key: bucketStructure.generatePathTests(el, taskId),
+    Body: tests[el].data,
+  })));
+};
+
 module.exports = awsModule;

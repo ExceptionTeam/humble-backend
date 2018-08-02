@@ -62,4 +62,20 @@ route.post('/submit/:assignId', (req, res) => {
   req.pipe(busboy);
 });
 
+route.get('/download/:submissionId', (req, res) => {
+  controller
+    .downloadSubmission(req.params.submissionId)
+    .then((file) => {
+      res.setHeader('Content-type', 'text/plain');
+      res.setHeader('Content-Disposition', 'attachment; filename="solution.java');
+      return file;
+    })
+    .then((file) => {
+      file.pipe(res);
+    })
+    .catch((err) => {
+      res.status(404).end();
+    });
+});
+
 module.exports = route;
