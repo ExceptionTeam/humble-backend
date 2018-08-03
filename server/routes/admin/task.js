@@ -1,7 +1,7 @@
 const route = require('express').Router();
 const taskApi = require('../../db-middleware/task-api');
 
-route.post('/activate/:taskId', (req, res) => {
+/* route.post('/activate/:taskId', (req, res) => {
   taskApi
     .activateTask(req.params.taskId)
     .then(() => {
@@ -10,7 +10,7 @@ route.post('/activate/:taskId', (req, res) => {
     .catch(() => {
       res.status(404).end();
     });
-});
+}); */
 
 route.post('/abbreviated-info', (req, res) => {
   taskApi

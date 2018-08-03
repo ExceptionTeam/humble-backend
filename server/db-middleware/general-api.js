@@ -31,7 +31,7 @@ function addUser(userData) {
       mailer.sendMail(
         userData.email,
         'Добро пожаловать на портал Exception',
-        `Вы были успешно зарегестрированы на портале Exception.\nВаши данные для входа:\n
+        `Вы были успешно зарегистрированы на портале Exception.\nВаши данные для входа:\n
         \tЛогин: ${userData.email}\n
         \tПароль: ${password}`,
       );
