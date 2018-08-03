@@ -37,4 +37,15 @@ route.get('/submission/:assignmentId/:studentId', (req, res) => {
     });
 });
 
+route.get('/assignments/:studentId', (req, res) => {
+  testApi
+    .getStudAllAssignments(req.params.studentId)
+    .then((assignments) => {
+      res.status(200).send(assignments);
+    })
+    .catch((err) => {
+      res.status(404).send(err);
+    });
+});
+
 module.exports = route;

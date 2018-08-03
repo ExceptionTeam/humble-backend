@@ -16,7 +16,7 @@ route.post('/approve/:requestid/:teacherid', (req, res) => {
 
 route.get('/get-students/:teacherId', (req, res) => {
   generalApi
-    .getStudentsByTeacherFlat(req.params.teacherId)
+    .getStudentsByTeacher(req.params.teacherId)
     .then((studId) => {
       res.status(200).send(studId);
     })

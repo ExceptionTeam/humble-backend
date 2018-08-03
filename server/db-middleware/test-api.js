@@ -7,6 +7,8 @@ const {
 } = require('../models/testing/test-request');
 const {
   TestAssignment,
+  ASSIGNMENT_STATUS_PENDING,
+  ASSIGNMENT_STATUS_EXPIRED,
 } = require('../models/testing/test-assignment');
 const { TagAttachment } = require('../models/testing/tag-attachment');
 const generalApi = require('./general-api');
@@ -88,6 +90,52 @@ apiModule.getPendingRequestsByTeacher = function (teacherId) {
       .populate('userId', '_id name surname')
       .populate('sectionId', '_id name')
       .lean());
+};
+
+apiModule.checkIfAssignmentsExpired = function (assignmentIds) {
+  const actualAssignmentIds = [];
+  const assignmentsToExpire = [];
+  return TestAssignment.find({ _id: { $in: assignmentIds } })
+    .select('-__v -studentId -trainingPercentage -status')
+    .populate('teacherId', 'surname name')
+    .populate('groupId', 'name')
+    .then((allAssignments) => {
+      allAssignments.forEach((el) => {
+        if (el.deadline !== null && el.deadline < new Date().getTime()) {
+          assignmentsToExpire.push(el._id);
+        } else actualAssignmentIds.push(el);
+      });
+    })
+    .then(() => {
+      Promise.all(assignmentsToExpire.map(el => TestAssignment.findByIdAndUpdate(
+        el,
+        { $set: { status: ASSIGNMENT_STATUS_EXPIRED } },
+      )));
+    })
+    .then(() => actualAssignmentIds);
+};
+
+apiModule.getStudAllAssignments = function (studId) {
+  const assignmentIds = [];
+  return generalApi.getGroupIdsByStudent(studId)
+    .then(groupIds => TestAssignment
+      .find({
+        groupId: { $in: groupIds },
+        status: ASSIGNMENT_STATUS_PENDING,
+      })
+      .select('_id'))
+    .then(groupAssignments => apiModule.checkIfAssignmentsExpired(groupAssignments))
+    .then((groupAssignments) => {
+      groupAssignments.forEach(el => assignmentIds.push(el));
+    })
+    .then(() => TestAssignment
+      .find({ studentId: studId })
+      .select('_id'))
+    .then(individualAssignments => apiModule.checkIfAssignmentsExpired(individualAssignments))
+    .then((individualAssignments) => {
+      individualAssignments.forEach(el => assignmentIds.push(el));
+    })
+    .then(() => assignmentIds);
 };
 
 module.exports = apiModule;
