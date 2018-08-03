@@ -31,39 +31,52 @@ function addUser(userData) {
       mailer.sendMail(
         userData.email,
         'Добро пожаловать на портал Exception',
-        `Вы были успешно зарегестрированы на портале Exception.\nВаши данные для входа:\n
+        `Вы были успешно зарегистрированы на портале Exception.\nВаши данные для входа:\n
         \tЛогин: ${userData.email}\n
         \tПароль: ${password}`,
       );
     });
 }
 
-apiModule.changePassword = function (userId, newPassword) {
+apiModule.changePassword = function (userId, oldPass, newPass) {
   return User
     .findById(userId)
+    .then((user) => {
+      if (user.verifyPassword(oldPass)) {
+        return user;
+      }
+      throw new Error();
+    })
     .then((user) => {
       const { email } = user;
       mailer.sendMail(
         email,
-        'Сброс пароля',
+        'Смена пароля',
         'Здравствуйте, ваш пароль был успешно изменен.',
       );
-      user.setPassword(newPassword);
+      user.setPassword(newPass);
+      user.markModified('hash');
+      user.markModified('salt');
+      return user.save();
     });
 };
 
-apiModule.resetPassword = function (userId) {
+apiModule.resetPassword = function (email) {
   return User
-    .findById(userId)
+    .findOne({ email })
     .then((user) => {
-      const { email } = user;
-      const password = generatePassword(8, false);
-      mailer.sendMail(
-        email,
-        'Сброс пароля',
-        `Здравствуйте, на вашем аккаунте была задействована функция сброса пароля.\nНовый пароль: ${password}`,
-      );
-      user.setPassword(password);
+      if (user) {
+        const password = generatePassword(8, false);
+        mailer.sendMail(
+          email,
+          'Сброс пароля',
+          `Здравствуйте, на вашем аккаунте была задействована функция сброса пароля.\nНовый пароль: ${password}`,
+        );
+        user.setPassword(password);
+        user.markModified('hash');
+        user.markModified('salt');
+        user.save();
+      }
     });
 };
 

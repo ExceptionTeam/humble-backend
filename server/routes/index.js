@@ -1,5 +1,6 @@
 const route = require('express').Router();
 const generalApi = require('../db-middleware/general-api');
+const taskApi = require('../db-middleware/task-api');
 
 const guestRoute = require('./guest');
 const studentRoute = require('./student');
@@ -20,6 +21,24 @@ route.use('/student', studentRoute);
 route.use('/teacher', teacherRoute);
 route.use('/admin', adminRoute);
 
+route.post('/activate/:taskId', (req, res) => {
+  taskApi
+    .activateTask(req.params.taskId)
+    .then(() => {
+      res.status(200).end();
+    })
+    .catch(() => {
+      res.status(404).end();
+    });
+});
+
+route.use('/info', (req, res) => {
+  res.status(200).send({
+    id: req.user.id,
+    role: req.user.role,
+  });
+});
+
 route.use('/logout', (req, res) => {
   req.logout();
   res.status(200).end();
@@ -36,9 +55,9 @@ route.post('/reset-password', (req, res) => {
     });
 });
 
-route.post('/change-password/:userId/:password', (req, res) => {
+route.post('/change-password', (req, res) => {
   generalApi
-    .changePassword(req.params.userId, req.params.password)
+    .changePassword(req.params.userId, req.body.oldPass, req.body.newPass)
     .then(() => {
       res.status(200).send();
     })
