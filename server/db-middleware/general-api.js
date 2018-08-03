@@ -38,6 +38,15 @@ function addUser(userData) {
     });
 }
 
+/* adduser({
+  name: "Vlad",
+  surname: "Malinovsky",
+  role: "STUDENT",
+  email: "vlad.malinovsky.98@gmail.com",
+  primarySkill: "intermediate",
+  account: "БГУ"
+}); */
+
 apiModule.changePassword = function (userId, newPassword) {
   return User
     .findById(userId)
