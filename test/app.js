@@ -19,11 +19,22 @@ function runExec(container, cmd) {
   return container.exec(options)
     .then(exec => exec.start({ Detach: false }))
     .then(exec => new Promise((resolve, reject) => {
-      exec.output.on('close', resolve);
+      console.log('YAY');
+      // exec.output.on('close', resolve);
       exec.output.on('end', resolve);
       exec.output.on('error', reject);
-      container.modem.demuxStream(exec.output, process.stdout, process.stderr);
+      // container.modem.demuxStream(exec.output, process.stdout, process.stderr);
+      exec.output.pipe(process.stdout);
+      // while (true) {
+      //   exec.inspect((err, data) => {
+      //     if (!data.Running) {
+      //       resolve();
+      //     } else console.log('not yet');
+      //   });
+      // }
     }));
+  // .then(() => exec.inspect())
+  // .then(data => console.log(data)));
 }
 
 
@@ -32,7 +43,7 @@ docker.createContainer({
     Binds: [path.resolve('./haHAA') + ':/data'],
   },
   OpenStdin: true,
-  Tty: true,
+  Tty: false,
   WorkingDir: '/data',
   Cmd: ['/bin/sh'],
   name: 'test',
@@ -49,8 +60,11 @@ docker.createContainer({
     let testsLine = Promise.resolve();
     for (let i = 0; i < 5; i++) {
       testsLine = testsLine.then(() => console.log('started ' + i))
+        .then(() => runExec(docker.getContainer(id), ['mv', `input${i + 1}.txt`, 'input.txt']))
         .then(() => {
-          fs.renameSync('./haHAA/input' + (i + 1) + '.txt', './haHAA/input.txt');
+          // fs.renameSync('./haHAA/input' + (i + 1) + '.txt', './haHAA/input.txt');
+          console.log('=>');
+          console.log(fs.readdirSync('./haHAA'));
           return runExec(docker.getContainer(id), ['java', 'Main']);
         })
         .then(() => {
@@ -66,11 +80,12 @@ docker.createContainer({
           console.log(err);
           tests[i] = err;
         })
-        .then((res) => {
-          fs.renameSync('./haHAA/input.txt', './haHAA/input' + (i + 1) + '.txt');
-          fs.unlinkSync('./haHAA/output.txt');
-          return res;
-        });
+        .then(() => runExec(docker.getContainer(id), ['mv', 'input.txt', `input${i + 1}.txt`]))
+        .then(() => runExec(docker.getContainer(id), ['rm', 'output.txt']));
+      // .then(() => {
+      // fs.renameSync('./haHAA/input.txt', './haHAA/input' + (i + 1) + '.txt');
+      // fs.unlinkSync('./haHAA/output.txt');
+      // });
     }
     return testsLine;
   })
