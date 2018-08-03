@@ -25,7 +25,6 @@ const {
 const apiModule = {};
 
 apiModule.getQuestionsByTags = function (questionTags = null) {
-  console.log(questionTags);
   if (questionTags === null) {
     return Question
       .find();
