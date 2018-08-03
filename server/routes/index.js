@@ -36,6 +36,8 @@ route.use('/info', (req, res) => {
   res.status(200).send({
     id: req.user.id,
     role: req.user.role,
+    name: req.user.name,
+    surname: req.user.surname,
   });
 });
 
@@ -44,20 +46,9 @@ route.use('/logout', (req, res) => {
   res.status(200).end();
 });
 
-route.post('/reset-password', (req, res) => {
-  generalApi
-    .resetPassword(req.user.id)
-    .then(() => {
-      res.status(200).send();
-    })
-    .catch(() => {
-      res.status(400).send();
-    });
-});
-
 route.post('/change-password', (req, res) => {
   generalApi
-    .changePassword(req.params.userId, req.body.oldPass, req.body.newPass)
+    .changePassword(req.user.id, req.body.oldPass, req.body.newPass)
     .then(() => {
       res.status(200).send();
     })

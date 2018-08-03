@@ -14,7 +14,7 @@ route.use('/login', (req, res, next) => {
   passport.authenticate('local', (err, user) => {
     if (user) {
       req.login(user, error => (error ?
-        res.status(401).end() :
+        res.status(400).end() :
         res.json({
           id: user._id,
           name: user.name,
@@ -23,7 +23,7 @@ route.use('/login', (req, res, next) => {
           email: user.email,
         })));
     } else {
-      return res.status(401).json(err);
+      return res.status(400).json(err);
     }
   })(req, res, next);
 });
@@ -41,6 +41,17 @@ route.post('/register', (req, res) => {
     })
     .catch((err) => {
       console.log(err);
+      res.status(400).send();
+    });
+});
+
+route.post('/reset-password', (req, res) => {
+  generalApi
+    .resetPassword(req.body.email)
+    .then(() => {
+      res.status(200).send();
+    })
+    .catch(() => {
       res.status(400).send();
     });
 });
