@@ -20,6 +20,17 @@ route.use('/student', studentRoute);
 route.use('/teacher', teacherRoute);
 route.use('/admin', adminRoute);
 
+route.post('/activate/:taskId', (req, res) => {
+  taskApi
+    .activateTask(req.params.taskId)
+    .then(() => {
+      res.status(200).end();
+    })
+    .catch(() => {
+      res.status(404).end();
+    });
+});
+
 route.use('/info', (req, res) => {
   res.status(200).send({
     id: req.user.id,
