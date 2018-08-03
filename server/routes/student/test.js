@@ -23,4 +23,15 @@ route.post('/new-request/:userid', (req, res) => {
     });
 });
 
+route.post('/tags', (req, res) => {
+  testApi
+    .getAllTags(req.query.sectionId, req.body)
+    .then((result) => {
+      res.status(200).send(result);
+    })
+    .catch((err) => {
+      res.status(404).send(err);
+    });
+});
+
 module.exports = route;
