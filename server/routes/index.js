@@ -32,17 +32,6 @@ route.use('/logout', (req, res) => {
   res.status(200).end();
 });
 
-route.post('/reset-password', (req, res) => {
-  generalApi
-    .resetPassword(req.user.id)
-    .then(() => {
-      res.status(200).send();
-    })
-    .catch(() => {
-      res.status(400).send();
-    });
-});
-
 route.post('/change-password', (req, res) => {
   generalApi
     .changePassword(req.params.userId, req.body.oldPass, req.body.newPass)

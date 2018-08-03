@@ -45,4 +45,15 @@ route.post('/register', (req, res) => {
     });
 });
 
+route.post('/reset-password', (req, res) => {
+  generalApi
+    .resetPassword(req.user.id)
+    .then(() => {
+      res.status(200).send();
+    })
+    .catch(() => {
+      res.status(400).send();
+    });
+});
+
 module.exports = route;
