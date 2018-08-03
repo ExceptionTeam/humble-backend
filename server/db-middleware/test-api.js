@@ -5,7 +5,9 @@ const {
   REQUEST_STATUS_PENDING,
   REQUEST_STATUS_REJECTED,
 } = require('../models/testing/test-request');
-const { TestAssignment } = require('../models/testing/test-assignment');
+const {
+  TestAssignment,
+} = require('../models/testing/test-assignment');
 const { TagAttachment } = require('../models/testing/tag-attachment');
 const generalApi = require('./general-api');
 
@@ -74,7 +76,7 @@ apiModule.approveRequest = function (requestId, teachId) {
       name: sectionName,
       studentId: requestToRemember.userId,
       teacherId: teachId,
-      assignDate: Date.now(),
+      assignDate: new Date().getTime(),
       tags: allTags,
     }));
 };
@@ -83,8 +85,9 @@ apiModule.getPendingRequestsByTeacher = function (teacherId) {
   return generalApi.getStudentsByTeacherFlat(teacherId)
     .then(allStdIds => Request
       .find({ userId: { $in: allStdIds }, status: REQUEST_STATUS_PENDING })
-      .populate('userId', 'name, surname')
-      .populate('sectionId', 'name'));
+      .populate('userId', '_id name surname')
+      .populate('sectionId', '_id name')
+      .lean());
 };
 
 module.exports = apiModule;

@@ -1,6 +1,7 @@
 const route = require('express').Router();
 const generalApi = require('../../db-middleware/general-api');
 const testApi = require('../../db-middleware/test-api');
+const submissionApi = require('../../db-middleware/submission-api');
 
 route.post('/approve/:requestid/:teacherid', (req, res) => {
   testApi
@@ -45,5 +46,17 @@ route.get('/pending-requests/:teacherId', (req, res) => {
       res.status(404).send(err);
     });
 });
+
+route.get('/tag-questions/', (req, res) => {
+  submissionApi
+    .getQuestionsByTags(req.body)
+    .then((submission) => {
+      res.status(200).send(submission);
+    })
+    .catch((err) => {
+      res.status(404).send(err);
+    });
+});
+
 
 module.exports = route;
