@@ -7,6 +7,7 @@ const {
 const {
   TestSubmission,
   SUBMISSION_STATUS_PENDING,
+  SUBMISSION_STATUS_ANSWERED,
 } = require('../models/testing/test-submission');
 const {
   Question,
@@ -17,15 +18,29 @@ const {
   TYPE_TRAINING_QUESTION,
   TYPE_PRIMARY_QUESTION,
 } = require('../models/testing/question');
+const {
+  TagAttachment,
+} = require('../models/testing/tag-attachment');
 
 const apiModule = {};
 
-apiModule.getQuestionsByTags = function (questionTags) {
+apiModule.getQuestionsByTags = function (questionTags = null) {
+  if (questionTags === null) {
+    return Question
+      .find();
+  }
   return Question
     .find({
-      tags: { $in: questionTags },
+      tags: { $in: questionTags.split(', ') },
     });
 };
+
+apiModule.getAllTagAttachments = function () {
+  return TagAttachment
+    .find()
+    .populate('sectionId');
+};
+
 
 apiModule.getQuestionsAndSort = function (questionTags, questionType) {
   const questions = {};
@@ -595,6 +610,20 @@ apiModule.makeTestSubmission = function (testAssignmentId, studentId) {
         throw new Error('Can not create test submission');
       }
     });
+};
+
+apiModule.getQuestionsAndUpdateSubmition = function (submissionId, allAnsweres) {
+  return TestSubmission
+    .findByIdAndUpdate(
+      submissionId,
+      {
+        $set: {
+          answeres: allAnsweres,
+          status: SUBMISSION_STATUS_ANSWERED,
+          completeDate: new Date().getTime(),
+        },
+      },
+    );
 };
 
 module.exports = apiModule;

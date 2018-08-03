@@ -16,7 +16,7 @@ route.post('/approve/:requestid/:teacherid', (req, res) => {
 
 route.get('/get-students/:teacherId', (req, res) => {
   generalApi
-    .getStudentsByTeacherFlat(req.params.teacherId)
+    .getStudentsByTeacher(req.params.teacherId)
     .then((studId) => {
       res.status(200).send(studId);
     })
@@ -47,9 +47,9 @@ route.get('/pending-requests/:teacherId', (req, res) => {
     });
 });
 
-route.get('/tag-questions/', (req, res) => {
+route.post('/tag-questions/', (req, res) => {
   submissionApi
-    .getQuestionsByTags(req.body)
+    .getQuestionsByTags(req.body.tags)
     .then((submission) => {
       res.status(200).send(submission);
     })
@@ -58,5 +58,26 @@ route.get('/tag-questions/', (req, res) => {
     });
 });
 
+route.get('/tags/', (req, res) => {
+  submissionApi
+    .getAllTagAttachments()
+    .then((tags) => {
+      res.status(200).send(tags);
+    })
+    .catch((err) => {
+      res.status(404).send(err);
+    });
+});
+
+route.post('/new-question/', (req, res) => {
+  testApi
+    .newQuestion(req.body)
+    .then(() => {
+      res.status(200).send();
+    })
+    .catch((err) => {
+      res.status(404).send(err);
+    });
+});
 
 module.exports = route;

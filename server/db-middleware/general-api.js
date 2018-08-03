@@ -176,6 +176,14 @@ apiModule.getGroupsByStudent = function (studentId, groupProj) {
     .lean();
 };
 
+apiModule.getGroupIdsByStudent = function (studentId) {
+  return UserAssignment
+    .find({ studentId })
+    .exists('groupId')
+    .select('groupId')
+    .then(userAssignment => userAssignment.map(el => el.groupId));
+};
+
 apiModule.getStudentsByGroup = function (groupId, studProj) {
   return UserAssignment
     .find({ groupId })
