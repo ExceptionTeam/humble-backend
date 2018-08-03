@@ -18,15 +18,30 @@ const {
   TYPE_TRAINING_QUESTION,
   TYPE_PRIMARY_QUESTION,
 } = require('../models/testing/question');
+const {
+  TagAttachment,
+} = require('../models/testing/tag-attachment');
 
 const apiModule = {};
 
-apiModule.getQuestionsByTags = function (questionTags) {
+apiModule.getQuestionsByTags = function (questionTags = null) {
+  console.log(questionTags);
+  if (questionTags === null) {
+    return Question
+      .find();
+  }
   return Question
     .find({
-      tags: { $in: questionTags },
+      tags: { $in: questionTags.split(', ') },
     });
 };
+
+apiModule.getAllTags = function () {
+  return TagAttachment
+    .find()
+    .populate('sectionId');
+};
+
 
 apiModule.getQuestionsAndSort = function (questionTags, questionType) {
   const questions = {};

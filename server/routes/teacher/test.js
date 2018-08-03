@@ -47,11 +47,22 @@ route.get('/pending-requests/:teacherId', (req, res) => {
     });
 });
 
-route.get('/tag-questions/', (req, res) => {
+route.post('/tag-questions/', (req, res) => {
   submissionApi
-    .getQuestionsByTags(req.body)
+    .getQuestionsByTags(req.body.tags)
     .then((submission) => {
       res.status(200).send(submission);
+    })
+    .catch((err) => {
+      res.status(404).send(err);
+    });
+});
+
+route.get('/tags/', (req, res) => {
+  submissionApi
+    .getAllTags()
+    .then((tags) => {
+      res.status(200).send(tags);
     })
     .catch((err) => {
       res.status(404).send(err);
