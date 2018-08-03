@@ -10,6 +10,15 @@ const {
   ASSIGNMENT_STATUS_PENDING,
   ASSIGNMENT_STATUS_EXPIRED,
 } = require('../models/testing/test-assignment');
+const {
+  Question,
+  CATEGORY_SINGLE_ANSWER,
+  CATEGORY_MULTIPLE_ANSWERS,
+  CATEGORY_WORD_ANSWER,
+  CATEGORY_SENTENCE_ANSWER,
+  TYPE_TRAINING_QUESTION,
+  TYPE_PRIMARY_QUESTION,
+} = require('../models/testing/question');
 const { TagAttachment } = require('../models/testing/tag-attachment');
 const generalApi = require('./general-api');
 
@@ -29,7 +38,10 @@ const checkRequestsForSections = function (sectId, studentId) {
     });
 };
 
-apiModule.getAcceptableSectionsToRequest = function (studentId) {
+apiModule.getAcceptableSectionsToRequest = function (studentId, skip = 0, top = 20) {
+  const sectionsToReturn = {};
+  sectionsToReturn.sect = [];
+  sectionsToReturn.amount = 0;
   return Section
     .find()
     .then(sections => Promise.all(sections.map(el => checkRequestsForSections(el.id, studentId))))
@@ -38,7 +50,16 @@ apiModule.getAcceptableSectionsToRequest = function (studentId) {
         return false;
       }
       return true;
-    }));
+    }))
+    .then((sections) => {
+      sectionsToReturn.amount = sections.length;
+      if (+skip < sections.length && (+skip + +top) < sections.length) {
+        sectionsToReturn.sect = sections.slice(skip, top);
+      } else if (+skip < sections.length && (+skip + +top) >= sections.length) {
+        sectionsToReturn.sect = sections.slice(skip, sections.length);
+      }
+      return sectionsToReturn;
+    });
 };
 
 apiModule.newTestRequest = function (user, section) {
@@ -92,18 +113,15 @@ apiModule.getPendingRequestsByTeacher = function (teacherId) {
       .lean());
 };
 
-apiModule.checkIfAssignmentsExpired = function (assignmentIds) {
-  const actualAssignmentIds = [];
+apiModule.checkIfAssignmentsExpired = function () {
   const assignmentsToExpire = [];
-  return TestAssignment.find({ _id: { $in: assignmentIds } })
-    .select('-__v -studentId -trainingPercentage -status')
-    .populate('teacherId', 'surname name')
-    .populate('groupId', 'name')
+  return TestAssignment.find({ status: ASSIGNMENT_STATUS_PENDING })
+    .select('_id deadline')
     .then((allAssignments) => {
       allAssignments.forEach((el) => {
-        if (el.deadline !== null && el.deadline < new Date().getTime()) {
+        if (el.deadline !== undefined && el.deadline < new Date().getTime()) {
           assignmentsToExpire.push(el._id);
-        } else actualAssignmentIds.push(el);
+        }
       });
     })
     .then(() => {
@@ -111,31 +129,66 @@ apiModule.checkIfAssignmentsExpired = function (assignmentIds) {
         el,
         { $set: { status: ASSIGNMENT_STATUS_EXPIRED } },
       )));
-    })
-    .then(() => actualAssignmentIds);
+    });
 };
 
-apiModule.getStudAllAssignments = function (studId) {
-  const assignmentIds = [];
-  return generalApi.getGroupIdsByStudent(studId)
+
+apiModule.getStudAllAssignments = function (studId, skip = 0, top = 20) {
+  const assignments = {};
+  assignments.ids = [];
+  assignments.amount = 0;
+  return apiModule.checkIfAssignmentsExpired()
+    .then(() => generalApi.getGroupIdsByStudent(studId))
     .then(groupIds => TestAssignment
       .find({
         groupId: { $in: groupIds },
         status: ASSIGNMENT_STATUS_PENDING,
       })
-      .select('_id'))
-    .then(groupAssignments => apiModule.checkIfAssignmentsExpired(groupAssignments))
+      .select('-__v -studentId -trainingPercentage ')
+      .populate('teacherId', 'surname name')
+      .populate('groupId', 'name'))
     .then((groupAssignments) => {
-      groupAssignments.forEach(el => assignmentIds.push(el));
+      groupAssignments.forEach(el => assignments.ids.push(el));
     })
     .then(() => TestAssignment
-      .find({ studentId: studId })
-      .select('_id'))
-    .then(individualAssignments => apiModule.checkIfAssignmentsExpired(individualAssignments))
+      .find({
+        studentId: studId,
+        status: ASSIGNMENT_STATUS_PENDING,
+      })
+      .select('-__v -studentId -trainingPercentage ')
+      .populate('teacherId', 'surname name')
+      .populate('groupId', 'name'))
     .then((individualAssignments) => {
-      individualAssignments.forEach(el => assignmentIds.push(el));
+      individualAssignments.forEach(el => assignments.ids.push(el));
     })
-    .then(() => assignmentIds);
+    .then(() => {
+      assignments.amount = assignments.ids.length;
+      if (+skip < assignments.ids.length && (+skip + +top) < assignments.ids.length) {
+        assignments.ids = assignments.ids.slice(skip, top);
+      } else if (+skip < assignments.ids.length && (+skip + +top) >= assignments.ids.length) {
+        assignments.ids = assignments.ids.slice(skip, assignments.ids.length);
+      }
+      return assignments;
+    });
+};
+
+apiModule.checkQuestionAndUpdate = function (answer) {
+  return Question.findById(answer.questionId);
+};
+
+apiModule.newQuestion = function (question) {
+  return Question.create({
+    section: question.section,
+    tags: question.tags,
+    type: question.type,
+    active: question.active,
+    category: question.category,
+    question: question.question,
+    questionAuthorId: question.questionAuthorId,
+    answerOptions: question.answerOptions,
+    correctOptions: question.correctOptions,
+    difficulty: question.difficulty,
+  });
 };
 
 module.exports = apiModule;

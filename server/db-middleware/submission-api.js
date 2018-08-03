@@ -7,6 +7,7 @@ const {
 const {
   TestSubmission,
   SUBMISSION_STATUS_PENDING,
+  SUBMISSION_STATUS_ANSWERED,
 } = require('../models/testing/test-submission');
 const {
   Question,
@@ -595,6 +596,20 @@ apiModule.makeTestSubmission = function (testAssignmentId, studentId) {
         throw new Error('Can not create test submission');
       }
     });
+};
+
+apiModule.getQuestionsAndUpdateSubmition = function (submissionId, allAnsweres) {
+  return TestSubmission
+    .findByIdAndUpdate(
+      submissionId,
+      {
+        $set: {
+          answeres: allAnsweres,
+          status: SUBMISSION_STATUS_ANSWERED,
+          completeDate: new Date().getTime(),
+        },
+      },
+    );
 };
 
 module.exports = apiModule;

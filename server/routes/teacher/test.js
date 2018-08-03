@@ -58,5 +58,15 @@ route.get('/tag-questions/', (req, res) => {
     });
 });
 
+route.post('/new-question/', (req, res) => {
+  testApi
+    .newQuestion(req.body)
+    .then(() => {
+      res.status(200).send();
+    })
+    .catch((err) => {
+      res.status(404).send(err);
+    });
+});
 
 module.exports = route;
