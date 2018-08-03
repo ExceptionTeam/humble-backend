@@ -55,9 +55,9 @@ route.post('/reset-password', (req, res) => {
     });
 });
 
-route.post('/change-password/:userId/:password', (req, res) => {
+route.post('/change-password', (req, res) => {
   generalApi
-    .changePassword(req.params.userId, req.params.password)
+    .changePassword(req.params.userId, req.body.oldPass, req.body.newPass)
     .then(() => {
       res.status(200).send();
     })

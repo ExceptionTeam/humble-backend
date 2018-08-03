@@ -38,41 +38,45 @@ function addUser(userData) {
     });
 }
 
-/* adduser({
-  name: "Vlad",
-  surname: "Malinovsky",
-  role: "STUDENT",
-  email: "vlad.malinovsky.98@gmail.com",
-  primarySkill: "intermediate",
-  account: "БГУ"
-}); */
-
-apiModule.changePassword = function (userId, newPassword) {
+apiModule.changePassword = function (userId, oldPass, newPass) {
   return User
     .findById(userId)
+    .then((user) => {
+      if (user.verifyPassword(oldPass)) {
+        return user;
+      }
+      throw new Error();
+    })
     .then((user) => {
       const { email } = user;
       mailer.sendMail(
         email,
-        'Сброс пароля',
+        'Смена пароля',
         'Здравствуйте, ваш пароль был успешно изменен.',
       );
-      user.setPassword(newPassword);
+      user.setPassword(newPass);
+      user.markModified('hash');
+      user.markModified('salt');
+      return user.save();
     });
 };
 
-apiModule.resetPassword = function (userId) {
+apiModule.resetPassword = function (email) {
   return User
-    .findById(userId)
+    .findOne({ email })
     .then((user) => {
-      const { email } = user;
-      const password = generatePassword(8, false);
-      mailer.sendMail(
-        email,
-        'Сброс пароля',
-        `Здравствуйте, на вашем аккаунте была задействована функция сброса пароля.\nНовый пароль: ${password}`,
-      );
-      user.setPassword(password);
+      if (user) {
+        const password = generatePassword(8, false);
+        mailer.sendMail(
+          email,
+          'Сброс пароля',
+          `Здравствуйте, на вашем аккаунте была задействована функция сброса пароля.\nНовый пароль: ${password}`,
+        );
+        user.setPassword(password);
+        user.markModified('hash');
+        user.markModified('salt');
+        user.save();
+      }
     });
 };
 
