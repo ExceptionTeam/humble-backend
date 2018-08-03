@@ -35,7 +35,7 @@ apiModule.getQuestionsByTags = function (questionTags = null) {
     });
 };
 
-apiModule.getAllTags = function () {
+apiModule.getAllTagAttachments = function () {
   return TagAttachment
     .find()
     .populate('sectionId');

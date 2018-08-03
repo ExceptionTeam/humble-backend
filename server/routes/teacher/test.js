@@ -60,7 +60,7 @@ route.post('/tag-questions/', (req, res) => {
 
 route.get('/tags/', (req, res) => {
   submissionApi
-    .getAllTags()
+    .getAllTagAttachments()
     .then((tags) => {
       res.status(200).send(tags);
     })
