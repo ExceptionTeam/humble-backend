@@ -1,4 +1,5 @@
 const route = require('express').Router();
+const testApi = require('../db-middleware/test-api');
 const generalApi = require('../db-middleware/general-api');
 const taskApi = require('../db-middleware/task-api');
 
@@ -9,13 +10,13 @@ const adminRoute = require('./admin');
 
 route.use('/guest', guestRoute);
 
-// route.use((req, res, next) => {
-//   if (req.isAuthenticated()) {
-//     next();
-//   } else {
-//     res.status(401).send();
-//   }
-// });
+route.use((req, res, next) => {
+  if (req.isAuthenticated()) {
+    next();
+  } else {
+    res.status(401).send();
+  }
+});
 
 route.use('/student', studentRoute);
 route.use('/teacher', teacherRoute);
@@ -63,6 +64,17 @@ route.post('/change-password', (req, res) => {
     })
     .catch(() => {
       res.status(400).send();
+    });
+});
+
+route.post('/tags', (req, res) => {
+  testApi
+    .getAllTags(req.query.sectionId, req.body)
+    .then((result) => {
+      res.status(200).send(result);
+    })
+    .catch((err) => {
+      res.status(404).send(err);
     });
 });
 

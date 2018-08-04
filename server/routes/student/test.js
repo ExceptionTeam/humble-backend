@@ -24,17 +24,6 @@ route.post('/new-request/:userid', (req, res) => {
     });
 });
 
-route.post('/tags', (req, res) => {
-  testApi
-    .getAllTags(req.query.sectionId, req.body)
-    .then((result) => {
-      res.status(200).send(result);
-    })
-    .catch((err) => {
-      res.status(404).send(err); 
-    });
-});
-
 route.get('/submission/:assignmentId/:studentId', (req, res) => {
   submissionApi
     .makeTestSubmission(req.params.assignmentId, req.params.studentId)
