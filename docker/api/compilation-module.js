@@ -1,39 +1,83 @@
+const { setTimeout } = require('timers');
+
+const Docker = require('dockerode');
 const fs = require('fs');
 
-module.exports = function (CONTAINERS_AMOUNT, next) {
-  const compilationModule = {};
-  const containerCondition = new Array(CONTAINERS_AMOUNT).fill({
-    submission: null,
-  });
-  containerCondition.forEach((el, i) => {
-    containerCondition[i].volumePath = '../containers/volume-' + i + '/';
-    containerCondition[i].containerIndex = i;
-  });
+const docker = new Docker();
 
-  const loadBasicData = function (submission, containerIndex) {
-    // write test input/output files in path
+function runExec(container, cmd) {
+  const options = {
+    Cmd: cmd,
+    AttachStdOut: true,
+    AttachStdErr: true,
   };
+  return container.exec(options)
+    .then(exec => exec.start({ Detach: false }))
+    .then(exec => new Promise((resolve, reject) => {
+      exec.output.on('close', resolve);
+      exec.output.on('end', resolve);
+      exec.output.on('error', reject);
+      exec.output.pipe(process.stdout);
+    }));
+}
 
-  const prepareIterationData = function (iteration, containerIndex) {
-    const path = containerCondition[containerIndex].volumePath;
-    fs.renameSync(path + 'input' + iteration + '.txt', path + 'input.txt');
+module.exports = function (containerInfoPromise, next) {
+  const compilationModule = {};
+
+  let containerCondition;
+
+  containerInfoPromise
+    .then((containerInfo) => {
+      containerInfo.forEach((el, i) => {
+        containerCondition[i] = {
+          id: el.id,
+          index: i,
+          volumePath: el.volumePath,
+          submission: null,
+        };
+      });
+    });
+
+  const loadBasicData = function (containerIndex) {
+    // write test input/output files in path
   };
 
   compilationModule.enter = function (submission) {
     const containerIndex = containerCondition.findIndex(el => !el.submission);
     containerCondition[containerIndex].submission = submission;
-    loadBasicData(submission, containerIndex);
-    compile();
+    loadBasicData(containerIndex)
+      .then(() => setTimeout(compile, 0, containerIndex));
   };
 
-  const compile = function () {
-    // plz compile here
-    compilationModule.leave();
-  };
-
-  const unprepareIterationData = function (iteration, containerIndex) {
+  const compile = function (containerIndex) {
     const path = containerCondition[containerIndex].volumePath;
-    fs.renameSync(path + 'input.txt', path + 'input' + iteration + '.txt');
+    const container = docker.getContainer(containerCondition[containerIndex].id);
+    const testsAmount = containerCondition[containerIndex].submission.tests.length;
+    Promise.resolve()
+      .then(() => container.start())
+      .then(() => runExec(container, ['javac', 'Main.java']))
+      .then(() => {
+        let testsLine = Promise.resolve();
+        for (let i = 0; i < testsAmount; i++) {
+          testsLine = testsLine
+            .then(() => runExec(container, ['mv', `input${i + 1}.txt`, 'input.txt']))
+            .then(() => runExec(container, ['java', 'Main']))
+            .then(() => {
+              const a1 = fs.readFileSync(path + '/output.txt').toString();
+              const a2 = fs.readFileSync(path + '/output' + (i + 1) + '.txt').toString();
+              containerCondition[containerIndex].submission.tests[i] = a1 === a2;
+            })
+            .catch((err) => {
+              console.log(err);
+              containerCondition[containerIndex].submission.tests[i] = err;
+            })
+            .then(() => runExec(container, ['mv', 'input.txt', `input${i + 1}.txt`]))
+            .then(() => runExec(container, ['rm', 'output.txt']));
+        }
+        return testsLine;
+      })
+      .then(() => container.stop())
+      .then(() => setTimeout(compilationModule.leave, 0, containerIndex));
   };
 
   const unloadBasicData = function (containerIndex) {

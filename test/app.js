@@ -19,22 +19,11 @@ function runExec(container, cmd) {
   return container.exec(options)
     .then(exec => exec.start({ Detach: false }))
     .then(exec => new Promise((resolve, reject) => {
-      console.log('YAY');
-      // exec.output.on('close', resolve);
+      exec.output.on('close', resolve);
       exec.output.on('end', resolve);
       exec.output.on('error', reject);
-      // container.modem.demuxStream(exec.output, process.stdout, process.stderr);
       exec.output.pipe(process.stdout);
-      // while (true) {
-      //   exec.inspect((err, data) => {
-      //     if (!data.Running) {
-      //       resolve();
-      //     } else console.log('not yet');
-      //   });
-      // }
     }));
-  // .then(() => exec.inspect())
-  // .then(data => console.log(data)));
 }
 
 
@@ -82,10 +71,6 @@ docker.createContainer({
         })
         .then(() => runExec(docker.getContainer(id), ['mv', 'input.txt', `input${i + 1}.txt`]))
         .then(() => runExec(docker.getContainer(id), ['rm', 'output.txt']));
-      // .then(() => {
-      // fs.renameSync('./haHAA/input.txt', './haHAA/input' + (i + 1) + '.txt');
-      // fs.unlinkSync('./haHAA/output.txt');
-      // });
     }
     return testsLine;
   })

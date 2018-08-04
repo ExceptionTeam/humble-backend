@@ -4,13 +4,14 @@ module.exports = function (emmiter) {
   const saveModule = {};
 
   const markCalculationAlgorithm = function (tests) {
-    const correct = tests.reduce((container, el) => (container + el ? 1 : 0));
+    const correct = tests.reduce((container, el) => (container + (el === true ? 1 : 0)));
     return (100 * correct) / tests.length;
   };
 
   saveModule.save = function (submission) {
     emmiter.emit('submission-save');
     TaskSubmission.create({
+      _id: submission._id,
       assignId: submission.assignId,
       srcFileId: submission.srcFileId,
       mark: markCalculationAlgorithm(submission.tests),
