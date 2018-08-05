@@ -172,10 +172,6 @@ apiModule.getStudAllAssignments = function (studId, skip = 0, top = 20) {
     });
 };
 
-apiModule.checkQuestionAndUpdate = function (answer) {
-  return Question.findById(answer.questionId);
-};
-
 apiModule.newQuestion = function (question) {
   return Question.create({
     section: question.section,
@@ -190,5 +186,6 @@ apiModule.newQuestion = function (question) {
     difficulty: question.difficulty,
   });
 };
+
 
 module.exports = apiModule;
