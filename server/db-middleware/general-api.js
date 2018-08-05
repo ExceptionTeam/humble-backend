@@ -211,14 +211,16 @@ apiModule.getStudentsByTeacherFlat = function (teacherId) {
     .then(() => Object.keys(allKeys));
 };
 
-apiModule.getPersonsCategoried = function (category, skip = 0, top = 10, filterConfig) {
-  if (category !== 'student' && category !== 'teacher') {
-    return new Promise((resolve, reject) => {
-      reject();
-    });
-  }
+apiModule.getPersonsCategorized = function (category, skip = 0, top = 10, filterConfig) {
   const resUsers = {};
   let configString = '';
+  const toValidate = {
+    role: category,
+  };
+
+  if (!this.isTeacher(toValidate) && !this.isStudent(toValidate)) {
+    return Promise.reject();
+  }
 
   filterConfig.replace(/[.,\/#!$%\^&\*;:{}=\-_`~()]/g, '').split(' ').forEach((el, i) => {
     if (el !== '') {

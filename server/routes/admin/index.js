@@ -11,11 +11,11 @@ route.use('/test', testRoute);
 
 route.post('/info/:category', (req, res) => {
   generalApi
-    .getPersonsCategoried(
+    .getPersonsCategorized(
       req.params.category,
       req.query.skip,
       req.query.top,
-      req.body.find,
+      req.body.filterConfig,
     )
     .then((data) => {
       res.status(200).send(data);
