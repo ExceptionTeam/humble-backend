@@ -214,11 +214,8 @@ apiModule.getStudentsByTeacherFlat = function (teacherId) {
 apiModule.getPersonsCategorized = function (category, skip = 0, top = 10, filterConfig) {
   const resUsers = {};
   let configString = '';
-  const toValidate = {
-    role: category,
-  };
 
-  if (!this.isTeacher(toValidate) && !this.isStudent(toValidate)) {
+  if (!validateRole(category.toUpperCase())) {
     return Promise.reject();
   }
 
