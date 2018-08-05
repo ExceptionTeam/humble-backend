@@ -120,6 +120,18 @@ apiModule.changeUserRole = function (userId, oldRole, newRole) {
   return Promise.reject(new Error('Incorrect role'));
 };
 
+apiModule.checkEmail = function (email) {
+  User
+    .find({ email })
+    .countDocuments()
+    .then((amount) => {
+      if (!amount) {
+        return true;
+      }
+      return false;
+    });
+};
+
 apiModule.getIndividualStudents = function (teachId, studProj) {
   return UserAssignment
     .find({ teacherId: teachId })

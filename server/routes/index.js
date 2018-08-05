@@ -4,11 +4,13 @@ const generalApi = require('../db-middleware/general-api');
 const taskApi = require('../db-middleware/task-api');
 
 const guestRoute = require('./guest');
+const utilRoute = require('./util');
 const studentRoute = require('./student');
 const teacherRoute = require('./teacher');
 const adminRoute = require('./admin');
 
 route.use('/guest', guestRoute);
+route.use('/util', utilRoute);
 
 route.use((req, res, next) => {
   if (req.isAuthenticated()) {
