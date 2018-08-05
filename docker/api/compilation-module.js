@@ -1,7 +1,8 @@
 const { setTimeout } = require('timers');
-
 const Docker = require('dockerode');
 const fs = require('fs');
+
+const storageController = require('../../server/controllers/storage-controller');
 
 const docker = new Docker();
 
@@ -39,7 +40,11 @@ module.exports = function (containerInfoPromise, next) {
     });
 
   const loadBasicData = function (containerIndex) {
-    // write test input/output files in path
+    return storageController
+      .getTestsTask(
+        containerCondition[containerIndex].volumePath + '/',
+        containerCondition[containerIndex].submission,
+      );
   };
 
   compilationModule.enter = function (submission) {
@@ -71,7 +76,7 @@ module.exports = function (containerInfoPromise, next) {
               console.log(err);
               containerCondition[containerIndex].submission.tests[i] = err;
             })
-            .then(() => runExec(container, ['mv', 'input.txt', `input${i + 1}.txt`]))
+            .then(() => runExec(container, ['rm', 'input.txt']))
             .then(() => runExec(container, ['rm', 'output.txt']));
         }
         return testsLine;
@@ -82,10 +87,10 @@ module.exports = function (containerInfoPromise, next) {
 
   const unloadBasicData = function (containerIndex) {
     const path = containerCondition[containerIndex].volumePath;
-    fs.unlinkSync(path + 'src.java');
+    fs.unlinkSync(path + '/Main.java');
+    fs.unlinkSync(path + '/Main.class');
     containerCondition[containerIndex].submission.tests.forEach((el, i) => {
-      fs.unlinkSync(path + 'input' + i + '.txt');
-      fs.unlinkSync(path + 'output' + i + '.txt');
+      fs.unlinkSync(path + '/output' + i + '.txt');
     });
   };
 
@@ -93,7 +98,7 @@ module.exports = function (containerInfoPromise, next) {
     const { submission } = containerCondition[containerIndex];
     containerCondition[containerIndex].submission = null;
     unloadBasicData();
-    setTimeout(() => next(submission), 0);
+    setTimeout(next, 0, submission);
   };
 
   return compilationModule;

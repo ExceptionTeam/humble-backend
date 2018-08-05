@@ -1,6 +1,4 @@
-const Docker = require('dockerode');
 const { EventEmitter } = require('events');
-const fs = require('fs');
 
 const myEmmiter = new EventEmitter();
 
@@ -15,6 +13,4 @@ const distributionModule = require('./distribution-module')(compilationModule.en
 myEmmiter.on('submission-new', distributionModule.semaphore.wait);
 myEmmiter.on('submission-save', distributionModule.semaphore.signal);
 
-const docker = new Docker();
-
-module.exports = { enqueueSubmission: distributionModule.submissionQueue.enqueueSubmission };
+module.exports = distributionModule.submissionQueue.enqueueSubmission;

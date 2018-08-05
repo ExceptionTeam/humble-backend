@@ -2,7 +2,7 @@
 module.exports = function (next, CONTAINERS_AMOUNT, emmiter) {
   const distributionModule = {};
 
-  const submissionQueue = (function () {
+  distributionModule.submissionQueue = (function () {
     const queue = [];
     return {
       length: 0,
@@ -22,7 +22,7 @@ module.exports = function (next, CONTAINERS_AMOUNT, emmiter) {
   }());
 
   const tryEnterCompilationModule = function () {
-    const submission = submissionQueue.dequeueSubmission();
+    const submission = distributionModule.submissionQueue.dequeueSubmission();
     if (submission) {
       setTimeout(() => next(submission), 0);
       return true;
@@ -46,8 +46,6 @@ module.exports = function (next, CONTAINERS_AMOUNT, emmiter) {
       },
     };
   }());
-
-  distributionModule.submissionQueue = submissionQueue;
 
   return distributionModule;
 };
