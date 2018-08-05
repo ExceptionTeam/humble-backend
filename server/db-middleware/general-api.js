@@ -222,7 +222,7 @@ apiModule.getPersonsCategorized = function (category, skip = 0, top = 10, filter
     return Promise.reject();
   }
 
-  filterConfig.replace(/[.,\/#!$%\^&\*;:{}=\-_`~()]/g, '').split(' ').forEach((el, i) => {
+  filterConfig.replace(/[.,\/#!$%\^&\*;:{}=\-_`~()]/g, ' ').split(' ').forEach((el, i) => {
     if (el !== '') {
       if (configString === '') {
         configString += el;
