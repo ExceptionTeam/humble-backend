@@ -211,4 +211,52 @@ apiModule.getStudentsByTeacherFlat = function (teacherId) {
     .then(() => Object.keys(allKeys));
 };
 
+apiModule.getPersonsCategorized = function (category, skip = 0, top = 10, filterConfig) {
+  const resUsers = {};
+  let configString = '';
+
+  if (!validateRole(category.toUpperCase())) {
+    return Promise.reject();
+  }
+
+  filterConfig.replace(/[.,\/#!$%\^&\*;:{}=\-_`~()]/g, ' ').split(' ').forEach((el, i) => {
+    if (el !== '') {
+      if (configString === '') {
+        configString += el;
+      } else {
+        configString += '|' + el;
+      }
+    }
+  });
+
+  return User.find({ role: category.toUpperCase() })
+    .find({
+      $or: [{ name: { $regex: configString, $options: 'i' } },
+        { surname: { $regex: configString, $options: 'i' } },
+        { 'account.university': { $regex: configString, $options: 'i' } }],
+    })
+    .select('-__v -role -email -primarySkill -hash -salt')
+    .skip(+skip < 0 ? 0 : +skip)
+    .limit(+top <= 0 ? 10 : +top)
+    .then((users) => {
+      resUsers.data = users;
+      return User.find({ role: category.toUpperCase() })
+        .countDocuments();
+    })
+    .then((total) => {
+      resUsers.pagination = { total };
+      return User.find({ role: category.toUpperCase() })
+        .find({
+          $or: [{ name: { $regex: configString, $options: 'i' } },
+            { surname: { $regex: configString, $options: 'i' } },
+            { 'account.university': { $regex: configString, $options: 'i' } }],
+        })
+        .countDocuments();
+    })
+    .then((filtered) => {
+      resUsers.pagination.filtered = filtered;
+      return resUsers;
+    });
+};
+
 module.exports = apiModule;
