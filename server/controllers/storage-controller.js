@@ -2,6 +2,7 @@ const mongoose = require('mongoose');
 const taskApi = require('../db-middleware/task-api');
 const fileApi = require('../storage-service/file-api');
 const bucketStructure = require('../storage-service/bucket-structure');
+const fs = require('fs');
 
 const controller = {};
 
@@ -179,6 +180,58 @@ controller.editTask = function (files, body, taskId, length) {
         outputFilesId: outputsId,
       },
     ));
+};
+
+controller.getFileWithName = function (key) {
+  const result = {};
+  return fileApi.getFile(key)
+    .then((file) => {
+      result.file = file;
+    })
+    .then(() => {
+      result.name = key.substring(key.search('input|output'), key.length);
+    })
+    .then(() => result);
+};
+
+controller.getTestsTask = function (path, submission) {
+  let inputs;
+  let outputs;
+
+  return taskApi.getAssignmentById(submission.assignId)
+    .then((assignment) => {
+      inputs = assignment.taskId.inputFilesId;
+      outputs = assignment.taskId.outputFilesId;
+      if (inputs.length !== outputs.length) {
+        throw new Error('Bad tests value!');
+      }
+    })
+    .then(() => Promise.all(inputs.map(el => taskApi.getFileById(el))))
+    .then((inputKeys) => {
+      inputs = inputKeys;
+    })
+    .then(() => Promise.all(outputs.map(el => taskApi.getFileById(el))))
+    .then(outputKeys => inputs.concat(outputKeys))
+    .then(keys => Promise.all(keys.map(el => this.getFileWithName(el.url))))
+    .then(files => Promise.all(files.map((el) => {
+      fs.appendFile(path + el.name, el.file.Body, (err) => {
+        if (err) {
+          throw new Error('Appending error!');
+        }
+      });
+    })))
+    .then(() => taskApi.getFileById(submission.srcFile))
+    .then(key => fileApi.getFile(key.url))
+    .then((file) => {
+      fs.appendFile(path + 'Main.java', file.Body, (err) => {
+        if (err) {
+          throw new Error('Appending error!');
+        }
+      });
+    })
+    .catch((err) => {
+      throw new Error('Appending error!');
+    });
 };
 
 module.exports = controller;
