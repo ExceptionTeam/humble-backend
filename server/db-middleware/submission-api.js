@@ -714,4 +714,13 @@ apiModule.getSubmissionsByAssignment = function (assignId) {
     .lean();
 };
 
+apiModule.getSubmissionsByStudent= function (studId, skip = 0, top = 10) {
+  return TestSubmission
+    .find({ studentId: studId })
+    .skip(+skip < 0 ? 0 : +skip)
+    .limit(+top <= 0 ? 10 : +top)
+    .populate('questionsId', '_id category difficulty question type answerOptions tags')
+    .lean();
+};
+
 module.exports = apiModule;

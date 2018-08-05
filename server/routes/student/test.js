@@ -59,4 +59,15 @@ route.post('/answers/:assignmentId', (req, res) => {
     });
 });
 
+route.get('/sudmissions/:studentId', (req, res) => {
+  sudmissionApi
+    .getSubmissionsByStudent(req.params.studentId, req.query.skip, req.query.top)
+    .then((assignments) => {
+      res.status(200).send(assignments);
+    })
+    .catch((err) => {
+      res.status(404).send(err);
+    });
+});
+
 module.exports = route;
