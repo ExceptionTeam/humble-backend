@@ -75,10 +75,22 @@ apiModule.rejectRequest = function (requestId) {
     .findByIdAndUpdate(requestId, { $set: { status: REQUEST_STATUS_REJECTED } });
 };
 
-const getAllTags = function (sectId) {
+apiModule.getAllTags = function (sectId, filterConfig = []) {
+  const configString = filterConfig.length ? filterConfig.reduce((container, el, i) => {
+    if (i === 0) {
+      return container + el;
+    }
+    return container + '|' + el;
+  }) : '';
+  const map = {};
   return TagAttachment
-    .find({ sectionId: sectId })
-    .then(tags => Promise.all(tags.map(el => el.tag)));
+    .find(sectId ? { sectionId: sectId } : {})
+    .find((filterConfig && filterConfig.length) ? { tag: { $regex: configString, $options: 'i' } } : {})
+    .then(tags => Promise.all(tags.map(el => el.tag)))
+    .then((res) => {
+      res.forEach((el) => { map[el] = null; });
+      return Object.keys(map);
+    });
 };
 
 apiModule.approveRequest = function (requestId, teachId) {
@@ -94,7 +106,7 @@ apiModule.approveRequest = function (requestId, teachId) {
     .then((section) => {
       sectionName = 'Проверочный тест по секции: "' + section.name + '"';
     })
-    .then(() => getAllTags(requestToRemember.sectionId))
+    .then(() => apiModule.getAllTags(requestToRemember.sectionId))
     .then(allTags => TestAssignment.create({
       name: sectionName,
       studentId: requestToRemember.userId,
