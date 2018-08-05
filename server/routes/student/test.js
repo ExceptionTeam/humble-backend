@@ -50,7 +50,7 @@ route.get('/assignments/:studentId', (req, res) => {
 
 route.post('/answers/:assignmentId', (req, res) => {
   submissionApi
-    .getQuestionsAndUpdateSubmition(req.params.assignmentId, req.body)
+    .getAnswersAndUpdateSubmition(req.params.assignmentId, req.body)
     .then(() => {
       res.status(200).send();
     })

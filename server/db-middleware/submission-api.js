@@ -8,6 +8,7 @@ const {
   TestSubmission,
   SUBMISSION_STATUS_PENDING,
   SUBMISSION_STATUS_ANSWERED,
+  SUBMISSION_STATUS_EVALUATED,
 } = require('../models/testing/test-submission');
 const {
   Question,
@@ -26,6 +27,7 @@ const {
   REQUEST_STATUS_PENDING,
   REQUEST_STATUS_CHECKED,
 } = require('../models/testing/check-request');
+const checkGradeApi = require('./check-grade-api');
 
 const apiModule = {};
 
@@ -617,7 +619,7 @@ apiModule.makeTestSubmission = function (testAssignmentId, studentId) {
     });
 };
 
-apiModule.getQuestionsAndUpdateSubmition = function (submissionId, allAnswers) {
+apiModule.getAnswersAndUpdateSubmition = function (submissionId, allAnswers) {
   return TestSubmission
     .findByIdAndUpdate(
       submissionId,
@@ -630,7 +632,7 @@ apiModule.getQuestionsAndUpdateSubmition = function (submissionId, allAnswers) {
       },
     )
     .populate('assignmentId', 'teacherId _id')
-    .then(submission => Promise.all(allAnswers.every((el) => {
+    .then(submission => Promise.all(allAnswers.map((el) => {
       if (el.checking === true) {
         return CheckRequest.create({
           teacherId: submission.assignmentId.teacherId,
@@ -641,7 +643,13 @@ apiModule.getQuestionsAndUpdateSubmition = function (submissionId, allAnswers) {
         });
       }
       return true;
-    })));
+    })))
+    .then((questions) => {
+      if (questions.every((el) => {
+        if (el === true) return true;
+        return false;
+      })) { checkGradeApi.initCheckingSequence(); }
+    });
 };
 
 apiModule.getQuestionsToCheck = function (teachId) {
@@ -697,6 +705,13 @@ apiModule.sendCheckingResults = function (checkingId, res) {
         },
       }))
     .then(() => true);
+};
+
+apiModule.getSubmissionsByAssignment = function (assignId) {
+  return TestSubmission
+    .find({ assignmentId: assignId })
+    .populate('questionsId', '_id category difficulty question type answerOptions tags')
+    .lean();
 };
 
 module.exports = apiModule;

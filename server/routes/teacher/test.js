@@ -102,4 +102,26 @@ route.get('/check-res/:checkid/:result', (req, res) => {
     });
 });
 
+route.get('/all-assignments/:teacherid', (req, res) => {
+  testApi
+    .allTeachersAssignments(req.params.teacherid, req.query.skip, req.query.top)
+    .then((submissions) => {
+      res.status(200).send(submissions);
+    })
+    .catch((err) => {
+      res.status(404).send(err);
+    });
+});
+
+route.get('/my-std-submissions/:assignmentId', (req, res) => {
+  submissionApi
+    .getSubmissionsByAssignment(req.params.assignmentId)
+    .then((submissions) => {
+      res.status(200).send(submissions);
+    })
+    .catch((err) => {
+      res.status(404).send(err);
+    });
+});
+
 module.exports = route;

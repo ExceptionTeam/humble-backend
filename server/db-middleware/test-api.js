@@ -187,5 +187,15 @@ apiModule.newQuestion = function (question) {
   });
 };
 
+apiModule.allTeachersAssignments = function (teachId, skip = 0, top = 10) {
+  return TestAssignment
+    .find({ teacherId: teachId })
+    .skip(+skip < 0 ? 0 : +skip)
+    .limit(+top <= 0 ? 10 : +top)
+    .populate('groupId', 'name')
+    .populate('studentId', 'name surname')
+    .lean();
+};
+
 
 module.exports = apiModule;
