@@ -9,4 +9,20 @@ route.use((req, res, next) => (generalApi.isAdmin(req.user) ? next() : res.statu
 route.use('/task', taskRoute);
 route.use('/test', testRoute);
 
+route.post('/info/:category', (req, res) => {
+  generalApi
+    .getPersonsCategoried(
+      req.params.category,
+      req.query.skip,
+      req.query.top,
+      req.body.find,
+    )
+    .then((data) => {
+      res.status(200).send(data);
+    })
+    .catch((err) => {
+      res.status(404).end();
+    });
+});
+
 module.exports = route;
