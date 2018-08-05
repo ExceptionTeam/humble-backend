@@ -9,4 +9,15 @@ route.use((req, res, next) => (generalApi.isAdmin(req.user) ? next() : res.statu
 route.use('/task', taskRoute);
 route.use('/test', testRoute);
 
+route.get('/pending-teachers', (req, res) => {
+  generalApi
+    .getPendingTeachers(req.query.skip, req.query.top, 'email name surname account -__v')
+    .then((data) => {
+      res.status(200).send(data);
+    })
+    .catch(() => {
+      res.status(404).end();
+    });
+});
+
 module.exports = route;
