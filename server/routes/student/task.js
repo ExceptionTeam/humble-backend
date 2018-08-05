@@ -50,7 +50,7 @@ route.post('/submit/:assignId', (req, res) => {
           _id: result.submissionId,
           assignId: req.params.assignId,
           srcFileId: result.fileId,
-          tests: [],
+          tests: new Array(result.length).fill(null),
         };
         console.log(submission); /** First part of submission Object * */
       })

@@ -83,6 +83,7 @@ controller.createTask = function (file, input, length) {
 
 controller.createSubmission = function (file, assignId) {
   let taskId;
+  let length;
   const submissionId = new mongoose.Types.ObjectId();
   const fileId = new mongoose.Types.ObjectId();
 
@@ -100,9 +101,14 @@ controller.createSubmission = function (file, assignId) {
       };
       taskApi.addFile(fileInfo);
     })
+    .then(() => taskApi.getTaskById(taskId))
+    .then((task) => {
+      length = task.inputFilesId.length;
+    })
     .then(() => ({
       fileId,
       submissionId,
+      length,
     }));
 };
 
