@@ -11,6 +11,9 @@ const {
   ASSIGNMENT_STATUS_EXPIRED,
 } = require('../models/testing/test-assignment');
 const {
+  TestSubmission,
+} = require('../models/testing/test-submission');
+const {
   Question,
   CATEGORY_SINGLE_ANSWER,
   CATEGORY_MULTIPLE_ANSWERS,
@@ -145,6 +148,29 @@ apiModule.checkIfAssignmentsExpired = function () {
     });
 };
 
+apiModule.allSubmissions4Admin = function (skip = 0, top = 10) {
+  const submissions = {};
+  submissions.amount = 0;
+  submissions.subs = [];
+  return TestSubmission
+    .countDocuments()
+    .then((amount) => {
+      submissions.amount = amount;
+      return TestSubmission
+        .find()
+        .populate('assignmentId', 'groupId')
+        .populate('assignmentId.groupId', 'name')
+        .populate('studentId', 'surname name')
+        .skip(+skip < 0 ? 0 : +skip)
+        .limit(+top <= 0 ? 10 : +top)
+        .lean();
+    })
+    .then((subs) => {
+      submissions.subs = subs;
+      console.log(submissions);
+      return submissions;
+    });
+};
 
 apiModule.getStudAllAssignments = function (studId, skip = 0, top = 20) {
   const assignments = {};
@@ -231,6 +257,22 @@ apiModule.allTeachersAssignments = function (teachId, skip = 0, top = 10) {
     .then((assignments) => {
       allAssignments.assignments = assignments;
       return allAssignments;
+    });
+};
+
+apiModule.testAssign = function (assignment) {
+  return TestAssignment
+    .create({
+      groupId: assignment.groupId,
+      studentId: assignment.studentId,
+      name: assignment.name,
+      tags: assignment.tags,
+      timeToPass: assignment.timeToPass,
+      deadline: assignment.deadline,
+      testSize: assignment.testSize,
+      teacherId: assignment.teacherId,
+      trainingPercentage: assignment.trainingPercentage,
+      type: assignment.type,
     });
 };
 

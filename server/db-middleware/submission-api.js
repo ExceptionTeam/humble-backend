@@ -611,6 +611,11 @@ apiModule.makeTestSubmission = function (testAssignmentId, studentId) {
             .findById(submission._id)
             .populate('questionsId', '_id category difficulty question type answerOptions tags')
             .lean());
+      } else if (submission !== null && assignmentToSubmit.groupId !== undefined) {
+        return TestSubmission
+          .findById(submission._id)
+          .populate('questionsId', '_id category difficulty question type answerOptions tags')
+          .lean();
       } else if (submission === null) {
         throw new Error('Empty submition');
       } else if (submission === undefined) {
@@ -635,6 +640,7 @@ apiModule.getAnswersAndUpdateSubmition = function (submissionId, allAnswers) {
     .then(submission => Promise.all(allAnswers.map((el) => {
       if (el.checking === true) {
         return CheckRequest.create({
+          studentId: submission.userId,
           teacherId: submission.assignmentId.teacherId,
           assignmentId: submission.assignmentId._id,
           submissionId: submission._id,
@@ -652,10 +658,25 @@ apiModule.getAnswersAndUpdateSubmition = function (submissionId, allAnswers) {
     });
 };
 
-apiModule.getQuestionsToCheck = function (teachId) {
+apiModule.getQuestionsToCheck = function (teachId, skip = 0, top = 10) {
+  const res = {};
   return CheckRequest
-    .find({ teacherId: teachId, status: REQUEST_STATUS_PENDING })
-    .populate('questionId', 'section tags question');
+    .countDocuments({ teacherId: teachId, status: REQUEST_STATUS_PENDING })
+    .then((amount) => {
+      res.amount = amount;
+      return CheckRequest
+        .find({ teacherId: teachId, status: REQUEST_STATUS_PENDING })
+        .populate('questionId', 'section tags question')
+        .populate('submissionId', 'completeDate ')
+        .populate('studentId', 'name surname')
+        .skip(+skip < 0 ? 0 : +skip)
+        .limit(+top <= 0 ? 10 : +top)
+        .lean();
+    })
+    .then((requests) => {
+      res.requests = requests;
+      return res;
+    });
 };
 
 apiModule.sendCheckingResults = function (checkingId, res) {
@@ -711,6 +732,15 @@ apiModule.getSubmissionsByAssignment = function (assignId) {
   return TestSubmission
     .find({ assignmentId: assignId })
     .populate('questionsId', '_id assignmentId status category difficulty question type answerOptions tags mark')
+    .populate('userId', 'name surnmae')
+    .lean();
+};
+
+apiModule.getSubmissionsByAssignmentAndStd = function (assignId, studId) {
+  return TestSubmission
+    .find({ assignmentId: assignId, userId: studId })
+    .populate('questionsId', '_id assignmentId status category difficulty question type answerOptions tags mark')
+    .populate('userId', 'name surname')
     .lean();
 };
 
