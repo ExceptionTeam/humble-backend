@@ -88,12 +88,15 @@ module.exports = function (containerInfoPromise, next) {
 
   const unloadBasicData = function (containerIndex) {
     const myPath = containerCondition[containerIndex].volumePath;
-    fs.unlinkSync(path.join(myPath, 'Main.java'));
-    fs.unlinkSync(path.join(myPath, 'Main.class'));
-    console.log(containerCondition[containerIndex]);
-    containerCondition[containerIndex].submission.tests.forEach((el, i) => {
-      fs.unlinkSync(path.join(myPath, 'output' + (i + 1) + '.txt'));
-    });
+    try {
+      fs.unlinkSync(path.join(myPath, 'Main.java'));
+      fs.unlinkSync(path.join(myPath, 'Main.class'));
+      containerCondition[containerIndex].submission.tests.forEach((el, i) => {
+        fs.unlinkSync(path.join(myPath, 'output' + (i + 1) + '.txt'));
+      });
+    } catch (err) {
+      console.log(err);
+    }
   };
 
   compilationModule.leave = function (containerIndex) {
