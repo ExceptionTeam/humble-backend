@@ -203,7 +203,6 @@ controller.getFileWithName = function (key) {
 controller.getTestsTask = function (path, submission) {
   let inputs;
   let outputs;
-
   return taskApi.getAssignmentById(submission.assignId)
     .then((assignment) => {
       inputs = assignment.taskId.inputFilesId;
@@ -226,7 +225,7 @@ controller.getTestsTask = function (path, submission) {
         }
       });
     })))
-    .then(() => taskApi.getFileById(submission.srcFile))
+    .then(() => taskApi.getFileById(submission.srcFileId))
     .then(key => fileApi.getFile(key.url))
     .then((file) => {
       fs.appendFile(path + 'Main.java', file.Body, (err) => {

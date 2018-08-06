@@ -7,8 +7,8 @@ const MongoStore = require('connect-mongo')(expressSession);
 const cookieParser = require('cookie-parser');
 const passport = require('passport');
 
-require('./docker/api/');
 require('./server/initialization/db');
+require('./docker/api/');
 
 const app = express();
 const port = 3000;

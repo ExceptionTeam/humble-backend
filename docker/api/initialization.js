@@ -11,20 +11,23 @@ const containerInfo = new Array(CONTAINERS_AMOUNT).fill({
   volumePath: null,
 });
 
-const basicPath = path.resolve(CONTAINERS_VOLUMES_PATH + '/containers');
+const basicPath = path.resolve(CONTAINERS_VOLUMES_PATH + '\\containers');
 
-(function initContainersFolder() {
-  fs.mkdir(basicPath, (err) => {
-    if (!err) {
-      containerInfo.forEach((el, i) => {
-        containerInfo[i].volumePath = basicPath + '/' + CONTAINER_VOLUME_NAME + '-' + i;
-        fs.mkdir(el.volumePath, () => {});
-      });
-    }
-  });
-}());
 
-module.exports = Promise.all(containerInfo.map((el, i) => docker.createContainer({
+module.exports = Promise
+  .resolve()
+  .then(()=>{
+    return new Promise((resolve, reject)=>{
+    fs.mkdir(basicPath, (err) => {
+      if (!err || err.code === 'EEXIST') {
+        Promise.all(containerInfo.map((el, i) => {
+          containerInfo[i].volumePath = basicPath + '\\' + CONTAINER_VOLUME_NAME + '-' + (i+1);
+          return new Promise((res,rej)=> {fs.mkdir(el.volumePath, ()=>res())});
+        }))
+        .then(()=>resolve());
+      }
+  })})})
+.then(()=>Promise.all(containerInfo.map((el, i) => docker.createContainer({
   HostConfig: {
     Binds: [containerInfo[i].volumePath + ':/data'],
   },
@@ -41,4 +44,4 @@ module.exports = Promise.all(containerInfo.map((el, i) => docker.createContainer
   })
   .catch((err) => {
     console.log(err);
-  })));
+  }))));

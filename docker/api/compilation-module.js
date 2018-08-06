@@ -25,7 +25,7 @@ function runExec(container, cmd) {
 module.exports = function (containerInfoPromise, next) {
   const compilationModule = {};
 
-  let containerCondition;
+  let containerCondition = [];
 
   containerInfoPromise
     .then((containerInfo) => {
@@ -42,7 +42,7 @@ module.exports = function (containerInfoPromise, next) {
   const loadBasicData = function (containerIndex) {
     return storageController
       .getTestsTask(
-        containerCondition[containerIndex].volumePath + '/',
+        containerCondition[containerIndex].volumePath + '\\',
         containerCondition[containerIndex].submission,
       );
   };
@@ -60,6 +60,7 @@ module.exports = function (containerInfoPromise, next) {
     const testsAmount = containerCondition[containerIndex].submission.tests.length;
     Promise.resolve()
       .then(() => container.start())
+      .then(()=> runExec(container, ['ls', '/data/']))
       .then(() => runExec(container, ['javac', 'Main.java']))
       .then(() => {
         let testsLine = Promise.resolve();
@@ -103,4 +104,3 @@ module.exports = function (containerInfoPromise, next) {
 
   return compilationModule;
 };
-

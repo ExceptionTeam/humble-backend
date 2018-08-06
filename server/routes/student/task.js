@@ -59,7 +59,8 @@ route.post('/submit/:assignId', (req, res) => {
         enqueueSubmission(submission);
         res.status(200).end();
       })
-      .catch(() => {
+      .catch((err) => {
+        console.log(err);
         res.status(404).end();
       });
   });
