@@ -25,6 +25,6 @@ route.post('/info/:category', (req, res) => {
     });
 });
 
-route.use('../teacher/index.js');
+route.use(require('../teacher/'));
 
 module.exports = route;
