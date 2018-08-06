@@ -21,6 +21,7 @@ const {
 } = require('../models/testing/question');
 const { TagAttachment } = require('../models/testing/tag-attachment');
 const generalApi = require('./general-api');
+const submissionApi = require('./submission-api');
 
 const apiModule = {};
 
@@ -142,7 +143,6 @@ apiModule.getStudAllAssignments = function (studId, skip = 0, top = 20) {
     .then(groupIds => TestAssignment
       .find({
         groupId: { $in: groupIds },
-        status: ASSIGNMENT_STATUS_PENDING,
       })
       .select('-__v -studentId -trainingPercentage ')
       .populate('teacherId', 'surname name')
@@ -153,23 +153,47 @@ apiModule.getStudAllAssignments = function (studId, skip = 0, top = 20) {
     .then(() => TestAssignment
       .find({
         studentId: studId,
-        status: ASSIGNMENT_STATUS_PENDING,
       })
       .select('-__v -studentId -trainingPercentage ')
       .populate('teacherId', 'surname name')
-      .populate('groupId', 'name'))
+      .populate('groupId', 'name')
+      .lean())
     .then((individualAssignments) => {
       individualAssignments.forEach(el => assignments.ids.push(el));
     })
     .then(() => {
       assignments.amount = assignments.ids.length;
+      console.log(assignments);
+      console.log(123);
       if (+skip < assignments.ids.length && (+skip + +top) < assignments.ids.length) {
         assignments.ids = assignments.ids.slice(skip, top);
       } else if (+skip < assignments.ids.length && (+skip + +top) >= assignments.ids.length) {
         assignments.ids = assignments.ids.slice(skip, assignments.ids.length);
       }
       return assignments;
-    });
+    })
+    .then(() => Promise
+      .all(assignments.ids.map(el => submissionApi.getSubmissionsByAssignment(el._id))))
+    .then((submissions) => {
+      console.log(assignments);
+      console.log(submissions);
+      const map = {};
+      assignments.ids.forEach((el) => { map[el._id] = el; });
+      console.log(map);
+      submissions.forEach((el) => {
+        if (el.length) {
+          console.log(el);
+          console.log(el[0].assignmentId);
+          map[el[0].assignmentId].submissionMark = el[0].mark;
+          map[el[0].assignmentId].submissionStatus = el[0].status;
+          console.log(33333);
+        }
+      });
+      console.log(228);
+      console.log(map);
+      console.log(assignments);
+    })
+    .then(() => assignments);
 };
 
 apiModule.newQuestion = function (question) {

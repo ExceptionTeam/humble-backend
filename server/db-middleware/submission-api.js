@@ -644,11 +644,11 @@ apiModule.getAnswersAndUpdateSubmition = function (submissionId, allAnswers) {
       }
       return true;
     })))
-    .then((questions) => {
+    .then((questions) => { /*
       if (questions.every((el) => {
         if (el === true) return true;
         return false;
-      })) { checkGradeApi.initCheckingSequence(); }
+      })) { checkGradeApi.initCheckingSequence(); } */
     });
 };
 
@@ -710,11 +710,32 @@ apiModule.sendCheckingResults = function (checkingId, res) {
 apiModule.getSubmissionsByAssignment = function (assignId) {
   return TestSubmission
     .find({ assignmentId: assignId })
-    .populate('questionsId', '_id category difficulty question type answerOptions tags')
+    .populate('questionsId', '_id assignmentId status category difficulty question type answerOptions tags mark')
     .lean();
 };
 
 apiModule.getSubmissionsByStudent = function (studId, skip = 0, top = 10) {
+  const allSubmissions = {};
+  allSubmissions.subAmount = 0;
+  allSubmissions.submissions = [];
+  return TestSubmission
+    .countDocuments({ studentId: studId })
+    .then((amount) => {
+      allSubmissions.subAmount = amount;
+      return TestSubmission
+        .find({ studentId: studId })
+        .skip(+skip < 0 ? 0 : +skip)
+        .limit(+top <= 0 ? 10 : +top)
+        .populate('questionsId', '_id category difficulty question type answerOptions tags')
+        .lean();
+    })
+    .then((submissions) => {
+      allSubmissions.submissions = submissions;
+      return allSubmissions;
+    });
+};
+
+apiModule.getTestsByStudent = function (studId, skip = 0, top = 10) {
   const allSubmissions = {};
   allSubmissions.subAmount = 0;
   allSubmissions.submissions = [];
