@@ -3,9 +3,9 @@ const generalApi = require('../../db-middleware/general-api');
 const testApi = require('../../db-middleware/test-api');
 const submissionApi = require('../../db-middleware/submission-api');
 
-route.post('/approve/:requestid/:teacherid', (req, res) => {
+route.post('/approve/:requestId/:teacherId', (req, res) => {
   testApi
-    .approveRequest(req.params.requestid, req.params.teacherid)
+    .approveRequest(req.params.requestId, req.params.teacherId)
     .then(() => {
       res.status(200).end();
     })
@@ -25,9 +25,9 @@ route.get('/get-students/:teacherId', (req, res) => {
     });
 });
 
-route.post('/reject/:requestid', (req, res) => {
+route.post('/reject/:requestId', (req, res) => {
   testApi
-    .rejectRequest(req.params.requestid)
+    .rejectRequest(req.params.requestId)
     .then(() => {
       res.status(200).end();
     })
@@ -74,6 +74,50 @@ route.post('/new-question/', (req, res) => {
     .newQuestion(req.body)
     .then(() => {
       res.status(200).send();
+    })
+    .catch((err) => {
+      res.status(404).send(err);
+    });
+});
+
+route.get('/questions-check/:teacherId', (req, res) => {
+  submissionApi
+    .getQuestionsToCheck(req.params.teacherId)
+    .then((questions) => {
+      res.status(200).send(questions);
+    })
+    .catch((err) => {
+      res.status(404).send(err);
+    });
+});
+
+route.get('/check-res/:checkid/:result', (req, res) => {
+  submissionApi
+    .sendCheckingResults(req.params.checkid, req.params.result)
+    .then((questions) => {
+      res.status(200).send(questions);
+    })
+    .catch((err) => {
+      res.status(404).send(err);
+    });
+});
+
+route.get('/all-assignments/:teacherid', (req, res) => {
+  testApi
+    .allTeachersAssignments(req.params.teacherid, req.query.skip, req.query.top)
+    .then((submissions) => {
+      res.status(200).send(submissions);
+    })
+    .catch((err) => {
+      res.status(404).send(err);
+    });
+});
+
+route.get('/my-std-submissions/:assignmentId', (req, res) => {
+  submissionApi
+    .getSubmissionsByAssignment(req.params.assignmentId)
+    .then((submissions) => {
+      res.status(200).send(submissions);
     })
     .catch((err) => {
       res.status(404).send(err);

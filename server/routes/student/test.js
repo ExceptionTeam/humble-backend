@@ -48,11 +48,22 @@ route.get('/assignments/:studentId', (req, res) => {
     });
 });
 
-route.post('/answers/:assignmentId', (req, res) => {
+route.post('/answers/:submissionId', (req, res) => {
   submissionApi
-    .getQuestionsAndUpdateSubmition(req.params.assignmentId, req.body)
+    .getAnswersAndUpdateSubmition(req.params.submissionId, req.body)
     .then(() => {
       res.status(200).send();
+    })
+    .catch((err) => {
+      res.status(404).send(err);
+    });
+});
+
+route.get('/sudmissions/:studentId', (req, res) => {
+  submissionApi
+    .getSubmissionsByStudent(req.params.studentId, req.query.skip, req.query.top)
+    .then((assignments) => {
+      res.status(200).send(assignments);
     })
     .catch((err) => {
       res.status(404).send(err);
