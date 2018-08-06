@@ -25,7 +25,7 @@ route.get('/students', (req, res) => {
     });
 });
 
-route.post('group/:groupId/add/:studentId', (req, res) => {
+route.post('/group/:groupId/add/:studentId', (req, res) => {
   generalApi
     .addStudentToGroup(req.params.studentId, req.params.groupId)
     .then(() => {
