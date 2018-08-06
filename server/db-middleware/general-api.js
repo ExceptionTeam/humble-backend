@@ -160,7 +160,7 @@ apiModule.getStudentsByTeacher = function (teacherId) {
 };
 
 apiModule.getPendingTeachers = function (skip = 0, top = 20, userProj) {
-  return User.find({ role: USER_ROLE_PENDING }, userProj.toString())
+  return User.find({ role: USER_ROLE_PENDING }, userProj)
     .skip(+skip < 0 ? 0 : +skip)
     .limit(+top <= 0 ? 20 : +top)
     .lean();
