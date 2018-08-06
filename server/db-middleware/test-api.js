@@ -260,5 +260,21 @@ apiModule.allTeachersAssignments = function (teachId, skip = 0, top = 10) {
     });
 };
 
+apiModule.testAssign = function (assignment) {
+  return TestAssignment
+    .create({
+      groupId: assignment.groupId,
+      studentId: assignment.studentId,
+      name: assignment.name,
+      tags: assignment.tags,
+      timeToPass: assignment.timeToPass,
+      deadline: assignment.deadline,
+      testSize: assignment.testSize,
+      teacherId: assignment.teacherId,
+      trainingPercentage: assignment.trainingPercentage,
+      type: assignment.type,
+    });
+};
+
 
 module.exports = apiModule;

@@ -5,6 +5,12 @@ const {
   TYPE_TRAINING_TEST,
 } = require('../models/testing/test-assignment');
 const {
+  Question,
+  CATEGORY_SINGLE_ANSWER,
+  CATEGORY_MULTIPLE_ANSWERS,
+  CATEGORY_WORD_ANSWER,
+} = require('../models/testing/question');
+const {
   TestSubmission,
   SUBMISSION_STATUS_PENDING,
   SUBMISSION_STATUS_ANSWERED,
@@ -73,11 +79,35 @@ const isCheckingPossible = function (subId) {
     .countDocuments({ status: REQUEST_STATUS_PENDING, submissionId: subId });
 };
 
-const checkSub = function (subId) {
-  const answers = [];
-  return 2;
-  // return TestSubmission
-};
+/* const checkSub = function (subId) {
+  let submiss = {};
+  return TestSubmission
+    .findById(subId)
+    .populate('questionsId', 'correctOptions category')
+    .then((submission) => {
+      submiss = submission;
+    })
+    .then(() => {
+
+      const checkIfRight = function() {
+        if(
+          quest._id === ans.questionId && quest.category !== CATEGORY_SENTENCE_ANSWER &&
+          ((quest.category === CATEGORY_WORD_ANSWER && ans.answ === quest.question) ||
+          (ans.answ.every((el, index) => {
+            if(el === quest.answ[index]) return true;
+            return false;
+          })))) return true;
+          return false;
+      } 
+      submiss.questionId.forEach(quest => {
+        if( submiss.answers.some((ans, index) => {
+          checkIfRight()
+        })) submiss.answers[index].result = true;
+        })
+        
+      });
+    })
+}; */
 
 apiModule.initCheckingSequence = function (subId) {
   return isCheckingPossible(subId)
