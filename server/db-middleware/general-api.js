@@ -110,14 +110,22 @@ function validateRole(role, withPending = false) {
 
 apiModule.changeUserRole = function (userId, oldRole, newRole) {
   if (validateRole(oldRole, true) && validateRole(newRole)) {
-    const newRoleLevel = (newRole === USER_ROLE_ADMIN || newRole === USER_ROLE_TEACHER) ? 2 : 1;
-    const oldRoleLevel = (oldRole === USER_ROLE_ADMIN || oldRole === USER_ROLE_TEACHER) ? 2 : 1;
+    const newRoleLevel = (newRole === USER_ROLE_STUDENT) ? 1 : 2;
+    const oldRoleLevel = (oldRole === USER_ROLE_STUDENT) ? 1 : 2;
     if (oldRoleLevel !== newRoleLevel) {
       return User.findByIdAndUpdate(userId, { role: newRole, account: {} });
     }
     return User.findByIdAndUpdate(userId, { role: newRole });
   }
   return Promise.reject(new Error('Incorrect role'));
+};
+
+apiModule.updatePendingTeacher = function (teacherId, isApproved = false) {
+  return apiModule.changeUserRole(
+    teacherId,
+    USER_ROLE_PENDING,
+    isApproved ? USER_ROLE_TEACHER : USER_ROLE_STUDENT,
+  );
 };
 
 apiModule.getIndividualStudents = function (teachId, studProj) {
