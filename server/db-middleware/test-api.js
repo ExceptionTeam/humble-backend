@@ -163,8 +163,6 @@ apiModule.getStudAllAssignments = function (studId, skip = 0, top = 20) {
     })
     .then(() => {
       assignments.amount = assignments.ids.length;
-      console.log(assignments);
-      console.log(123);
       if (+skip < assignments.ids.length && (+skip + +top) < assignments.ids.length) {
         assignments.ids = assignments.ids.slice(skip, top);
       } else if (+skip < assignments.ids.length && (+skip + +top) >= assignments.ids.length) {
@@ -175,23 +173,14 @@ apiModule.getStudAllAssignments = function (studId, skip = 0, top = 20) {
     .then(() => Promise
       .all(assignments.ids.map(el => submissionApi.getSubmissionsByAssignment(el._id))))
     .then((submissions) => {
-      console.log(assignments);
-      console.log(submissions);
       const map = {};
       assignments.ids.forEach((el) => { map[el._id] = el; });
-      console.log(map);
       submissions.forEach((el) => {
         if (el.length) {
-          console.log(el);
-          console.log(el[0].assignmentId);
           map[el[0].assignmentId].submissionMark = el[0].mark;
           map[el[0].assignmentId].submissionStatus = el[0].status;
-          console.log(33333);
         }
       });
-      console.log(228);
-      console.log(map);
-      console.log(assignments);
     })
     .then(() => assignments);
 };
