@@ -5,7 +5,7 @@ const taskRoute = require('./task');
 const testRoute = require('./test');
 
 
-//route.use((req, res, next) => (
+// route.use((req, res, next) => (
 //  (generalApi.isTeacher(req.user) || generalApi.isAdmin(req.user))
 //    ? next() : res.status(403).end()));
 
@@ -24,5 +24,7 @@ route.get('/students', (req, res) => {
       res.status(404).json(err);
     });
 });
+
+route.use(require('../student/'));
 
 module.exports = route;
