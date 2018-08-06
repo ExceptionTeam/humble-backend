@@ -611,6 +611,11 @@ apiModule.makeTestSubmission = function (testAssignmentId, studentId) {
             .findById(submission._id)
             .populate('questionsId', '_id category difficulty question type answerOptions tags')
             .lean());
+      } else if (submission !== null && assignmentToSubmit.groupId !== undefined) {
+        return TestSubmission
+          .findById(submission._id)
+          .populate('questionsId', '_id category difficulty question type answerOptions tags')
+          .lean();
       } else if (submission === null) {
         throw new Error('Empty submition');
       } else if (submission === undefined) {

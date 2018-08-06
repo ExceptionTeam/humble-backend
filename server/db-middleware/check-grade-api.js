@@ -27,6 +27,7 @@ const {
   REQUEST_STATUS_CHECKED,
 } = require('../models/testing/check-request');
 const generalApi = require('./general-api');
+const submissionApi = require('./submission-api');
 
 const apiModule = {};
 
@@ -73,7 +74,7 @@ const isCheckingPossible = function (subId) {
     .countDocuments({ status: REQUEST_STATUS_PENDING, submissionId: subId });
 };
 
-/* const checkSub = function (subId) {
+const checkSub = function (subId) {
   let submiss = {};
   return TestSubmission
     .findById(subId)
@@ -82,26 +83,24 @@ const isCheckingPossible = function (subId) {
       submiss = submission;
     })
     .then(() => {
-
-      const checkIfRight = function() {
-        if(
+      const checkIfRight = function (ans, quest) {
+        if (
           quest._id === ans.questionId && quest.category !== CATEGORY_SENTENCE_ANSWER &&
           ((quest.category === CATEGORY_WORD_ANSWER && ans.answ === quest.question) ||
           (ans.answ.every((el, index) => {
-            if(el === quest.answ[index]) return true;
+            if (el === quest.answ[index]) return true;
             return false;
           })))) return true;
-          return false;
-      }
-      submiss.questionId.forEach(quest => {
-        if( submiss.answers.some((ans, index) => {
-          checkIfRight()
-        })) submiss.answers[index].result = true;
-        })
-
+        return false;
+      };
+      submiss.answers.forEach((ans, index) => {
+        if (submiss.questionId.some(quest => checkIfRight(ans, quest))) {
+          submiss.answers[index].result = true;
+        } else submiss.answers[index].result = false;
       });
-    })
-}; */
+      submissionApi.getAnswersAndUpdateSubmition();
+    });
+};
 
 apiModule.initCheckingSequence = function (subId) {
   return isCheckingPossible(subId)
@@ -111,6 +110,8 @@ apiModule.initCheckingSequence = function (subId) {
       } else return false;
     });
 };
+
+// checkSub('5b68568f40b4a92ae09af3ab');
 
 const initGraidingingSequence = function (assignmentId) {
   return isCheckingPossible();
