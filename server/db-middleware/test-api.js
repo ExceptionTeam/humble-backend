@@ -21,6 +21,7 @@ const {
 } = require('../models/testing/question');
 const { TagAttachment } = require('../models/testing/tag-attachment');
 const generalApi = require('./general-api');
+const submissionApi = require('./submission-api');
 
 const apiModule = {};
 
@@ -154,7 +155,6 @@ apiModule.getStudAllAssignments = function (studId, skip = 0, top = 20) {
     .then(groupIds => TestAssignment
       .find({
         groupId: { $in: groupIds },
-        status: ASSIGNMENT_STATUS_PENDING,
       })
       .select('-__v -studentId -trainingPercentage ')
       .populate('teacherId', 'surname name')
@@ -165,11 +165,11 @@ apiModule.getStudAllAssignments = function (studId, skip = 0, top = 20) {
     .then(() => TestAssignment
       .find({
         studentId: studId,
-        status: ASSIGNMENT_STATUS_PENDING,
       })
       .select('-__v -studentId -trainingPercentage ')
       .populate('teacherId', 'surname name')
-      .populate('groupId', 'name'))
+      .populate('groupId', 'name')
+      .lean())
     .then((individualAssignments) => {
       individualAssignments.forEach(el => assignments.ids.push(el));
     })
@@ -181,11 +181,20 @@ apiModule.getStudAllAssignments = function (studId, skip = 0, top = 20) {
         assignments.ids = assignments.ids.slice(skip, assignments.ids.length);
       }
       return assignments;
-    });
-};
-
-apiModule.checkQuestionAndUpdate = function (answer) {
-  return Question.findById(answer.questionId);
+    })
+    .then(() => Promise
+      .all(assignments.ids.map(el => submissionApi.getSubmissionsByAssignment(el._id))))
+    .then((submissions) => {
+      const map = {};
+      assignments.ids.forEach((el) => { map[el._id] = el; });
+      submissions.forEach((el) => {
+        if (el.length) {
+          map[el[0].assignmentId].submissionMark = el[0].mark;
+          map[el[0].assignmentId].submissionStatus = el[0].status;
+        }
+      });
+    })
+    .then(() => assignments);
 };
 
 apiModule.newQuestion = function (question) {
@@ -202,5 +211,28 @@ apiModule.newQuestion = function (question) {
     difficulty: question.difficulty,
   });
 };
+
+apiModule.allTeachersAssignments = function (teachId, skip = 0, top = 10) {
+  const allAssignments = {};
+  allAssignments.assignAmount = 0;
+  allAssignments.assignments = [];
+  return TestAssignment
+    .countDocuments({ teacherId: teachId })
+    .then((amount) => {
+      allAssignments.assignAmount = amount;
+      return TestAssignment
+        .find({ teacherId: teachId })
+        .skip(+skip < 0 ? 0 : +skip)
+        .limit(+top <= 0 ? 10 : +top)
+        .populate('groupId', 'name')
+        .populate('studentId', 'name surname')
+        .lean();
+    })
+    .then((assignments) => {
+      allAssignments.assignments = assignments;
+      return allAssignments;
+    });
+};
+
 
 module.exports = apiModule;
