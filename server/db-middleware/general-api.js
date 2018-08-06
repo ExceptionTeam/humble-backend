@@ -128,6 +128,10 @@ apiModule.updatePendingTeacher = function (teacherId, isApproved = false) {
   );
 };
 
+apiModule.removeStudentFromGroup = function (studentId, groupId) {
+  return UserAssignment.findOneAndRemove({ studentId, groupId });
+};
+
 apiModule.getIndividualStudents = function (teachId, studProj) {
   return UserAssignment
     .find({ teacherId: teachId })
