@@ -64,7 +64,7 @@ route.get('/task-statistics', (req, res) => {
       res.status(200).send();
     })
     .catch(() => {
-      res.status(400).send();
+      res.status(500).send();
     });
 });
 
