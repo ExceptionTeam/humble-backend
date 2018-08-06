@@ -7,7 +7,6 @@ module.exports = function (next, CONTAINERS_AMOUNT, emmiter) {
     return {
       length: 0,
       enqueueSubmission(submission) {
-        console.log('enqueued!');
         queue.push(submission);
         this.length++;
         emmiter.emit('submission-new');
@@ -24,7 +23,6 @@ module.exports = function (next, CONTAINERS_AMOUNT, emmiter) {
 
   const tryEnterCompilationModule = function () {
     const submission = distributionModule.submissionQueue.dequeueSubmission();
-    console.log('entering! => ', submission);
     if (submission) {
       setTimeout(() => next(submission), 0);
       return true;

@@ -61,7 +61,6 @@ module.exports = function (containerInfoPromise, next) {
     const testsAmount = containerCondition[containerIndex].submission.tests.length;
     Promise.resolve()
       .then(() => container.start())
-      .then(()=> runExec(container, ['ls', '/data']))
       .then(() => runExec(container, ['javac', 'Main.java']))
       .then(() => {
         let testsLine = Promise.resolve();
@@ -76,7 +75,7 @@ module.exports = function (containerInfoPromise, next) {
             })
             .catch((err) => {
               console.log(err);
-              containerCondition[containerIndex].submission.tests[i] = err;
+              containerCondition[containerIndex].submission.tests[i] = false;
             })
             .then(() => runExec(container, ['rm', 'input.txt']))
             .then(() => runExec(container, ['rm', 'output.txt']));
@@ -88,9 +87,10 @@ module.exports = function (containerInfoPromise, next) {
   };
 
   const unloadBasicData = function (containerIndex) {
-    const path = containerCondition[containerIndex].volumePath;
+    const myPath = containerCondition[containerIndex].volumePath;
     fs.unlinkSync(path.join(myPath, 'Main.java'));
     fs.unlinkSync(path.join(myPath, 'Main.class'));
+    console.log(containerCondition[containerIndex]);
     containerCondition[containerIndex].submission.tests.forEach((el, i) => {
       fs.unlinkSync(path.join(myPath, 'output' + (i + 1) + '.txt'));
     });
@@ -98,8 +98,8 @@ module.exports = function (containerInfoPromise, next) {
 
   compilationModule.leave = function (containerIndex) {
     const { submission } = containerCondition[containerIndex];
+    unloadBasicData(containerIndex);
     containerCondition[containerIndex].submission = null;
-    unloadBasicData();
     setTimeout(next, 0, submission);
   };
 
