@@ -11,7 +11,7 @@ const containerInfo = new Array(CONTAINERS_AMOUNT).fill({
   volumePath: null,
 });
 
-const basicPath = path.resolve(CONTAINERS_VOLUMES_PATH + '\\containers');
+const basicPath = path.join(path.resolve(CONTAINERS_VOLUMES_PATH, 'containers'));
 
 
 module.exports = Promise
@@ -21,7 +21,7 @@ module.exports = Promise
     fs.mkdir(basicPath, (err) => {
       if (!err || err.code === 'EEXIST') {
         Promise.all(containerInfo.map((el, i) => {
-          containerInfo[i].volumePath = basicPath + '\\' + CONTAINER_VOLUME_NAME + '-' + (i+1);
+          containerInfo[i].volumePath = path.join(basicPath, CONTAINER_VOLUME_NAME + '-' + (i+1));
           return new Promise((res,rej)=> {fs.mkdir(el.volumePath, ()=>res())});
         }))
         .then(()=>resolve());

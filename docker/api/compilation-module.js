@@ -1,5 +1,6 @@
 const { setTimeout } = require('timers');
 const Docker = require('dockerode');
+const path = require('path');
 const fs = require('fs');
 
 const storageController = require('../../server/controllers/storage-controller');
@@ -42,7 +43,7 @@ module.exports = function (containerInfoPromise, next) {
   const loadBasicData = function (containerIndex) {
     return storageController
       .getTestsTask(
-        containerCondition[containerIndex].volumePath + '\\',
+        containerCondition[containerIndex].volumePath,
         containerCondition[containerIndex].submission,
       );
   };
@@ -55,12 +56,12 @@ module.exports = function (containerInfoPromise, next) {
   };
 
   const compile = function (containerIndex) {
-    const path = containerCondition[containerIndex].volumePath;
+    const myPath = containerCondition[containerIndex].volumePath;
     const container = docker.getContainer(containerCondition[containerIndex].id);
     const testsAmount = containerCondition[containerIndex].submission.tests.length;
     Promise.resolve()
       .then(() => container.start())
-      .then(()=> runExec(container, ['ls', '/data/']))
+      .then(()=> runExec(container, ['ls', '/data']))
       .then(() => runExec(container, ['javac', 'Main.java']))
       .then(() => {
         let testsLine = Promise.resolve();
@@ -69,8 +70,8 @@ module.exports = function (containerInfoPromise, next) {
             .then(() => runExec(container, ['mv', `input${i + 1}.txt`, 'input.txt']))
             .then(() => runExec(container, ['java', 'Main']))
             .then(() => {
-              const a1 = fs.readFileSync(path + '/output.txt').toString();
-              const a2 = fs.readFileSync(path + '/output' + (i + 1) + '.txt').toString();
+              const a1 = fs.readFileSync(path.join(myPath, 'output.txt')).toString();
+              const a2 = fs.readFileSync(path.join(myPath, 'output' + (i + 1) + '.txt')).toString();
               containerCondition[containerIndex].submission.tests[i] = a1 === a2;
             })
             .catch((err) => {
@@ -88,10 +89,10 @@ module.exports = function (containerInfoPromise, next) {
 
   const unloadBasicData = function (containerIndex) {
     const path = containerCondition[containerIndex].volumePath;
-    fs.unlinkSync(path + '/Main.java');
-    fs.unlinkSync(path + '/Main.class');
+    fs.unlinkSync(path.join(myPath, 'Main.java'));
+    fs.unlinkSync(path.join(myPath, 'Main.class'));
     containerCondition[containerIndex].submission.tests.forEach((el, i) => {
-      fs.unlinkSync(path + '/output' + i + '.txt');
+      fs.unlinkSync(path.join(myPath, 'output' + (i + 1) + '.txt'));
     });
   };
 

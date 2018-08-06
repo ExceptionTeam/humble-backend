@@ -3,6 +3,7 @@ const taskApi = require('../db-middleware/task-api');
 const fileApi = require('../storage-service/file-api');
 const bucketStructure = require('../storage-service/bucket-structure');
 const fs = require('fs');
+const path = require('path');
 
 const controller = {};
 
@@ -200,7 +201,7 @@ controller.getFileWithName = function (key) {
     .then(() => result);
 };
 
-controller.getTestsTask = function (path, submission) {
+controller.getTestsTask = function (myPath, submission) {
   let inputs;
   let outputs;
   return taskApi.getAssignmentById(submission.assignId)
@@ -219,7 +220,7 @@ controller.getTestsTask = function (path, submission) {
     .then(outputKeys => inputs.concat(outputKeys))
     .then(keys => Promise.all(keys.map(el => this.getFileWithName(el.url))))
     .then(files => Promise.all(files.map((el) => {
-      fs.appendFile(path + el.name, el.file.Body, (err) => {
+      fs.appendFile(path.join(myPath, el.name), el.file.Body, (err) => {
         if (err) {
           throw new Error('Appending error!');
         }
@@ -228,7 +229,7 @@ controller.getTestsTask = function (path, submission) {
     .then(() => taskApi.getFileById(submission.srcFileId))
     .then(key => fileApi.getFile(key.url))
     .then((file) => {
-      fs.appendFile(path + 'Main.java', file.Body, (err) => {
+      fs.appendFile(path.join(myPath, 'Main.java'), file.Body, (err) => {
         if (err) {
           throw new Error('Appending error!');
         }
