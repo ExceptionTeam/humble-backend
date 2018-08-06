@@ -2,6 +2,7 @@ const UserAssignment = require('mongoose').model('UserAssignment');
 const {
   User, USER_ROLE_PENDING, USER_ROLE_STUDENT, USER_ROLE_ADMIN, USER_ROLE_TEACHER,
 } = require('../models/user/user');
+const { University } = require('../models/others/university');
 const generatePassword = require('password-generator');
 const mailer = require('../controllers/mailer');
 
@@ -219,14 +220,8 @@ apiModule.getStudentsByTeacherFlat = function (teacherId) {
     .then(() => Object.keys(allKeys));
 };
 
-apiModule.getPersonsCategorized = function (category, skip = 0, top = 10, filterConfig) {
-  const resUsers = {};
+apiModule.getConfigString = function (filterConfig) {
   let configString = '';
-
-  if (!validateRole(category.toUpperCase())) {
-    return Promise.reject();
-  }
-
   filterConfig.replace(/[.,\/#!$%\^&\*;:{}=\-_`~()]/g, ' ').split(' ').forEach((el, i) => {
     if (el !== '') {
       if (configString === '') {
@@ -236,6 +231,16 @@ apiModule.getPersonsCategorized = function (category, skip = 0, top = 10, filter
       }
     }
   });
+  return configString;
+};
+
+apiModule.getPersonsCategorized = function (category, skip = 0, top = 10, filterConfig) {
+  if (!validateRole(category.toUpperCase())) {
+    return Promise.reject();
+  }
+
+  const resUsers = {};
+  const configString = this.getConfigString(filterConfig);
 
   return User.find({ role: category.toUpperCase() })
     .find({
@@ -265,6 +270,16 @@ apiModule.getPersonsCategorized = function (category, skip = 0, top = 10, filter
       resUsers.pagination.filtered = filtered;
       return resUsers;
     });
+};
+
+apiModule.getUniversity = function (filterConfig) {
+  filterConfig = filterConfig || '';
+  const configString = this.getConfigString(filterConfig);
+
+  return University.find({
+    $or: [{ name: { $regex: configString, $options: 'i' } }],
+  })
+    .select('-__v');
 };
 
 module.exports = apiModule;

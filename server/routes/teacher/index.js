@@ -25,4 +25,6 @@ route.get('/students', (req, res) => {
     });
 });
 
+route.use(require('../student/'));
+
 module.exports = route;

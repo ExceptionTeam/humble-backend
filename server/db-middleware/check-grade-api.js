@@ -81,12 +81,10 @@ const checkSub = function (subId) {
         return false;
       };
       submiss.answers.forEach((ans, index) => {
-        console.log(1);
         if (submiss.questionsId.some(quest => checkIfRight(ans, quest))) {
           submiss.answers[index].result = true;
         } else submiss.answers[index].result = false;
       });
-      console.log(submiss);
       return submiss;
     })
     .then(() => {
