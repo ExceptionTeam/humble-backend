@@ -1,26 +1,13 @@
 const {
   TestAssignment,
-  ASSIGNMENT_STATUS_PASSED,
-  TYPE_PRIMARY_TEST,
-  TYPE_TRAINING_TEST,
 } = require('../models/testing/test-assignment');
 const {
   TestSubmission,
-  SUBMISSION_STATUS_PENDING,
-  SUBMISSION_STATUS_ANSWERED,
 } = require('../models/testing/test-submission');
 const {
-  Question,
-  CATEGORY_SINGLE_ANSWER,
-  CATEGORY_MULTIPLE_ANSWERS,
   CATEGORY_WORD_ANSWER,
   CATEGORY_SENTENCE_ANSWER,
-  TYPE_TRAINING_QUESTION,
-  TYPE_PRIMARY_QUESTION,
 } = require('../models/testing/question');
-const {
-  TagAttachment,
-} = require('../models/testing/tag-attachment');
 const {
   CheckRequest,
   REQUEST_STATUS_PENDING,
@@ -94,11 +81,17 @@ const checkSub = function (subId) {
         return false;
       };
       submiss.answers.forEach((ans, index) => {
-        if (submiss.questionId.some(quest => checkIfRight(ans, quest))) {
+        console.log(1);
+        if (submiss.questionsId.some(quest => checkIfRight(ans, quest))) {
           submiss.answers[index].result = true;
         } else submiss.answers[index].result = false;
       });
-      submissionApi.getAnswersAndUpdateSubmition();
+      console.log(submiss);
+      return submiss;
+      // return submissionApi.getAnswersAndUpdateSubmition(subId, submiss.answers);
+    })
+    .then(() => {
+      submissionApi.getAnswersAndUpdateSubmition(subId, submiss.answers);
     });
 };
 
@@ -111,6 +104,8 @@ apiModule.initCheckingSequence = function (subId) {
     });
 };
 
+
+console.log(submissionApi);
 // checkSub('5b68568f40b4a92ae09af3ab');
 
 const initGraidingingSequence = function (assignmentId) {
