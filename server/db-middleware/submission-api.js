@@ -27,7 +27,6 @@ const {
   REQUEST_STATUS_PENDING,
   REQUEST_STATUS_CHECKED,
 } = require('../models/testing/check-request');
-const checkGradeApi = require('./check-grade-api');
 
 const apiModule = {};
 
@@ -624,6 +623,60 @@ apiModule.makeTestSubmission = function (testAssignmentId, studentId) {
     });
 };
 
+const isCheckingPossible = function (subId) {
+  return CheckRequest
+    .countDocuments({ status: REQUEST_STATUS_PENDING, submissionId: subId });
+};
+
+const checkSub = function (subId) {
+  let submiss = {};
+  return TestSubmission
+    .findById(subId)
+    .populate('questionsId', 'correctOptions category')
+    .then((submission) => {
+      submiss = submission;
+    })
+    .then(() => {
+      const checkIfRight = function (ans, quest) {
+        if (
+          quest._id === ans.questionId && quest.category !== CATEGORY_SENTENCE_ANSWER &&
+          ((quest.category === CATEGORY_WORD_ANSWER && ans.answ === quest.question) ||
+          (ans.answ.every((el, index) => {
+            if (el === quest.answ[index]) return true;
+            return false;
+          })))) return true;
+        return false;
+      };
+      submiss.answers.forEach((ans, index) => {
+        console.log(1);
+        if (submiss.questionsId.some(quest => checkIfRight(ans, quest))) {
+          submiss.answers[index].result = true;
+        } else submiss.answers[index].result = false;
+      });
+      console.log(submiss);
+      return submiss;
+      // return submissionApi.getAnswersAndUpdateSubmition(subId, submiss.answers);
+    })
+    .then(() => {
+      apiModule.getAnswersAndUpdateSubmition(subId, submiss.answers);
+      console.log(1);
+    })
+    .catch((err) => {
+      console.log(err);
+    });
+};
+
+apiModule.initCheckingSequence = function (subId) {
+  return isCheckingPossible(subId)
+    .then((doCheck) => {
+      if (doCheck) {
+        checkSub(subId);
+      } else return false;
+    });
+};
+
+checkSub('5b68568f40b4a92ae09af3ab');
+
 apiModule.getAnswersAndUpdateSubmition = function (submissionId, allAnswers) {
   return TestSubmission
     .findByIdAndUpdate(
@@ -638,7 +691,7 @@ apiModule.getAnswersAndUpdateSubmition = function (submissionId, allAnswers) {
     )
     .populate('assignmentId', 'teacherId _id')
     .then(submission => Promise.all(allAnswers.map((el) => {
-      if (el.checking === true) {
+      if (el.checking === 'true') {
         return CheckRequest.create({
           studentId: submission.userId,
           teacherId: submission.assignmentId.teacherId,
@@ -700,7 +753,7 @@ apiModule.sendCheckingResults = function (checkingId, res) {
     .then(submission => Promise.all(submission.answers.map((el) => {
       if (el.checking && el.questionId == question) {
         const elReassign = {};
-        elReassign.checking = false;
+        elReassign.checking = 'false';
         elReassign.questionId = el.questionId;
         elReassign.answ = el.answ;
         elReassign.result = res;

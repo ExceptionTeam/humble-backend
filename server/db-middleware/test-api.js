@@ -25,6 +25,7 @@ const {
 const { TagAttachment } = require('../models/testing/tag-attachment');
 const generalApi = require('./general-api');
 const submissionApi = require('./submission-api');
+const checkGradeApi = require('./check-grade-api');
 
 const apiModule = {};
 
