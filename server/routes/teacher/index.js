@@ -25,6 +25,16 @@ route.get('/students', (req, res) => {
     });
 });
 
+route.get('/group/members/:groupId', (req, res) => {
+  generalApi.getStudentsByGroup(req.params.groupId, '-role -email -primarySkill -salt -hash -__v')
+    .then((data) => {
+      res.status(200).send(data);
+    })
+    .catch(() => {
+      res.status(404).end();
+    });
+});
+
 route.use(require('../student/'));
 
 module.exports = route;
