@@ -657,8 +657,7 @@ apiModule.getQuestionsToCheck = function (teachId) {
     .find({ teacherId: teachId, status: REQUEST_STATUS_PENDING })
     .populate('questionId', 'section tags question')
     .populate('submissionId', 'userId')
-    .populate('submissionId.userId', 'name surname')
-    .lean();
+    .populate('submissionId.userId', 'name surname');
 };
 
 apiModule.sendCheckingResults = function (checkingId, res) {
