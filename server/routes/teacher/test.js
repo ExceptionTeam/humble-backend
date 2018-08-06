@@ -82,7 +82,7 @@ route.post('/new-question/', (req, res) => {
 
 route.get('/questions-check/:teacherId', (req, res) => {
   submissionApi
-    .getQuestionsToCheck(req.params.teacherId)
+    .getQuestionsToCheck(req.params.teacherId, req.query.skip, req.query.top)
     .then((questions) => {
       res.status(200).send(questions);
     })

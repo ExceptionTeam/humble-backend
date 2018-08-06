@@ -74,7 +74,8 @@ const isCheckingPossible = function (subId) {
 };
 
 const checkSub = function (subId) {
-  const answers = 2;
+  const answers = [];
+  return 2;
   // return TestSubmission
 };
 

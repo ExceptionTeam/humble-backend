@@ -653,12 +653,14 @@ apiModule.getAnswersAndUpdateSubmition = function (submissionId, allAnswers) {
     });
 };
 
-apiModule.getQuestionsToCheck = function (teachId) {
+apiModule.getQuestionsToCheck = function (teachId, skip = 0, top = 10) {
   return CheckRequest
     .find({ teacherId: teachId, status: REQUEST_STATUS_PENDING })
     .populate('questionId', 'section tags question')
     .populate('submissionId', 'completeDate ')
     .populate('studentId', 'name surname')
+    .skip(+skip < 0 ? 0 : +skip)
+    .limit(+top <= 0 ? 10 : +top)
     .lean();
 };
 
