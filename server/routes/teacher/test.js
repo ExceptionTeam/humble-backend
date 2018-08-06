@@ -124,4 +124,15 @@ route.get('/my-std-submissions/:assignmentId', (req, res) => {
     });
 });
 
+route.get('/sub-of-std/:assignmentId/:studentId', (req, res) => {
+  submissionApi
+    .getSubmissionsByAssignmentAndStd(req.params.assignmentId, req.params.studentId)
+    .then((submissions) => {
+      res.status(200).send(submissions);
+    })
+    .catch((err) => {
+      res.status(404).send(err);
+    });
+});
+
 module.exports = route;

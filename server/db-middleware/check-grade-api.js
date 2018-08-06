@@ -68,8 +68,18 @@ apiModule.isGraidingPossible = function (assignmentId) {
     });
 };
 
-const initCheckingSequence = function (assignmentId) {
-  return isCheckingPossible();
+const isCheckingPossible = function (subId) {
+  return CheckRequest
+    .countDocuments({ status: REQUEST_STATUS_PENDING, submissionId: subId });
+};
+
+apiModule.initCheckingSequence = function (subId) {
+  return isCheckingPossible(subId)
+    .then((doCheck) => {
+      if (doCheck) {
+        checkSubId(subId);
+      } else return false;
+    });
 };
 
 const initGraidingingSequence = function (assignmentId) {

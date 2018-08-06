@@ -655,7 +655,10 @@ apiModule.getAnswersAndUpdateSubmition = function (submissionId, allAnswers) {
 apiModule.getQuestionsToCheck = function (teachId) {
   return CheckRequest
     .find({ teacherId: teachId, status: REQUEST_STATUS_PENDING })
-    .populate('questionId', 'section tags question');
+    .populate('questionId', 'section tags question')
+    .populate('submissionId', 'userId')
+    .populate('submissionId.userId', 'name surname')
+    .lean();
 };
 
 apiModule.sendCheckingResults = function (checkingId, res) {
@@ -711,6 +714,15 @@ apiModule.getSubmissionsByAssignment = function (assignId) {
   return TestSubmission
     .find({ assignmentId: assignId })
     .populate('questionsId', '_id assignmentId status category difficulty question type answerOptions tags mark')
+    .populate('userId', 'name surnmae')
+    .lean();
+};
+
+apiModule.getSubmissionsByAssignmentAndStd = function (assignId, studId) {
+  return TestSubmission
+    .find({ assignmentId: assignId, userId: studId })
+    .populate('questionsId', '_id assignmentId status category difficulty question type answerOptions tags mark')
+    .populate('userId', 'name surnmae')
     .lean();
 };
 
