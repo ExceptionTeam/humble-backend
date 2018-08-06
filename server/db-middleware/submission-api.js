@@ -8,6 +8,7 @@ const {
   TestSubmission,
   SUBMISSION_STATUS_PENDING,
   SUBMISSION_STATUS_ANSWERED,
+  SUBMISSION_STATUS_EVALUATED,
 } = require('../models/testing/test-submission');
 const {
   Question,
@@ -21,6 +22,12 @@ const {
 const {
   TagAttachment,
 } = require('../models/testing/tag-attachment');
+const {
+  CheckRequest,
+  REQUEST_STATUS_PENDING,
+  REQUEST_STATUS_CHECKED,
+} = require('../models/testing/check-request');
+const checkGradeApi = require('./check-grade-api');
 
 const apiModule = {};
 
@@ -612,18 +619,141 @@ apiModule.makeTestSubmission = function (testAssignmentId, studentId) {
     });
 };
 
-apiModule.getQuestionsAndUpdateSubmition = function (submissionId, allAnsweres) {
+apiModule.getAnswersAndUpdateSubmition = function (submissionId, allAnswers) {
   return TestSubmission
     .findByIdAndUpdate(
       submissionId,
       {
         $set: {
-          answeres: allAnsweres,
+          answers: allAnswers,
           status: SUBMISSION_STATUS_ANSWERED,
           completeDate: new Date().getTime(),
         },
       },
-    );
+    )
+    .populate('assignmentId', 'teacherId _id')
+    .then(submission => Promise.all(allAnswers.map((el) => {
+      if (el.checking === true) {
+        return CheckRequest.create({
+          teacherId: submission.assignmentId.teacherId,
+          assignmentId: submission.assignmentId._id,
+          submissionId: submission._id,
+          questionId: el.questionId,
+          answer: el.answ,
+        });
+      }
+      return true;
+    })))
+    .then((questions) => { /*
+      if (questions.every((el) => {
+        if (el === true) return true;
+        return false;
+      })) { checkGradeApi.initCheckingSequence(); } */
+    });
+};
+
+apiModule.getQuestionsToCheck = function (teachId) {
+  return CheckRequest
+    .find({ teacherId: teachId, status: REQUEST_STATUS_PENDING })
+    .populate('questionId', 'section tags question');
+};
+
+apiModule.sendCheckingResults = function (checkingId, res) {
+  let question;
+  let subId;
+  return CheckRequest
+    .findByIdAndUpdate(checkingId, {
+      $set: {
+        status: REQUEST_STATUS_CHECKED,
+        result: res,
+        checkDate: new Date().getTime(),
+      },
+    })
+    .then((check) => {
+      question = check.questionId;
+      subId = check.submissionId;
+      return TestSubmission
+        .findById(check.submissionId)
+        .select('answers _id');
+    })
+    .then(submission => Promise.all(submission.answers.map((el) => {
+      if (el.checking && el.questionId == question) {
+        const elReassign = {};
+        elReassign.checking = false;
+        elReassign.questionId = el.questionId;
+        elReassign.answ = el.answ;
+        elReassign.result = res;
+        return elReassign;
+      }
+      return el;
+    })))
+    .then(answ => TestSubmission
+      .findByIdAndUpdate(subId, { $set: { answers: answ } }))
+    .then(() => Question
+      .findById(question)
+      .select('peopleTested peopleAnswered'))
+    .then((questionInfo) => {
+      const info = [questionInfo.peopleTested + 1, questionInfo.peopleAnswered];
+      if (res) info[1]++;
+      return info;
+    })
+    .then(info => Question
+      .findByIdAndUpdate(question, {
+        $set: {
+          peopleTested: info[0],
+          peopleAnswered: info[1],
+        },
+      }))
+    .then(() => true);
+};
+
+apiModule.getSubmissionsByAssignment = function (assignId) {
+  return TestSubmission
+    .find({ assignmentId: assignId })
+    .populate('questionsId', '_id assignmentId status category difficulty question type answerOptions tags mark')
+    .lean();
+};
+
+apiModule.getSubmissionsByStudent = function (studId, skip = 0, top = 10) {
+  const allSubmissions = {};
+  allSubmissions.subAmount = 0;
+  allSubmissions.submissions = [];
+  return TestSubmission
+    .countDocuments({ studentId: studId })
+    .then((amount) => {
+      allSubmissions.subAmount = amount;
+      return TestSubmission
+        .find({ studentId: studId })
+        .skip(+skip < 0 ? 0 : +skip)
+        .limit(+top <= 0 ? 10 : +top)
+        .populate('questionsId', '_id category difficulty question type answerOptions tags')
+        .lean();
+    })
+    .then((submissions) => {
+      allSubmissions.submissions = submissions;
+      return allSubmissions;
+    });
+};
+
+apiModule.getTestsByStudent = function (studId, skip = 0, top = 10) {
+  const allSubmissions = {};
+  allSubmissions.subAmount = 0;
+  allSubmissions.submissions = [];
+  return TestSubmission
+    .countDocuments({ studentId: studId })
+    .then((amount) => {
+      allSubmissions.subAmount = amount;
+      return TestSubmission
+        .find({ studentId: studId })
+        .skip(+skip < 0 ? 0 : +skip)
+        .limit(+top <= 0 ? 10 : +top)
+        .populate('questionsId', '_id category difficulty question type answerOptions tags')
+        .lean();
+    })
+    .then((submissions) => {
+      allSubmissions.submissions = submissions;
+      return allSubmissions;
+    });
 };
 
 module.exports = apiModule;
