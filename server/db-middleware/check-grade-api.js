@@ -88,7 +88,6 @@ const checkSub = function (subId) {
       });
       console.log(submiss);
       return submiss;
-      // return submissionApi.getAnswersAndUpdateSubmition(subId, submiss.answers);
     })
     .then(() => {
       submissionApi.getAnswersAndUpdateSubmition(subId, submiss.answers);
@@ -103,11 +102,6 @@ apiModule.initCheckingSequence = function (subId) {
       } else return false;
     });
 };
-
-
-console.log(submissionApi);
-// checkSub('5b68568f40b4a92ae09af3ab');
-//
 
 const initGraidingingSequence = function (assignmentId) {
   return isCheckingPossible();
