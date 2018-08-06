@@ -3,6 +3,17 @@ const taskApi = require('../../db-middleware/task-api');
 const controller = require('../../controllers/storage-controller');
 const Busboy = require('busboy');
 
+route.post('/activate/:taskId', (req, res) => {
+  taskApi
+    .activateTask(req.params.taskId)
+    .then(() => {
+      res.status(200).end();
+    })
+    .catch(() => {
+      res.status(404).end();
+    });
+});
+
 route.get('/full-info/:taskId', (req, res) => {
   taskApi
     .getTaskById(
