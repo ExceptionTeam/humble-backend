@@ -121,11 +121,11 @@ apiModule.changeUserRole = function (userId, oldRole, newRole) {
 };
 
 apiModule.checkEmail = function (email) {
-  User
+  return User
     .find({ email })
     .countDocuments()
     .then((amount) => {
-      if (!amount) {
+      if (amount) {
         return true;
       }
       return false;
