@@ -73,11 +73,16 @@ const isCheckingPossible = function (subId) {
     .countDocuments({ status: REQUEST_STATUS_PENDING, submissionId: subId });
 };
 
+const checkSub = function (subId) {
+  const answers = 2;
+  // return TestSubmission
+};
+
 apiModule.initCheckingSequence = function (subId) {
   return isCheckingPossible(subId)
     .then((doCheck) => {
       if (doCheck) {
-        checkSubId(subId);
+        checkSub(subId);
       } else return false;
     });
 };
