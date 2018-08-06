@@ -5,12 +5,6 @@ const {
   TYPE_TRAINING_TEST,
 } = require('../models/testing/test-assignment');
 const {
-  Question,
-  CATEGORY_SINGLE_ANSWER,
-  CATEGORY_MULTIPLE_ANSWERS,
-  CATEGORY_WORD_ANSWER,
-} = require('../models/testing/question');
-const {
   TestSubmission,
   SUBMISSION_STATUS_PENDING,
   SUBMISSION_STATUS_ANSWERED,
@@ -98,13 +92,13 @@ const isCheckingPossible = function (subId) {
             return false;
           })))) return true;
           return false;
-      } 
+      }
       submiss.questionId.forEach(quest => {
         if( submiss.answers.some((ans, index) => {
           checkIfRight()
         })) submiss.answers[index].result = true;
         })
-        
+
       });
     })
 }; */
