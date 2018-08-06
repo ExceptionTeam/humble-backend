@@ -128,6 +128,14 @@ apiModule.updatePendingTeacher = function (teacherId, isApproved = false) {
   );
 };
 
+apiModule.addStudentToGroup = function (studentId, groupId) {
+  return UserAssignment
+    .create({
+      studentId,
+      groupId,
+    });
+};
+
 apiModule.getIndividualStudents = function (teachId, studProj) {
   return UserAssignment
     .find({ teacherId: teachId })
