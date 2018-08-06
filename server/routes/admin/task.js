@@ -15,7 +15,7 @@ route.post('/abbreviated-info', (req, res) => {
       res.status(200).send(task);
     })
     .catch((err) => {
-      res.status(404).send(err);
+      res.status(404).json(err);
     });
 });
 
@@ -31,8 +31,10 @@ route.get('/full-info/:taskId', (req, res) => {
       res.status(200).send(task);
     })
     .catch((err) => {
-      res.status(404).send(err);
+      res.status(404).json(err);
     });
 });
+
+route.use(require('../teacher/task'));
 
 module.exports = route;

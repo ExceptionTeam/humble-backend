@@ -10,7 +10,7 @@ route.post('/approve/:requestId/:teacherId', (req, res) => {
       res.status(200).end();
     })
     .catch((err) => {
-      res.status(404).send(err);
+      res.status(404).json(err);
     });
 });
 
@@ -21,7 +21,7 @@ route.get('/get-students/:teacherId', (req, res) => {
       res.status(200).send(studId);
     })
     .catch((err) => {
-      res.status(404).send(err);
+      res.status(404).json(err);
     });
 });
 
@@ -32,7 +32,7 @@ route.post('/reject/:requestId', (req, res) => {
       res.status(200).end();
     })
     .catch((err) => {
-      res.status(404).send(err);
+      res.status(404).json(err);
     });
 });
 
@@ -43,7 +43,7 @@ route.get('/pending-requests/:teacherId', (req, res) => {
       res.status(200).send(requests);
     })
     .catch((err) => {
-      res.status(404).send(err);
+      res.status(404).json(err);
     });
 });
 
@@ -54,7 +54,7 @@ route.post('/tag-questions/', (req, res) => {
       res.status(200).send(submission);
     })
     .catch((err) => {
-      res.status(404).send(err);
+      res.status(404).json(err);
     });
 });
 
@@ -65,7 +65,7 @@ route.get('/tags/', (req, res) => {
       res.status(200).send(tags);
     })
     .catch((err) => {
-      res.status(404).send(err);
+      res.status(404).json(err);
     });
 });
 
@@ -76,7 +76,7 @@ route.post('/new-question/', (req, res) => {
       res.status(200).send();
     })
     .catch((err) => {
-      res.status(404).send(err);
+      res.status(404).json(err);
     });
 });
 
@@ -123,5 +123,7 @@ route.get('/my-std-submissions/:assignmentId', (req, res) => {
       res.status(404).send(err);
     });
 });
+
+route.use(require('../student/test'));
 
 module.exports = route;

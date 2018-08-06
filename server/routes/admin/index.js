@@ -54,8 +54,10 @@ route.post('/info/:category', (req, res) => {
       res.status(200).send(data);
     })
     .catch((err) => {
-      res.status(404).end();
+      res.status(404).json(err);
     });
 });
+
+route.use(require('../teacher/'));
 
 module.exports = route;
