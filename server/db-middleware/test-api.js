@@ -25,6 +25,7 @@ const {
 const { TagAttachment } = require('../models/testing/tag-attachment');
 const generalApi = require('./general-api');
 const submissionApi = require('./submission-api');
+const { User, USER_ROLE_STUDENT } = require('../models/user/user');
 
 const apiModule = {};
 
@@ -172,7 +173,7 @@ apiModule.allSubmissions4Admin = function (skip = 0, top = 10) {
     });
 };
 
-apiModule.getStudAllAssignments = function (studId, skip = 0, top = 20) {
+apiModule.getStudAllAssignments = function (studId, skip = 0, top = 20, withPagination = true) {
   const assignments = {};
   assignments.ids = [];
   assignments.amount = 0;
@@ -201,10 +202,12 @@ apiModule.getStudAllAssignments = function (studId, skip = 0, top = 20) {
     })
     .then(() => {
       assignments.amount = assignments.ids.length;
-      if (+skip < assignments.ids.length && (+skip + +top) < assignments.ids.length) {
-        assignments.ids = assignments.ids.slice(skip, top);
-      } else if (+skip < assignments.ids.length && (+skip + +top) >= assignments.ids.length) {
-        assignments.ids = assignments.ids.slice(skip, assignments.ids.length);
+      if (withPagination) {
+        if (+skip < assignments.ids.length && (+skip + +top) < assignments.ids.length) {
+          assignments.ids = assignments.ids.slice(skip, top);
+        } else if (+skip < assignments.ids.length && (+skip + +top) >= assignments.ids.length) {
+          assignments.ids = assignments.ids.slice(skip, assignments.ids.length);
+        }
       }
       return assignments;
     })
@@ -273,6 +276,28 @@ apiModule.testAssign = function (assignment) {
       teacherId: assignment.teacherId,
       trainingPercentage: assignment.trainingPercentage,
       type: assignment.type,
+    });
+};
+
+apiModule.getStatistics = function (amount) {
+  let students;
+  User
+    .find({ role: USER_ROLE_STUDENT }, '_id name surname')
+    .lean()
+    .then((studs) => {
+      students = studs;
+      return Promise.all(students.map(el => apiModule
+        .getStudAllAssignments(el._id, null, null, false)));
+    })
+    .then((tests) => {
+      tests
+        .forEach((el, j) => {
+          students[j].averageMark = el
+            .filter(elem => (!!elem.submissionMark))
+            .reduce((sum, elem, i) => el + (!i ? 0 : sum))
+            / el.length;
+        });
+      students.sort((el1, el2) => el1.averageMark - el2.averageMark).slice(0, amount);
     });
 };
 

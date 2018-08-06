@@ -1,6 +1,7 @@
 const route = require('express').Router();
 const passport = require('passport');
 const generalApi = require('../db-middleware/general-api');
+const testApi = require('../db-middleware/test-api');
 
 route.use((req, res, next) => {
   if (req.isUnauthenticated()) {
@@ -53,6 +54,17 @@ route.post('/reset-password', (req, res) => {
     })
     .catch(() => {
       res.status(400).send();
+    });
+});
+
+route.post('/test-statistics', (req, res) => {
+  testApi
+    .getStatistics(10)
+    .then(() => {
+      res.status(200).send();
+    })
+    .catch(() => {
+      res.status(500).send();
     });
 });
 
