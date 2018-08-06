@@ -30,8 +30,28 @@ route.get('/group/members/:groupId', (req, res) => {
     .then((data) => {
       res.status(200).send(data);
     })
-    .catch(() => {
-      res.status(404).end();
+    .catch((err) => {
+      res.status(404).json(err);
+    });
+});
+
+route.post('/add/individual/student', (req, res) => {
+  generalApi.addIndividualStudent(req.body.student, req.body.teacher)
+    .then(() => {
+      res.status(200).send();
+    })
+    .catch((err) => {
+      res.status(404).json(err);
+    });
+});
+
+route.post('/delete/individual/student', (req, res) => {
+  generalApi.deleteIndividualStudent(req.body.student, req.body.teacher)
+    .then(() => {
+      res.status(200).send();
+    })
+    .catch((err) => {
+      res.status(404).json(err);
     });
 });
 

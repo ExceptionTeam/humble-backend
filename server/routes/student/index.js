@@ -12,8 +12,8 @@ route.post('/university', (req, res) => {
     .then((data) => {
       res.status(200).send(data);
     })
-    .catch(() => {
-      res.status(404).end();
+    .catch((err) => {
+      res.status(404).json(err);
     });
 });
 

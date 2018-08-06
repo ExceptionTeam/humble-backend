@@ -222,7 +222,7 @@ apiModule.getStudentsByTeacherFlat = function (teacherId) {
 
 apiModule.getConfigString = function (filterConfig) {
   let configString = '';
-  filterConfig.replace(/[.,\/#!$%\^&\*;:{}=\-_`~()]/g, ' ').split(' ').forEach((el, i) => {
+  filterConfig.replace(/[.,\/#!$%\^&\*;:{}=\-_`~()]/g, ' ').split(' ').forEach((el) => {
     if (el !== '') {
       if (configString === '') {
         configString += el;
@@ -280,6 +280,39 @@ apiModule.getUniversity = function (filterConfig) {
     $or: [{ name: { $regex: configString, $options: 'i' } }],
   })
     .select('-__v');
+};
+
+apiModule.addIndividualStudent = function (studentId, teacherId) {
+  if (!studentId || !teacherId) {
+    return Promise.reject();
+  }
+  return UserAssignment.find({ studentId, teacherId })
+    .countDocuments()
+    .then((size) => {
+      if (size === 0) {
+        userAssign = new UserAssignment({
+          studentId,
+          teacherId,
+        });
+        return userAssign.save();
+      }
+      return Promise.reject();
+    });
+};
+
+apiModule.deleteIndividualStudent = function (studentId, teacherId) {
+  if (!studentId || !teacherId) {
+    return Promise.reject();
+  }
+  return UserAssignment.find({ studentId, teacherId })
+    .countDocuments()
+    .then((size) => {
+      if (size > 0) {
+        return UserAssignment.find({ studentId, teacherId });
+      }
+      return Promise.reject();
+    })
+    .then(assignments => Promise.all(assignments.map(el => UserAssignment.findByIdAndRemove(el._id))));
 };
 
 module.exports = apiModule;

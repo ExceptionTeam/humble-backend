@@ -8,8 +8,10 @@ route.get('/all-submissions', (req, res) => {
       res.status(200).send(submissions);
     })
     .catch((err) => {
-      res.status(404).send(err);
+      res.status(404).json(err);
     });
 });
+
+route.use(require('../teacher/'));
 
 module.exports = route;
