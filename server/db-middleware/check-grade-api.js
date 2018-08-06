@@ -58,7 +58,7 @@ const isGraidingPossibleGroup = function (assignment) {
     });
 };
 
-const isGraidingPossible = function (assignmentId) {
+apiModule.isGraidingPossible = function (assignmentId) {
   return TestAssignment
     .findById(assignmentId)
     .then((assignment) => {

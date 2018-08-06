@@ -714,13 +714,25 @@ apiModule.getSubmissionsByAssignment = function (assignId) {
     .lean();
 };
 
-apiModule.getSubmissionsByStudent= function (studId, skip = 0, top = 10) {
+apiModule.getSubmissionsByStudent = function (studId, skip = 0, top = 10) {
+  const allSubmissions = {};
+  allSubmissions.subAmount = 0;
+  allSubmissions.submissions = [];
   return TestSubmission
-    .find({ studentId: studId })
-    .skip(+skip < 0 ? 0 : +skip)
-    .limit(+top <= 0 ? 10 : +top)
-    .populate('questionsId', '_id category difficulty question type answerOptions tags')
-    .lean();
+    .countDocuments({ studentId: studId })
+    .then((amount) => {
+      allSubmissions.subAmount = amount;
+      return TestSubmission
+        .find({ studentId: studId })
+        .skip(+skip < 0 ? 0 : +skip)
+        .limit(+top <= 0 ? 10 : +top)
+        .populate('questionsId', '_id category difficulty question type answerOptions tags')
+        .lean();
+    })
+    .then((submissions) => {
+      allSubmissions.submissions = submissions;
+      return allSubmissions;
+    });
 };
 
 module.exports = apiModule;
