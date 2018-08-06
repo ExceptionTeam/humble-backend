@@ -40,8 +40,7 @@ route.post('/register', (req, res) => {
       res.status(200).send();
     })
     .catch((err) => {
-      console.log(err);
-      res.status(400).send();
+      res.status(400).json(err);
     });
 });
 
