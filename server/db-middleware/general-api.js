@@ -110,8 +110,8 @@ function validateRole(role, withPending = false) {
 
 apiModule.changeUserRole = function (userId, oldRole, newRole) {
   if (validateRole(oldRole, true) && validateRole(newRole)) {
-    const newRoleLevel = (newRole === USER_ROLE_ADMIN || newRole === USER_ROLE_TEACHER) ? 2 : 1;
-    const oldRoleLevel = (oldRole === USER_ROLE_ADMIN || oldRole === USER_ROLE_TEACHER) ? 2 : 1;
+    const newRoleLevel = (newRole === USER_ROLE_STUDENT) ? 1 : 2;
+    const oldRoleLevel = (oldRole === USER_ROLE_STUDENT) ? 1 : 2;
     if (oldRoleLevel !== newRoleLevel) {
       return User.findByIdAndUpdate(userId, { role: newRole, account: {} });
     }
@@ -130,6 +130,14 @@ apiModule.checkEmail = function (email) {
       }
       return false;
     });
+  };
+
+apiModule.updatePendingTeacher = function (teacherId, isApproved = false) {
+  return apiModule.changeUserRole(
+    teacherId,
+    USER_ROLE_PENDING,
+    isApproved ? USER_ROLE_TEACHER : USER_ROLE_STUDENT,
+  );
 };
 
 apiModule.getIndividualStudents = function (teachId, studProj) {
@@ -163,10 +171,10 @@ apiModule.getStudentsByTeacher = function (teacherId) {
     });
 };
 
-apiModule.getPendingTeacher = function (skip = 0, top = 10, userProj) {
+apiModule.getPendingTeachers = function (skip = 0, top = 20, userProj) {
   return User.find({ role: USER_ROLE_PENDING }, userProj)
     .skip(+skip < 0 ? 0 : +skip)
-    .limit(+top <= 0 ? 5 : +top)
+    .limit(+top <= 0 ? 20 : +top)
     .lean();
 };
 
@@ -221,6 +229,54 @@ apiModule.getStudentsByTeacherFlat = function (teacherId) {
       allKeys[str] = true;
     }))
     .then(() => Object.keys(allKeys));
+};
+
+apiModule.getPersonsCategorized = function (category, skip = 0, top = 10, filterConfig) {
+  const resUsers = {};
+  let configString = '';
+
+  if (!validateRole(category.toUpperCase())) {
+    return Promise.reject();
+  }
+
+  filterConfig.replace(/[.,\/#!$%\^&\*;:{}=\-_`~()]/g, ' ').split(' ').forEach((el, i) => {
+    if (el !== '') {
+      if (configString === '') {
+        configString += el;
+      } else {
+        configString += '|' + el;
+      }
+    }
+  });
+
+  return User.find({ role: category.toUpperCase() })
+    .find({
+      $or: [{ name: { $regex: configString, $options: 'i' } },
+        { surname: { $regex: configString, $options: 'i' } },
+        { 'account.university': { $regex: configString, $options: 'i' } }],
+    })
+    .select('-__v -role -email -primarySkill -hash -salt')
+    .skip(+skip < 0 ? 0 : +skip)
+    .limit(+top <= 0 ? 10 : +top)
+    .then((users) => {
+      resUsers.data = users;
+      return User.find({ role: category.toUpperCase() })
+        .countDocuments();
+    })
+    .then((total) => {
+      resUsers.pagination = { total };
+      return User.find({ role: category.toUpperCase() })
+        .find({
+          $or: [{ name: { $regex: configString, $options: 'i' } },
+            { surname: { $regex: configString, $options: 'i' } },
+            { 'account.university': { $regex: configString, $options: 'i' } }],
+        })
+        .countDocuments();
+    })
+    .then((filtered) => {
+      resUsers.pagination.filtered = filtered;
+      return resUsers;
+    });
 };
 
 module.exports = apiModule;

@@ -232,8 +232,4 @@ apiModule.getSubmissionById = function (submissionId) {
     .then(data => this.getFileById(data.srcFileId));
 };
 
-apiModule.getPendingTeacher = function (skip, top) {
-  return generalApi.getPendingTeacher(skip, top, '-password -role -__v');
-};
-
 module.exports = apiModule;
