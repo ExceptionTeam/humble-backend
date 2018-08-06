@@ -48,9 +48,9 @@ route.get('/assignments/:studentId', (req, res) => {
     });
 });
 
-route.post('/answers/:assignmentId', (req, res) => {
+route.post('/answers/:submissionId', (req, res) => {
   submissionApi
-    .getAnswersAndUpdateSubmition(req.params.assignmentId, req.body)
+    .getAnswersAndUpdateSubmition(req.params.submissionId, req.body)
     .then(() => {
       res.status(200).send();
     })
@@ -60,7 +60,7 @@ route.post('/answers/:assignmentId', (req, res) => {
 });
 
 route.get('/sudmissions/:studentId', (req, res) => {
-  sudmissionApi
+  submissionApi
     .getSubmissionsByStudent(req.params.studentId, req.query.skip, req.query.top)
     .then((assignments) => {
       res.status(200).send(assignments);

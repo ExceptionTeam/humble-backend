@@ -188,13 +188,25 @@ apiModule.newQuestion = function (question) {
 };
 
 apiModule.allTeachersAssignments = function (teachId, skip = 0, top = 10) {
+  const allAssignments = {};
+  allAssignments.assignAmount = 0;
+  allAssignments.assignments = [];
   return TestAssignment
-    .find({ teacherId: teachId })
-    .skip(+skip < 0 ? 0 : +skip)
-    .limit(+top <= 0 ? 10 : +top)
-    .populate('groupId', 'name')
-    .populate('studentId', 'name surname')
-    .lean();
+    .countDocuments({ teacherId: teachId })
+    .then((amount) => {
+      allAssignments.assignAmount = amount;
+      return TestAssignment
+        .find({ teacherId: teachId })
+        .skip(+skip < 0 ? 0 : +skip)
+        .limit(+top <= 0 ? 10 : +top)
+        .populate('groupId', 'name')
+        .populate('studentId', 'name surname')
+        .lean();
+    })
+    .then((assignments) => {
+      allAssignments.assignments = assignments;
+      return allAssignments;
+    });
 };
 
 
