@@ -107,6 +107,7 @@ apiModule.initCheckingSequence = function (subId) {
 
 console.log(submissionApi);
 // checkSub('5b68568f40b4a92ae09af3ab');
+//
 
 const initGraidingingSequence = function (assignmentId) {
   return isCheckingPossible();
