@@ -55,6 +55,16 @@ route.post('/delete/individual/student', (req, res) => {
     });
 });
 
+route.post('/add-group', (req, res) => {
+  generalApi.addGroupToTeacher(req.body.name, req.body.teacherId)
+    .then(() => {
+      res.status(200).end();
+    })
+    .catch((err) => {
+      res.status(404).json(err);
+    });
+});
+
 route.use(require('../student/'));
 
 module.exports = route;

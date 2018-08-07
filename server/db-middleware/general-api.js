@@ -1,11 +1,12 @@
+const mongoose = require('mongoose');
 const UserAssignment = require('mongoose').model('UserAssignment');
 const {
   User, USER_ROLE_PENDING, USER_ROLE_STUDENT, USER_ROLE_ADMIN, USER_ROLE_TEACHER,
 } = require('../models/user/user');
 const { University } = require('../models/others/university');
+const { Group } = require('../models/user/group');
 const generatePassword = require('password-generator');
 const mailer = require('../controllers/mailer');
-
 
 const apiModule = {};
 
@@ -282,6 +283,16 @@ apiModule.getUniversity = function (filterConfig) {
     .select('-__v');
 };
 
+apiModule.addUserAssignment = function (params) {
+  const userAssign = new UserAssignment(params);
+  return userAssign.save();
+};
+
+apiModule.addGroup = function (params) {
+  const group = new Group(params);
+  return group.save();
+};
+
 apiModule.addIndividualStudent = function (studentId, teacherId) {
   if (!studentId || !teacherId) {
     return Promise.reject();
@@ -290,11 +301,11 @@ apiModule.addIndividualStudent = function (studentId, teacherId) {
     .countDocuments()
     .then((size) => {
       if (size === 0) {
-        userAssign = new UserAssignment({
+        const params = {
           studentId,
           teacherId,
-        });
-        return userAssign.save();
+        };
+        return this.addUserAssignment(params);
       }
       return Promise.reject();
     });
@@ -313,6 +324,36 @@ apiModule.deleteIndividualStudent = function (studentId, teacherId) {
       return Promise.reject();
     })
     .then(assignments => Promise.all(assignments.map(el => UserAssignment.findByIdAndRemove(el._id))));
+};
+
+apiModule.addGroupToTeacher = function (name, teacherId) {
+  const groupId = new mongoose.Types.ObjectId();
+
+  return new Promise((resolve, reject) => {
+    Group.find({ name })
+      .then((data) => {
+        if (data.length !== 0) {
+          reject();
+        }
+      })
+      .then(() => {
+        resolve();
+      });
+  })
+    .then(() => {
+      const params = {
+        _id: groupId,
+        name,
+      };
+      return this.addGroup(params);
+    })
+    .then(() => {
+      const params = {
+        groupId,
+        teacherId,
+      };
+      return this.addUserAssignment(params);
+    });
 };
 
 module.exports = apiModule;
