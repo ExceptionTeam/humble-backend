@@ -3,7 +3,7 @@ const testApi = require('../../db-middleware/test-api');
 
 route.get('/all-submissions', (req, res) => {
   testApi
-    .allSubmissions4Admin(req.query.skip, req.query.top)
+    .allSubmissionsForAdmin(req.query.skip, req.query.top)
     .then((submissions) => {
       res.status(200).send(submissions);
     })

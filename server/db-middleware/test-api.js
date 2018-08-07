@@ -149,7 +149,7 @@ apiModule.checkIfAssignmentsExpired = function () {
     });
 };
 
-apiModule.allSubmissions4Admin = function (skip = 0, top = 10) {
+apiModule.allSubmissionsForAdmin = function (skip = 0, top = 10) {
   const submissions = {};
   submissions.amount = 0;
   submissions.subs = [];
@@ -168,7 +168,6 @@ apiModule.allSubmissions4Admin = function (skip = 0, top = 10) {
     })
     .then((subs) => {
       submissions.subs = subs;
-      console.log(submissions);
       return submissions;
     });
 };

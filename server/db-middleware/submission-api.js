@@ -672,50 +672,43 @@ const checkSub = function (subId) {
     })
     .then(() => {
       const checkIfRight = function (ans, quest) {
-        console.log('for elements');
-        console.log(quest);
-        console.log('and');
-        console.log(ans);
-        console.log('result is');
         if (
-          quest._id === ans.questionId && quest.category !== CATEGORY_SENTENCE_ANSWER &&
-          ((quest.category === CATEGORY_WORD_ANSWER && ans.answ === quest.question) ||
+          quest._id == ans.questionId && quest.category === CATEGORY_WORD_ANSWER &&
+          ans.answ === quest.correctOptions) {
+          return true;
+        } else if (
+          quest._id == ans.questionId && quest.category !== CATEGORY_SENTENCE_ANSWER &&
+          quest.category !== CATEGORY_WORD_ANSWER &&
           (ans.answ.every((el, index) => {
-            if (el === quest.answ[index]) return true;
+            if (el === quest.correctOptions[index]) return true;
             return false;
-          })))) { console.log(true); return true; }
-        console.log(false);
+          }))) { return true; }
+
         return false;
       };
       submiss.answers.forEach((ans, index) => {
-        console.log(1);
-        console.log(index);
         if (submiss.questionsId.some(quest => checkIfRight(ans, quest))) {
           submiss.answers[index].result = true;
-          console.log('overall');
-          console.log(true);
+
           updateQuestion(submiss.answers[index].questionId, true);
         } else if (submiss.answers[index].category !== CATEGORY_SENTENCE_ANSWER) {
           submiss.answers[index].result = false;
-          console.log('overall');
-          console.log(false);
+
           updateQuestion(submiss.answers[index].questionId, false);
         }
       });
-      console.log(submiss);
+
       return submiss;
       // return submissionApi.getAnswersAndUpdateSubmition(subId, submiss.answers);
     })
     .then(() => {
       apiModule.getCheckingResultsAndUpdateSub(subId, submiss.answers);
-      console.log(1);
     });
 };
 
 apiModule.initCheckingSequence = function (subId) {
   return isCheckingPossible(subId)
     .then((doCheck) => {
-      console.log(doCheck);
       if (doCheck) {
         checkSub(subId);
       } else return false;
@@ -763,7 +756,8 @@ apiModule.getCheckingResultsAndUpdateSub = function (submissionId, allAnswers) {
           status: SUBMISSION_STATUS_CHECKED,
         },
       },
-    );
+    )
+    .then(() => true);
 };
 
 apiModule.getQuestionsToCheck = function (teachId, skip = 0, top = 10) {
@@ -827,7 +821,7 @@ apiModule.getSubmissionsByAssignment = function (assignId) {
   return TestSubmission
     .find({ assignmentId: assignId })
     .populate('questionsId', '_id assignmentId status category difficulty question type answerOptions tags mark')
-    .populate('userId', 'name surnmae')
+    .populate('userId', 'name surname')
     .lean();
 };
 
