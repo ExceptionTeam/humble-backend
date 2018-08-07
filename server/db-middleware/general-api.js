@@ -126,6 +126,18 @@ apiModule.changeUserRole = function (userId, newRole) {
     });
 };
 
+apiModule.checkEmail = function (email) {
+  return User
+    .find({ email })
+    .countDocuments()
+    .then((amount) => {
+      if (amount) {
+        return true;
+      }
+      return false;
+    });
+  };
+
 apiModule.updatePendingTeacher = function (teacherId, isApproved = false) {
   return apiModule.changeUserRole(
     teacherId,
