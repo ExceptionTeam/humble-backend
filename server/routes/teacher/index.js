@@ -20,7 +20,17 @@ route.get('/students', (req, res) => {
       res.status(200).send(result);
     })
     .catch((err) => {
-      console.log(err);
+      res.status(404).json(err);
+    });
+});
+
+route.delete('/group/:groupId/remove/:studentId', (req, res) => {
+  generalApi
+    .removeStudentFromGroup(req.params.studentId, req.params.groupId)
+    .then(() => {
+      res.status(200).send();
+    })
+    .catch((err) => {
       res.status(404).json(err);
     });
 });
