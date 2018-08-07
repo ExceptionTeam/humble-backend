@@ -23,9 +23,11 @@ const {
   TYPE_PRIMARY_QUESTION,
 } = require('../models/testing/question');
 const { TagAttachment } = require('../models/testing/tag-attachment');
+const { User, USER_ROLE_STUDENT } = require('../models/user/user');
 const generalApi = require('./general-api');
 const submissionApi = require('./submission-api');
 const checkGradeApi = require('./check-grade-api');
+const taskApi = require('../db-middleware/task-api');
 
 const apiModule = {};
 
@@ -280,6 +282,40 @@ apiModule.testAssign = function (assignment) {
 apiModule.getInfoQuestion = function (id) {
   return Question.findById(id)
     .select('-__v');
+};
+
+apiModule.getStatisticsRating = function (amount) {
+  let students;
+  User
+    .find({ role: USER_ROLE_STUDENT }, '_id name surname')
+    .lean()
+    .then((studs) => {
+      students = studs;
+      return Promise.all(students.map(el => apiModule
+        .getStudAllAssignments(el._id, null, null, false)));
+    })
+    .then((tests) => {
+      tests
+        .forEach((el, j) => {
+          const withSubmission = el.filter(elem => (!!elem.submissionMark));
+          students[j].averageMarkTests = withSubmission.length ? withSubmission
+            .reduce((sum, elem, i) => el + (!i ? 0 : sum)) / withSubmission.length : 0;
+        });
+      return Promise.all(students.map(el => taskApi
+        .getAllStudentTasks(el._id)));
+    })
+    .then((tasks) => {
+      tasks
+        .forEach((el, j) => {
+          const withSubmissions = el.filter(elem => (!!elem.submission));
+          students[j].averageMarkTasks = withSubmissions.length ? withSubmissions
+            .reduce((sum, elem, i) => el + (!i ? 0 : sum)) / withSubmissions.length : 0;
+        });
+      return students.sort((el1, el2) =>
+        ((el1.averageMarkTests + el1.averageMarkTasks) / 2) -
+        ((el2.averageMarkTests + el2.averageMarkTasks) / 2))
+        .slice(0, amount);
+    });
 };
 
 module.exports = apiModule;
