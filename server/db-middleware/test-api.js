@@ -276,5 +276,9 @@ apiModule.testAssign = function (assignment) {
     });
 };
 
+apiModule.getInfoQuestion = function (id) {
+  return Question.findById(id)
+    .select('-__v');
+};
 
 module.exports = apiModule;
