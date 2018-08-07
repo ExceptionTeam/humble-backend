@@ -109,7 +109,7 @@ function validateRole(role, withPending = false) {
 }
 
 apiModule.changeUserRole = function (userId, newRole) {
-  User
+  return User
     .findById(userId, 'role')
     .then((user) => {
       if (validateRole(user.role, true) && validateRole(newRole)) {
