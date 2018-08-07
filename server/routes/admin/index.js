@@ -58,6 +58,17 @@ route.post('/info/:category', (req, res) => {
     });
 });
 
+route.post('/change-role/:userId/:newRole', (req, res) => {
+  generalApi
+    .changeUserRole(req.params.userId, req.params.newRole)
+    .then(() => {
+      res.status(200).send(true);
+    })
+    .catch(() => {
+      res.status(400).json(false);
+    });
+});
+
 route.use(require('../teacher/'));
 
 module.exports = route;
