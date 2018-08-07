@@ -362,4 +362,11 @@ apiModule.deleteGroupAndAssingments = function (groupId) {
     .then(data => Promise.all(data.map(el => UserAssignment.findByIdAndRemove(el._id))));
 };
 
+apiModule.editGroup = function (groupId, name) {
+  if (!name || !groupId) {
+    return Promise.reject();
+  }
+  return Group.findByIdAndUpdate(groupId, { name });
+};
+
 module.exports = apiModule;
