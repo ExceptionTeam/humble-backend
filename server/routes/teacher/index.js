@@ -75,6 +75,15 @@ route.get('/delete-group/:groupId', (req, res) => {
     });
 });
 
+route.post('/edit/group/:groupId', (req, res) => {
+  generalApi.editGroup(req.params.groupId, req.body.name)
+    .then(() => {
+      res.status(200).end();
+    })
+    .catch((err) => {
+      res.status(404).json(err);
+    });
+});
 
 route.use(require('../student/'));
 
