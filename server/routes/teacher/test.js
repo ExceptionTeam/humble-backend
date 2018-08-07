@@ -88,7 +88,7 @@ route.post('/new-assignment/', (req, res) => {
       res.status(200).send();
     })
     .catch((err) => {
-      res.status(404).send(err);
+      res.status(404).json(err);
     });
 });
 
@@ -99,7 +99,7 @@ route.get('/questions-check/:teacherId', (req, res) => {
       res.status(200).send(questions);
     })
     .catch((err) => {
-      res.status(404).send(err);
+      res.status(404).json(err);
     });
 });
 
@@ -110,7 +110,7 @@ route.get('/check-res/:checkid/:result', (req, res) => {
       res.status(200).send(questions);
     })
     .catch((err) => {
-      res.status(404).send(err);
+      res.status(404).json(err);
     });
 });
 
@@ -121,7 +121,7 @@ route.get('/all-assignments/:teacherid', (req, res) => {
       res.status(200).send(submissions);
     })
     .catch((err) => {
-      res.status(404).send(err);
+      res.status(404).json(err);
     });
 });
 
@@ -132,7 +132,7 @@ route.get('/my-std-submissions/:assignmentId', (req, res) => {
       res.status(200).send(submissions);
     })
     .catch((err) => {
-      res.status(404).send(err);
+      res.status(404).json(err);
     });
 });
 
@@ -143,11 +143,11 @@ route.get('/sub-of-std/:assignmentId/:studentId', (req, res) => {
       res.status(200).send(submissions);
     })
     .catch((err) => {
-      res.status(404).send(err);
+      res.status(404).json(err);
     });
 });
 
 
-route.use(require('../student/test'));
+route.use(require('../student/'));
 
 module.exports = route;
