@@ -290,8 +290,8 @@ apiModule.getPersonsCategorized = function (category, skip = 0, top = 10, filter
 };
 
 apiModule.getUniversity = function (filterConfig) {
-  filterConfig = filterConfig || '';
-  const configString = this.getConfigString(filterConfig);
+  const filterConfigSafe = filterConfig || '';
+  const configString = this.getConfigString(filterConfigSafe);
 
   return University.find({
     $or: [{ name: { $regex: configString, $options: 'i' } }],
@@ -339,7 +339,8 @@ apiModule.deleteIndividualStudent = function (studentId, teacherId) {
       }
       return Promise.reject();
     })
-    .then(assignments => Promise.all(assignments.map(el => UserAssignment.findByIdAndRemove(el._id))));
+    .then(assignments =>
+      Promise.all(assignments.map(el => UserAssignment.findByIdAndRemove(el._id))));
 };
 
 apiModule.addGroupToTeacher = function (name, teacherId) {

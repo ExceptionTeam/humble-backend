@@ -138,7 +138,7 @@ apiModule.getAssignmentByIdNonPopulate = function (assignId) {
     .findById(assignId);
 };
 
-apiModule.getAllStudentTasks = function (studId) {
+apiModule.getAllStudentTasks = function (studId, oneSubmission = true) {
   const result = {};
 
   return getAssignmentsByStudent(studId)
@@ -162,12 +162,19 @@ apiModule.getAllStudentTasks = function (studId) {
         .sort('-mark')
         .limit(1))))
     .then((submissions) => {
-      const submitted = submissions.map(el => el[0]);
       const map = {};
-      result.assignment.forEach((el) => { map[el._id] = el; });
-      submitted.forEach((el) => {
-        if (el) map[el.assignId].submission = el;
-      });
+      if (oneSubmission) {
+        const submitted = submissions.map(el => el[0]);
+        result.assignment.forEach((el) => { map[el._id] = el; });
+        submitted.forEach((el) => {
+          if (el) map[el.assignId].submission = el;
+        });
+      } else {
+        result.assignment.forEach((el) => { map[el._id] = el; });
+        submissions.forEach((el) => {
+          if (el && el.length) map[el[0].assignId].submissions = el;
+        });
+      }
     })
     .then(() => result.assignment);
 };
