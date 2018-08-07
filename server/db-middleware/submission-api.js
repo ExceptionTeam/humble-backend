@@ -31,15 +31,24 @@ const {
 
 const apiModule = {};
 
-apiModule.getQuestionsByTags = function (questionTags = null) {
+apiModule.getQuestionsByTags = function (questionTags = null, skip = 0, top = 20) {
+  const questions = {};
+  questions.amount = 0;
+  questions.subs = [];
   if (questionTags === null) {
     return Question
-      .find();
+      .find()
+      .skip(+skip < 0 ? 0 : +skip)
+      .limit(+top <= 0 ? 20 : +top)
+      .lean();
   }
   return Question
     .find({
       tags: { $in: questionTags.split(', ') },
-    });
+    })
+    .skip(+skip < 0 ? 0 : +skip)
+    .limit(+top <= 0 ? 20 : +top)
+    .lean();
 };
 
 apiModule.getAllTagAttachments = function () {

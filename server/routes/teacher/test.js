@@ -49,7 +49,7 @@ route.get('/pending-requests/:teacherId', (req, res) => {
 
 route.post('/tag-questions/', (req, res) => {
   submissionApi
-    .getQuestionsByTags(req.body.tags)
+    .getQuestionsByTags(req.body.tags, req.query.skip, req.query.top)
     .then((submission) => {
       res.status(200).send(submission);
     })
@@ -57,6 +57,7 @@ route.post('/tag-questions/', (req, res) => {
       res.status(404).json(err);
     });
 });
+
 
 route.get('/tags/', (req, res) => {
   submissionApi
