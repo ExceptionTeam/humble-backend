@@ -19,6 +19,9 @@ const testSubmissionSchema = new Schema({
   userId: {
     type: Schema.Types.ObjectId, required: true, index: true, ref: 'User',
   },
+  teacherId: {
+    type: Schema.Types.ObjectId, required: true, index: true, ref: 'User',
+  },
   status: {
     type: String,
     required: true,

@@ -25,6 +25,7 @@ const {
 const { TagAttachment } = require('../models/testing/tag-attachment');
 const generalApi = require('./general-api');
 const submissionApi = require('./submission-api');
+const checkGradeApi = require('./check-grade-api');
 
 const apiModule = {};
 
@@ -148,7 +149,7 @@ apiModule.checkIfAssignmentsExpired = function () {
     });
 };
 
-apiModule.allSubmissions4Admin = function (skip = 0, top = 10) {
+apiModule.allSubmissionsForAdmin = function (skip = 0, top = 10) {
   const submissions = {};
   submissions.amount = 0;
   submissions.subs = [];
@@ -167,7 +168,6 @@ apiModule.allSubmissions4Admin = function (skip = 0, top = 10) {
     })
     .then((subs) => {
       submissions.subs = subs;
-      console.log(submissions);
       return submissions;
     });
 };
@@ -268,6 +268,7 @@ apiModule.testAssign = function (assignment) {
       name: assignment.name,
       tags: assignment.tags,
       timeToPass: assignment.timeToPass,
+      assignDate: new Date().getTime(),
       deadline: assignment.deadline,
       testSize: assignment.testSize,
       teacherId: assignment.teacherId,

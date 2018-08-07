@@ -56,53 +56,6 @@ apiModule.isGraidingPossible = function (assignmentId) {
     });
 };
 
-const isCheckingPossible = function (subId) {
-  return CheckRequest
-    .countDocuments({ status: REQUEST_STATUS_PENDING, submissionId: subId });
-};
 
-const checkSub = function (subId) {
-  let submiss = {};
-  return TestSubmission
-    .findById(subId)
-    .populate('questionsId', 'correctOptions category')
-    .then((submission) => {
-      submiss = submission;
-    })
-    .then(() => {
-      const checkIfRight = function (ans, quest) {
-        if (
-          quest._id === ans.questionId && quest.category !== CATEGORY_SENTENCE_ANSWER &&
-          ((quest.category === CATEGORY_WORD_ANSWER && ans.answ === quest.question) ||
-          (ans.answ.every((el, index) => {
-            if (el === quest.answ[index]) return true;
-            return false;
-          })))) return true;
-        return false;
-      };
-      submiss.answers.forEach((ans, index) => {
-        if (submiss.questionsId.some(quest => checkIfRight(ans, quest))) {
-          submiss.answers[index].result = true;
-        } else submiss.answers[index].result = false;
-      });
-      return submiss;
-    })
-    .then(() => {
-      submissionApi.getAnswersAndUpdateSubmition(subId, submiss.answers);
-    });
-};
-
-apiModule.initCheckingSequence = function (subId) {
-  return isCheckingPossible(subId)
-    .then((doCheck) => {
-      if (doCheck) {
-        checkSub(subId);
-      } else return false;
-    });
-};
-
-const initGraidingingSequence = function (assignmentId) {
-  return isCheckingPossible();
-};
 
 module.exports = apiModule;
