@@ -166,10 +166,19 @@ apiModule.getStudentsByTeacher = function (teacherId) {
 };
 
 apiModule.getPendingTeachers = function (skip = 0, top = 20, userProj) {
+  const result = {};
   return User.find({ role: USER_ROLE_PENDING }, userProj)
     .skip(+skip < 0 ? 0 : +skip)
     .limit(+top <= 0 ? 20 : +top)
-    .lean();
+    .lean()
+    .then((users) => {
+      result.teachers = users;
+      return User.find({ role: USER_ROLE_PENDING }).countDocuments();
+    })
+    .then((amount) => {
+      result.total = amount;
+      return result;
+    });
 };
 
 apiModule.getGroupsByTeacher = function (teacherId, groupProj) {
