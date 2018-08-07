@@ -57,8 +57,4 @@ apiModule.isGraidingPossible = function (assignmentId) {
 };
 
 
-const initGraidingingSequence = function (assignmentId) {
-  return isCheckingPossible();
-};
-
 module.exports = apiModule;
