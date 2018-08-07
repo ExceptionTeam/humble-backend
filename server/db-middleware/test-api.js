@@ -269,6 +269,7 @@ apiModule.testAssign = function (assignment) {
       name: assignment.name,
       tags: assignment.tags,
       timeToPass: assignment.timeToPass,
+      assignDate: new Date().getTime(),
       deadline: assignment.deadline,
       testSize: assignment.testSize,
       teacherId: assignment.teacherId,
