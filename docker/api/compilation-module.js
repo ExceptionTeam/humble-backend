@@ -1,7 +1,7 @@
 const { setTimeout } = require('timers');
 const Docker = require('dockerode');
 const path = require('path');
-const fs = require('fs');
+const fs = require('fs-extra');
 
 const storageController = require('../../server/controllers/storage-controller');
 
@@ -16,17 +16,25 @@ function runExec(container, cmd) {
   return container.exec(options)
     .then(exec => exec.start({ Detach: false }))
     .then(exec => new Promise((resolve, reject) => {
-      exec.output.on('close', resolve);
-      exec.output.on('end', resolve);
+      exec.output.on('close', () => resolve(exec));
+      exec.output.on('end', () => resolve(exec));
       exec.output.on('error', reject);
-      exec.output.pipe(process.stdout);
-    }));
+      docker.modem.demuxStream(exec.output, process.stdout, process.stderr);
+      // exec.output.pipe(process.stdout);
+    }))
+    .then(exec => exec.inspect())
+    .then((data) => {
+      if (data.ExitCode) {
+        console.log('yayks' + data.ExitCode);
+        throw new Error(data.ExitCode);
+      }
+    });
 }
 
 module.exports = function (containerInfoPromise, next) {
   const compilationModule = {};
 
-  let containerCondition = [];
+  const containerCondition = [];
 
   containerInfoPromise
     .then((containerInfo) => {
@@ -58,6 +66,9 @@ module.exports = function (containerInfoPromise, next) {
   const compile = function (containerIndex) {
     const myPath = containerCondition[containerIndex].volumePath;
     const container = docker.getContainer(containerCondition[containerIndex].id);
+    console.log(containerCondition);
+    // console.log('==> ' + containerIndex);
+    // console.log('=====>' + containerCondition[containerIndex].id);
     const testsAmount = containerCondition[containerIndex].submission.tests.length;
     Promise.resolve()
       .then(() => container.start())
@@ -78,9 +89,14 @@ module.exports = function (containerInfoPromise, next) {
               containerCondition[containerIndex].submission.tests[i] = false;
             })
             .then(() => runExec(container, ['rm', 'input.txt']))
-            .then(() => runExec(container, ['rm', 'output.txt']));
+            .then(() => runExec(container, ['rm', 'output.txt']))
+            .catch((err) => console.log(err));
         }
         return testsLine;
+      })
+      .catch((err) => {
+        console.log(err);
+        containerCondition[containerIndex].submission.tests = [];
       })
       .then(() => container.stop())
       .then(() => setTimeout(compilationModule.leave, 0, containerIndex));
@@ -89,13 +105,15 @@ module.exports = function (containerInfoPromise, next) {
   const unloadBasicData = function (containerIndex) {
     const myPath = containerCondition[containerIndex].volumePath;
     try {
-      fs.unlinkSync(path.join(myPath, 'Main.java'));
-      fs.unlinkSync(path.join(myPath, 'Main.class'));
-      containerCondition[containerIndex].submission.tests.forEach((el, i) => {
-        fs.unlinkSync(path.join(myPath, 'output' + (i + 1) + '.txt'));
-      });
+      fs.removeSync(myPath);
+      fs.mkdirSync(myPath);
+      // fs.unlinkSync(path.join(myPath, 'Main.java'));
+      // fs.unlinkSync(path.join(myPath, 'Main.class'));
+      // containerCondition[containerIndex].submission.tests.forEach((el, i) => {
+      //   fs.unlinkSync(path.join(myPath, 'output' + (i + 1) + '.txt'));
+      // });
     } catch (err) {
-      console.log(err);
+      console.log();
     }
   };
 

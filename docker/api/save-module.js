@@ -5,16 +5,18 @@ module.exports = function (emmiter) {
 
   const markCalculationAlgorithm = function (tests) {
     const correct = tests.reduce((container, el) => (container + (el === true ? 1 : 0)));
-    return (100 * correct) / tests.length;
+    console.log(tests.length + ' ' + correct);
+    return (10 * correct) / tests.length;
   };
 
   saveModule.save = function (submission) {
     emmiter.emit('submission-save');
+    console.log('save!');
     TaskSubmission.create({
       _id: submission._id,
       assignId: submission.assignId,
       srcFileId: submission.srcFileId,
-      mark: markCalculationAlgorithm(submission.tests),
+      mark: submission.tests.length ? markCalculationAlgorithm(submission.tests) : 0,
       submitTime: submission.submitTime,
       tests: submission.tests,
     });
