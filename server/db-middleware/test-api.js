@@ -176,6 +176,7 @@ apiModule.getStudAllAssignments = function (studId, skip = 0, top = 20) {
   const assignments = {};
   assignments.ids = [];
   assignments.amount = 0;
+  console.log(1);
   return apiModule.checkIfAssignmentsExpired()
     .then(() => generalApi.getGroupIdsByStudent(studId))
     .then(groupIds => TestAssignment

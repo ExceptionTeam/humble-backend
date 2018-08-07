@@ -40,7 +40,16 @@ apiModule.getQuestionsByTags = function (questionTags = null, skip = 0, top = 20
       .find()
       .skip(+skip < 0 ? 0 : +skip)
       .limit(+top <= 0 ? 20 : +top)
-      .lean();
+      .lean()
+      .then((quest) => {
+        questions.subs = quest;
+        return Question
+          .countDocuments();
+      })
+      .then((amount) => {
+        questions.amount = amount;
+        return questions;
+      });
   }
   return Question
     .find({
@@ -48,7 +57,16 @@ apiModule.getQuestionsByTags = function (questionTags = null, skip = 0, top = 20
     })
     .skip(+skip < 0 ? 0 : +skip)
     .limit(+top <= 0 ? 20 : +top)
-    .lean();
+    .lean()
+    .then((quest) => {
+      questions.subs = quest;
+      return Question
+        .countDocuments();
+    })
+    .then((amount) => {
+      questions.amount = amount;
+      return questions;
+    });
 };
 
 apiModule.getAllTagAttachments = function () {
