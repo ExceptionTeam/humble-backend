@@ -49,7 +49,7 @@ route.get('/pending-requests/:teacherId', (req, res) => {
 
 route.post('/tag-questions/', (req, res) => {
   submissionApi
-    .getQuestionsByTags(req.body.tags)
+    .getQuestionsByTags(req.body.tags, req.query.skip, req.query.top)
     .then((submission) => {
       res.status(200).send(submission);
     })
@@ -57,6 +57,7 @@ route.post('/tag-questions/', (req, res) => {
       res.status(404).json(err);
     });
 });
+
 
 route.get('/tags/', (req, res) => {
   submissionApi
@@ -87,7 +88,7 @@ route.post('/new-assignment/', (req, res) => {
       res.status(200).send();
     })
     .catch((err) => {
-      res.status(404).send(err);
+      res.status(404).json(err);
     });
 });
 
@@ -98,7 +99,7 @@ route.get('/questions-check/:teacherId', (req, res) => {
       res.status(200).send(questions);
     })
     .catch((err) => {
-      res.status(404).send(err);
+      res.status(404).json(err);
     });
 });
 
@@ -109,7 +110,7 @@ route.get('/check-res/:checkid/:result', (req, res) => {
       res.status(200).send(questions);
     })
     .catch((err) => {
-      res.status(404).send(err);
+      res.status(404).json(err);
     });
 });
 
@@ -120,7 +121,7 @@ route.get('/all-assignments/:teacherid', (req, res) => {
       res.status(200).send(submissions);
     })
     .catch((err) => {
-      res.status(404).send(err);
+      res.status(404).json(err);
     });
 });
 
@@ -131,7 +132,7 @@ route.get('/my-std-submissions/:assignmentId', (req, res) => {
       res.status(200).send(submissions);
     })
     .catch((err) => {
-      res.status(404).send(err);
+      res.status(404).json(err);
     });
 });
 
@@ -142,11 +143,20 @@ route.get('/sub-of-std/:assignmentId/:studentId', (req, res) => {
       res.status(200).send(submissions);
     })
     .catch((err) => {
-      res.status(404).send(err);
+      res.status(404).json(err);
     });
 });
 
+route.get('/full-info/question/:qId', (req, res) => {
+  testApi.getInfoQuestion(req.params.qId)
+    .then((data) => {
+      res.status(200).send(data);
+    })
+    .catch((err) => {
+      res.status(404).json(err);
+    });
+});
 
-route.use(require('../student/test'));
+route.use(require('../student/'));
 
 module.exports = route;

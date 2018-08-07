@@ -48,6 +48,7 @@ awsModule.uploadTogether = function (files, taskId, number) {
 };
 
 awsModule.upload = function (params) {
+  params.ContentEncoding = 'utf-8';
   return s3.upload(params, (err) => {
     if (err) {
       throw new Error(err);
