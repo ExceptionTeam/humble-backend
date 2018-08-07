@@ -27,8 +27,8 @@ route.get('/students', (req, res) => {
 route.delete('/group/:groupId/remove/:studentId', (req, res) => {
   generalApi
     .removeStudentFromGroup(req.params.studentId, req.params.groupId)
-    .then((result) => {
-      res.status(200).send(result);
+    .then(() => {
+      res.status(200).send();
     })
     .catch((err) => {
       res.status(404).json(err);
