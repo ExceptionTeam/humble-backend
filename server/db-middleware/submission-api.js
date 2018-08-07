@@ -699,7 +699,6 @@ const checkSub = function (subId) {
       });
 
       return submiss;
-      // return submissionApi.getAnswersAndUpdateSubmition(subId, submiss.answers);
     })
     .then(() => {
       apiModule.getCheckingResultsAndUpdateSub(subId, submiss.answers);
@@ -714,8 +713,6 @@ apiModule.initCheckingSequence = function (subId) {
       } else return false;
     });
 };
-
-apiModule.initCheckingSequence('5b68568f40b4a92ae09af3ab');
 
 apiModule.getAnswersAndUpdateSubmition = function (submissionId, allAnswers) {
   return TestSubmission
