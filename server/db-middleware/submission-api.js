@@ -710,21 +710,17 @@ const checkSub = function (subId) {
             if (el === quest.correctOptions[index]) return true;
             return false;
           }))) { return true; }
-
         return false;
       };
       submiss.answers.forEach((ans, index) => {
         if (submiss.questionsId.some(quest => checkIfRight(ans, quest))) {
           submiss.answers[index].result = true;
-
           updateQuestion(submiss.answers[index].questionId, true);
         } else if (submiss.answers[index].category !== CATEGORY_SENTENCE_ANSWER) {
           submiss.answers[index].result = false;
-
           updateQuestion(submiss.answers[index].questionId, false);
         }
       });
-
       return submiss;
     })
     .then(() => {
