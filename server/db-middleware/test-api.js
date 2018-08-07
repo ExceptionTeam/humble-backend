@@ -293,10 +293,9 @@ apiModule.getStatistics = function (amount) {
     .then((tests) => {
       tests
         .forEach((el, j) => {
-          students[j].averageMark = el
-            .filter(elem => (!!elem.submissionMark))
-            .reduce((sum, elem, i) => el + (!i ? 0 : sum))
-            / el.length;
+          const withSubmission = el.filter(elem => (!!elem.submissionMark));
+          students[j].averageMark = withSubmission.length ? withSubmission
+            .reduce((sum, elem, i) => el + (!i ? 0 : sum)) / el.length : 0;
         });
       students.sort((el1, el2) => el1.averageMark - el2.averageMark).slice(0, amount);
     });
