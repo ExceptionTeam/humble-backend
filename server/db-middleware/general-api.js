@@ -356,4 +356,10 @@ apiModule.addGroupToTeacher = function (name, teacherId) {
     });
 };
 
+apiModule.deleteGroupAndAssingments = function (groupId) {
+  return Group.findByIdAndRemove(groupId)
+    .then(() => UserAssignment.find({ groupId }))
+    .then(data => Promise.all(data.map(el => UserAssignment.findByIdAndRemove(el._id))));
+};
+
 module.exports = apiModule;

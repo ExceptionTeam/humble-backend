@@ -65,6 +65,17 @@ route.post('/add-group', (req, res) => {
     });
 });
 
+route.get('/delete-group/:groupId', (req, res) => {
+  generalApi.deleteGroupAndAssingments(req.params.groupId)
+    .then(() => {
+      res.status(200).end();
+    })
+    .catch((err) => {
+      res.status(404).json(err);
+    });
+});
+
+
 route.use(require('../student/'));
 
 module.exports = route;
