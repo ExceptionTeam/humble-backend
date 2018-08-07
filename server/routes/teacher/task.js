@@ -92,6 +92,6 @@ route.post('/edit-task/:taskId/:length', (req, res) => {
   req.pipe(busboy);
 });
 
-route.use(require('../student/task'));
+route.use(require('../student/'));
 
 module.exports = route;

@@ -1,32 +1,20 @@
 const {
   TestAssignment,
-  ASSIGNMENT_STATUS_PASSED,
-  TYPE_PRIMARY_TEST,
-  TYPE_TRAINING_TEST,
 } = require('../models/testing/test-assignment');
 const {
   TestSubmission,
-  SUBMISSION_STATUS_PENDING,
-  SUBMISSION_STATUS_ANSWERED,
 } = require('../models/testing/test-submission');
 const {
-  Question,
-  CATEGORY_SINGLE_ANSWER,
-  CATEGORY_MULTIPLE_ANSWERS,
   CATEGORY_WORD_ANSWER,
   CATEGORY_SENTENCE_ANSWER,
-  TYPE_TRAINING_QUESTION,
-  TYPE_PRIMARY_QUESTION,
 } = require('../models/testing/question');
-const {
-  TagAttachment,
-} = require('../models/testing/tag-attachment');
 const {
   CheckRequest,
   REQUEST_STATUS_PENDING,
   REQUEST_STATUS_CHECKED,
 } = require('../models/testing/check-request');
 const generalApi = require('./general-api');
+const submissionApi = require('./submission-api');
 
 const apiModule = {};
 
@@ -68,12 +56,6 @@ apiModule.isGraidingPossible = function (assignmentId) {
     });
 };
 
-const initCheckingSequence = function (assignmentId) {
-  return isCheckingPossible();
-};
 
-const initGraidingingSequence = function (assignmentId) {
-  return isCheckingPossible();
-};
 
 module.exports = apiModule;

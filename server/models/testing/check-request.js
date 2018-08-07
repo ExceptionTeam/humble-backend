@@ -10,6 +10,9 @@ const checkRequestSchema = new Schema({
   teacherId: {
     type: Schema.Types.ObjectId, required: true, index: true, ref: 'User',
   },
+  studentId: {
+    type: Schema.Types.ObjectId, required: true, index: true, ref: 'User',
+  },
   assignmentId: { type: Schema.Types.ObjectId, ref: 'TestAssignment', index: true },
   submissionId: { type: Schema.Types.ObjectId, ref: 'TestSubmission', index: true },
   questionId: { type: Schema.Types.ObjectId, ref: 'Question', index: true },
