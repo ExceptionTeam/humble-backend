@@ -35,6 +35,6 @@ route.get('/full-info/:taskId', (req, res) => {
     });
 });
 
-route.use(require('../teacher/task'));
+route.use(require('../teacher/'));
 
 module.exports = route;

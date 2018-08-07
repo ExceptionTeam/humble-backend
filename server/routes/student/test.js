@@ -66,7 +66,7 @@ route.get('/sudmissions/:studentId', (req, res) => {
       res.status(200).send(assignments);
     })
     .catch((err) => {
-      res.status(404).send(err);
+      res.status(404).json(err);
     });
 });
 

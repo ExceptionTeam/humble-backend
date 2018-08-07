@@ -81,14 +81,11 @@ const checkSub = function (subId) {
         return false;
       };
       submiss.answers.forEach((ans, index) => {
-        console.log(1);
         if (submiss.questionsId.some(quest => checkIfRight(ans, quest))) {
           submiss.answers[index].result = true;
         } else submiss.answers[index].result = false;
       });
-      console.log(submiss);
       return submiss;
-      // return submissionApi.getAnswersAndUpdateSubmition(subId, submiss.answers);
     })
     .then(() => {
       submissionApi.getAnswersAndUpdateSubmition(subId, submiss.answers);
@@ -103,11 +100,6 @@ apiModule.initCheckingSequence = function (subId) {
       } else return false;
     });
 };
-
-
-console.log(submissionApi);
-// checkSub('5b68568f40b4a92ae09af3ab');
-//
 
 const initGraidingingSequence = function (assignmentId) {
   return isCheckingPossible();
