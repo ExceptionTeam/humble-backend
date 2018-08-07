@@ -24,16 +24,11 @@ route.get('/students', (req, res) => {
     });
 });
 
-route.post('/all-students', (req, res) => {
+route.delete('/group/:groupId/remove/:studentId', (req, res) => {
   generalApi
-    .getPersonsCategorized(
-      'STUDENT',
-      req.query.skip,
-      req.query.top,
-      req.body.filterConfig,
-    )
-    .then((data) => {
-      res.status(200).send(data);
+    .removeStudentFromGroup(req.params.studentId, req.params.groupId)
+    .then(() => {
+      res.status(200).send();
     })
     .catch((err) => {
       res.status(404).json(err);
