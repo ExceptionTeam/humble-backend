@@ -100,4 +100,15 @@ route.get('/activity-statistics', (req, res) => {
     });
 });
 
+route.get('/rating-statistics', (req, res) => {
+  testApi
+    .getStatisticsRating(10)
+    .then((data) => {
+      res.status(200).send(data);
+    })
+    .catch((err) => {
+      res.status(500).json(err);
+    });
+});
+
 module.exports = route;

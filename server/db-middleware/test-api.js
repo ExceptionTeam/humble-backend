@@ -307,6 +307,39 @@ apiModule.getStatisticsActivity = function (amount) {
     });
 };
 
+apiModule.getStatisticsRating = function (amount) {
+  let students;
+  return User
+    .find({ role: USER_ROLE_STUDENT }, '_id name surname')
+    .lean()
+    .then((studs) => {
+      students = studs;
+      return Promise.all(students.map(el => apiModule
+        .getStudAllAssignments(el._id, null, null, false)));
+    })
+    .then((tests) => {
+      tests
+        .forEach((el, j) => {
+          const withSubmission = el.ids.filter(elem => (!!elem.submissionMark));
+          students[j].averageMarkTests = withSubmission.length ? withSubmission
+            .reduce(((sum, elem) => elem.submissionMark + sum), 0) / el.length : 0;
+        });
+      return Promise.all(students.map(el => taskApi.getAllStudentTasks(el._id)));
+    })
+    .then((tasks) => {
+      tasks
+        .forEach((el, j) => {
+          const withSubmissions = el.filter(elem => (!!elem.submission));
+          students[j].averageMarkTasks = withSubmissions.length ? withSubmissions
+            .reduce(((sum, elem) => elem.submission.mark + sum), 0) / el.length : 0;
+        });
+      return students.sort((el1, el2) =>
+        ((el2.averageMarkTests + el2.averageMarkTasks) / 2) -
+        ((el1.averageMarkTests + el1.averageMarkTasks) / 2))
+        .slice(0, amount);
+    });
+};
+
 apiModule.getAllQuestions = function (skip = 0, top = 10, configString = '') {
   const resQues = {};
 
