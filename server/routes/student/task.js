@@ -3,7 +3,7 @@ const taskApi = require('../../db-middleware/task-api');
 const controller = require('../../controllers/storage-controller');
 const Busboy = require('busboy');
 
-const enqueueSubmission = require('../../../docker/api/index');
+// const enqueueSubmission = require('../../../docker/api/index');
 
 route.get('/full-info/:assignId', (req, res) => {
   taskApi

@@ -291,7 +291,7 @@ apiModule.getStatisticsRating = function (amount) {
     .then((tests) => {
       tests
         .forEach((el, j) => {
-          const withSubmission = el.filter(elem => (!!elem.submissionMark));
+          const withSubmission = el.ids.filter(elem => (!!elem.submissionMark));
           students[j].averageMarkTests = withSubmission.length ? withSubmission
             .reduce(((sum, elem) => elem.submissionMark + sum), 0) / el.length : 0;
         });
