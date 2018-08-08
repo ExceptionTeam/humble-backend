@@ -56,7 +56,7 @@ route.post('/reset-password', (req, res) => {
 });
 
 route.post('/university', (req, res) => {
-  generalApi.getUniversity(req.body.filterConfig)
+  generalApi.getUniversity(req.body.filterConfig || '')
     .then((data) => {
       res.status(200).send(data);
     })
@@ -65,8 +65,8 @@ route.post('/university', (req, res) => {
     });
 });
 
-route.post('/primarySkills', (req, res) => {
-  generalApi.getSkills(req.body.filterConfig)
+route.post('/primary-skills', (req, res) => {
+  generalApi.getSkills(req.body.filterConfig || '')
     .then((data) => {
       res.status(200).send(data);
     })

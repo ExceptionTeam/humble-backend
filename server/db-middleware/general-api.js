@@ -303,7 +303,6 @@ apiModule.getPersonsCategorized = function (category, skip = 0, top = 10, filter
 };
 
 apiModule.getUniversity = function (filterConfig) {
-  filterConfig = filterConfig || '';
   const configString = this.getConfigString(filterConfig);
 
   return University.find({
@@ -313,7 +312,6 @@ apiModule.getUniversity = function (filterConfig) {
 };
 
 apiModule.getSkills = function (filterConfig) {
-  filterConfig = filterConfig || '';
   const configString = this.getConfigString(filterConfig);
 
   return Skills.find({
