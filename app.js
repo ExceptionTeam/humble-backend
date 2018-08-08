@@ -8,7 +8,7 @@ const cookieParser = require('cookie-parser');
 const passport = require('passport');
 
 require('./server/initialization/db');
-// require('./docker/api/');
+require('./docker/api/');
 
 const app = express();
 const port = 3000;
