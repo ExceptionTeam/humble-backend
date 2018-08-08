@@ -59,8 +59,8 @@ route.post('/reset-password', (req, res) => {
 route.get('/task-statistics', (req, res) => {
   taskApi
     .getStatistics(10)
-    .then(() => {
-      res.status(200).send();
+    .then((data) => {
+      res.status(200).send(data);
     })
     .catch(() => {
       res.status(500).send();

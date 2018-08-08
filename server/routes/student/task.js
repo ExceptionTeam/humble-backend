@@ -7,7 +7,7 @@ route.get('/full-info/:assignId', (req, res) => {
   taskApi
     .getAssignmentById(
       req.params.assignId,
-      '-_id -studentId -__v',
+      '-studentId -__v',
       'name description weight -_id',
       'name surname -_id',
     )
