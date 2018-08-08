@@ -66,9 +66,6 @@ module.exports = function (containerInfoPromise, next) {
   const compile = function (containerIndex) {
     const myPath = containerCondition[containerIndex].volumePath;
     const container = docker.getContainer(containerCondition[containerIndex].id);
-    console.log(containerCondition);
-    // console.log('==> ' + containerIndex);
-    // console.log('=====>' + containerCondition[containerIndex].id);
     const testsAmount = containerCondition[containerIndex].submission.tests.length;
     Promise.resolve()
       .then(() => container.start())
@@ -90,7 +87,7 @@ module.exports = function (containerInfoPromise, next) {
             })
             .then(() => runExec(container, ['rm', 'input.txt']))
             .then(() => runExec(container, ['rm', 'output.txt']))
-            .catch((err) => console.log(err));
+            .catch(err => console.log(err));
         }
         return testsLine;
       })
@@ -107,11 +104,6 @@ module.exports = function (containerInfoPromise, next) {
     try {
       fs.removeSync(myPath);
       fs.mkdirSync(myPath);
-      // fs.unlinkSync(path.join(myPath, 'Main.java'));
-      // fs.unlinkSync(path.join(myPath, 'Main.class'));
-      // containerCondition[containerIndex].submission.tests.forEach((el, i) => {
-      //   fs.unlinkSync(path.join(myPath, 'output' + (i + 1) + '.txt'));
-      // });
     } catch (err) {
       console.log();
     }
