@@ -7,6 +7,7 @@ const { University } = require('../models/others/university');
 const { Group } = require('../models/user/group');
 const generatePassword = require('password-generator');
 const mailer = require('../controllers/mailer');
+const { Skills } = require('../models/others/skills');
 
 const apiModule = {};
 
@@ -123,6 +124,18 @@ apiModule.changeUserRole = function (userId, newRole) {
         return User.findByIdAndUpdate(userId, { role: newRole });
       }
       return Promise.reject(new Error('Incorrect role'));
+    });
+};
+
+apiModule.checkEmail = function (email) {
+  return User
+    .find({ email })
+    .countDocuments()
+    .then((amount) => {
+      if (amount) {
+        return true;
+      }
+      return false;
     });
 };
 
@@ -290,10 +303,18 @@ apiModule.getPersonsCategorized = function (category, skip = 0, top = 10, filter
 };
 
 apiModule.getUniversity = function (filterConfig) {
-  const filterConfigSafe = filterConfig || '';
-  const configString = this.getConfigString(filterConfigSafe);
+  const configString = this.getConfigString(filterConfig || '');
 
   return University.find({
+    $or: [{ name: { $regex: configString, $options: 'i' } }],
+  })
+    .select('-__v');
+};
+
+apiModule.getSkills = function (filterConfig) {
+  const configString = this.getConfigString(filterConfig);
+
+  return Skills.find({
     $or: [{ name: { $regex: configString, $options: 'i' } }],
   })
     .select('-__v');

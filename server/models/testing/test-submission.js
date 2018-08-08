@@ -12,7 +12,7 @@ const testSubmissionSchema = new Schema({
   answers: { type: Schema.Types.Mixed },
   creationDate: { type: Number, required: true, min: 0 },
   completeDate: { type: Number, min: 0 },
-  timeToPass: { type: Number, required: true, default: 1200000 },
+  timeToPass: { type: Number, required: true, default: 2400000 },
   assignmentId: {
     type: Schema.Types.ObjectId, required: true, index: true, ref: 'TestAssignment',
   },
