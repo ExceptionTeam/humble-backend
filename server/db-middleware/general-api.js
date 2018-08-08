@@ -146,6 +146,26 @@ apiModule.updatePendingTeacher = function (teacherId, isApproved = false) {
   );
 };
 
+apiModule.addStudentToGroup = function (studentId, groupId) {
+  return UserAssignment
+    .find()
+    .exists('studentId')
+    .exists('groupId')
+    .find({ studentId, groupId })
+    .countDocuments()
+    .then((amount) => {
+      if (!amount) {
+        console.log('!');
+        return UserAssignment
+          .create({
+            studentId,
+            groupId,
+          });
+      }
+      throw new Error('Already exists');
+    });
+};
+
 apiModule.removeStudentFromGroup = function (studentId, groupId) {
   return UserAssignment.findOneAndRemove({ studentId, groupId });
 };
@@ -303,7 +323,7 @@ apiModule.getPersonsCategorized = function (category, skip = 0, top = 10, filter
 };
 
 apiModule.getUniversity = function (filterConfig) {
-  const configString = this.getConfigString(filterConfig);
+  const configString = this.getConfigString(filterConfig || '');
 
   return University.find({
     $or: [{ name: { $regex: configString, $options: 'i' } }],
@@ -360,7 +380,8 @@ apiModule.deleteIndividualStudent = function (studentId, teacherId) {
       }
       return Promise.reject();
     })
-    .then(assignments => Promise.all(assignments.map(el => UserAssignment.findByIdAndRemove(el._id))));
+    .then(assignments =>
+      Promise.all(assignments.map(el => UserAssignment.findByIdAndRemove(el._id))));
 };
 
 apiModule.addGroupToTeacher = function (name, teacherId) {

@@ -30,8 +30,8 @@ route.post('/activate/:taskId', (req, res) => {
     .then(() => {
       res.status(200).end();
     })
-    .catch(() => {
-      res.status(404).end();
+    .catch((err) => {
+      res.status(404).json(err);
     });
 });
 
@@ -55,8 +55,8 @@ route.post('/change-password', (req, res) => {
     .then(() => {
       res.status(200).send();
     })
-    .catch(() => {
-      res.status(400).send();
+    .catch((err) => {
+      res.status(400).json(err);
     });
 });
 
@@ -67,7 +67,7 @@ route.post('/tags', (req, res) => {
       res.status(200).send(result);
     })
     .catch((err) => {
-      res.status(404).send(err);
+      res.status(404).json(err);
     });
 });
 

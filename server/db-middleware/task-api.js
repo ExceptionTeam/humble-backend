@@ -139,7 +139,7 @@ apiModule.getAssignmentByIdNonPopulate = function (assignId) {
     .findById(assignId);
 };
 
-apiModule.getAllStudentTasks = function (studId) {
+apiModule.getAllStudentTasks = function (studId, oneSubmission = true) {
   const result = {};
 
   return getAssignmentsByStudent(studId)
@@ -158,17 +158,28 @@ apiModule.getAllStudentTasks = function (studId) {
         result.assignment = result.assignment.concat(assignments);
       }
     })
-    .then(() => Promise.all(result.assignment.map(el => getBestSubmissionByAssignment(el._id, '-_id -submitTime'))))
+    .then(() => Promise.all(result.assignment.map(el => (oneSubmission ?
+      getBestSubmissionByAssignment
+      : apiModule.getSubmissionsByAssignment)(el._id, '-_id -submitTime'))))
     .then((submissions) => {
       if (submissions.length) {
-        const submitted = submissions.map(el => el[0]);
         const map = {};
-        result.assignment.forEach((el) => { map[el._id] = el; });
-        submitted.forEach((el) => {
-          if (el) {
-            map[el.assignId].submission = el;
-          }
-        });
+        if (oneSubmission) {
+          const submitted = submissions.map(el => el[0]);
+          result.assignment.forEach((el) => { map[el._id] = el; });
+          submitted.forEach((el) => {
+            if (el) {
+              map[el.assignId].submission = el;
+            }
+          });
+        } else {
+          result.assignment.forEach((el) => { map[el._id] = el; });
+          submissions.forEach((el) => {
+            if (el && el.length) {
+              map[el[0].assignId].submissions = el;
+            }
+          });
+        }
       }
     })
     .then(() => result.assignment);

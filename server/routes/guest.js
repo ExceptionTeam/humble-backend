@@ -52,8 +52,8 @@ route.post('/reset-password', (req, res) => {
     .then(() => {
       res.status(200).send();
     })
-    .catch(() => {
-      res.status(400).send();
+    .catch((err) => {
+      res.status(400).json(err);
     });
 });
 
@@ -74,8 +74,8 @@ route.get('/task-statistics', (req, res) => {
     .then((data) => {
       res.status(200).send(data);
     })
-    .catch(() => {
-      res.status(500).send();
+    .catch((err) => {
+      res.status(500).json(err);
     });
 });
 
@@ -96,6 +96,28 @@ route.post('/primary-skills', (req, res) => {
     })
     .catch((err) => {
       res.status(404).json(err);
+    });
+});
+
+route.get('/activity-statistics', (req, res) => {
+  testApi
+    .getStatisticsActivity(10)
+    .then((result) => {
+      res.status(200).send(result);
+    })
+    .catch((err) => {
+      res.status(404).json(err);
+    });
+});
+
+route.get('/rating-statistics', (req, res) => {
+  testApi
+    .getStatisticsRating(10)
+    .then((data) => {
+      res.status(200).send(data);
+    })
+    .catch((err) => {
+      res.status(500).json(err);
     });
 });
 
