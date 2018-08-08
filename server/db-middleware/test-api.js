@@ -280,7 +280,7 @@ apiModule.getInfoQuestion = function (id) {
 
 apiModule.getStatisticsActivity = function (amount) {
   let students;
-  User
+  return User
     .find({ role: USER_ROLE_STUDENT }, '_id name surname')
     .lean()
     .then((studs) => {
@@ -303,7 +303,7 @@ apiModule.getStatisticsActivity = function (amount) {
             students[j].activityIndex += element.submissions.length;
           });
       });
-      return students.sort((el1, el2) => el1.activityIndex - el2.activityIndex).slice(0, amount);
+      return students.sort((el1, el2) => el2.activityIndex - el1.activityIndex).slice(0, amount);
     });
 };
 

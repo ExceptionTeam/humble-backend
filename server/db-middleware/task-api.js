@@ -158,7 +158,9 @@ apiModule.getAllStudentTasks = function (studId, oneSubmission = true) {
         result.assignment = result.assignment.concat(assignments);
       }
     })
-    .then(() => Promise.all(result.assignment.map(el => getBestSubmissionByAssignment(el._id, '-_id -submitTime'))))
+    .then(() => Promise.all(result.assignment.map(el => (oneSubmission ?
+      getBestSubmissionByAssignment
+      : apiModule.getSubmissionsByAssignment)(el._id, '-_id -submitTime'))))
     .then((submissions) => {
       if (submissions.length) {
         const map = {};
