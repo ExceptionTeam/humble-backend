@@ -130,9 +130,21 @@ apiModule.updatePendingTeacher = function (teacherId, isApproved = false) {
 
 apiModule.addStudentToGroup = function (studentId, groupId) {
   return UserAssignment
-    .create({
-      studentId,
-      groupId,
+    .find()
+    .exists('studentId')
+    .exists('groupId')
+    .find({ studentId, groupId })
+    .countDocuments()
+    .then((amount) => {
+      if (!amount) {
+        console.log('!');
+        return UserAssignment
+          .create({
+            studentId,
+            groupId,
+          });
+      }
+      throw new Error('Already exists');
     });
 };
 
