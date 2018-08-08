@@ -15,12 +15,6 @@ const {
 } = require('../models/testing/test-submission');
 const {
   Question,
-  CATEGORY_SINGLE_ANSWER,
-  CATEGORY_MULTIPLE_ANSWERS,
-  CATEGORY_WORD_ANSWER,
-  CATEGORY_SENTENCE_ANSWER,
-  TYPE_TRAINING_QUESTION,
-  TYPE_PRIMARY_QUESTION,
 } = require('../models/testing/question');
 const { TagAttachment } = require('../models/testing/tag-attachment');
 const generalApi = require('./general-api');
@@ -304,6 +298,31 @@ apiModule.getStatistics = function (amount) {
 apiModule.getInfoQuestion = function (id) {
   return Question.findById(id)
     .select('-__v');
+};
+
+apiModule.getAllQuestions = function (skip = 0, top = 10, configString = '') {
+  const resQues = {};
+
+  return Question.find({ $or: [{ question: { $regex: configString, $options: 'i' } }, { tags: { $in: configString } }] })
+    .skip(+skip < 0 ? 0 : +skip)
+    .limit(+top <= 0 ? 10 : +top)
+    .select('-category -questionAuthorId -answerOptions -correctOptions -peopleTested -peopleAnswered -__v')
+    .then((questions) => {
+      resQues.data = questions;
+      return Question
+        .find()
+        .countDocuments();
+    })
+    .then((total) => {
+      resQues.pagination = { total };
+      return Question
+        .find({ $or: [{ question: { $regex: configString, $options: 'i' } }, { tags: { $in: configString } }] })
+        .countDocuments();
+    })
+    .then((filtered) => {
+      resQues.pagination.filtered = filtered;
+      return resQues;
+    });
 };
 
 module.exports = apiModule;

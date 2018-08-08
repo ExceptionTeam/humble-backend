@@ -2,14 +2,15 @@ const route = require('express').Router();
 const passport = require('passport');
 const generalApi = require('../db-middleware/general-api');
 const testApi = require('../db-middleware/test-api');
+const taskApi = require('../db-middleware/task-api');
 
-route.use((req, res, next) => {
-  if (req.isUnauthenticated()) {
-    next();
-  } else {
-    res.status(403).send();
-  }
-});
+// route.use((req, res, next) => {
+//   if (req.isUnauthenticated()) {
+//     next();
+//   } else {
+//     res.status(403).send();
+//   }
+// });
 
 route.use('/login', (req, res, next) => {
   passport.authenticate('local', (err, user) => {
@@ -67,8 +68,29 @@ route.post('/test-statistics', (req, res) => {
     });
 });
 
+route.get('/task-statistics', (req, res) => {
+  taskApi
+    .getStatistics(10)
+    .then((data) => {
+      res.status(200).send(data);
+    })
+    .catch((err) => {
+      res.status(500).send();
+    });
+});
+
 route.post('/university', (req, res) => {
-  generalApi.getUniversity(req.body.filterConfig)
+  generalApi.getUniversity(req.body.filterConfig || '')
+    .then((data) => {
+      res.status(200).send(data);
+    })
+    .catch((err) => {
+      res.status(404).json(err);
+    });
+});
+
+route.post('/primary-skills', (req, res) => {
+  generalApi.getSkills(req.body.filterConfig || '')
     .then((data) => {
       res.status(200).send(data);
     })

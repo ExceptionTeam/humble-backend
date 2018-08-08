@@ -2,6 +2,7 @@ const { TaskAssignment } = require('../models/tasks/task-assignment');
 const { TaskSubmission } = require('../models/tasks/task-submission');
 const { Task } = require('../models/tasks/task');
 const { File } = require('../models/tasks/file');
+const { User, USER_ROLE_STUDENT } = require('../models/user/user');
 
 const generalApi = require('./general-api');
 
@@ -157,17 +158,18 @@ apiModule.getAllStudentTasks = function (studId) {
         result.assignment = result.assignment.concat(assignments);
       }
     })
-    .then(() => Promise
-      .all(result.assignment.map(el => apiModule.getSubmissionsByAssignment(el._id, '-_id -submitTime')
-        .sort('-mark')
-        .limit(1))))
+    .then(() => Promise.all(result.assignment.map(el => getBestSubmissionByAssignment(el._id, '-_id -submitTime'))))
     .then((submissions) => {
-      const submitted = submissions.map(el => el[0]);
-      const map = {};
-      result.assignment.forEach((el) => { map[el._id] = el; });
-      submitted.forEach((el) => {
-        if (el) map[el.assignId].submission = el;
-      });
+      if (submissions.length) {
+        const submitted = submissions.map(el => el[0]);
+        const map = {};
+        result.assignment.forEach((el) => { map[el._id] = el; });
+        submitted.forEach((el) => {
+          if (el) {
+            map[el.assignId].submission = el;
+          }
+        });
+      }
     })
     .then(() => result.assignment);
 };
@@ -230,6 +232,46 @@ apiModule.getFileById = function (fileId) {
 apiModule.getSubmissionById = function (submissionId) {
   return TaskSubmission.findById(submissionId, '-assignId -mark -submitTime -tests -__v')
     .then(data => this.getFileById(data.srcFileId));
+};
+
+apiModule.getPendingTeacher = function (skip, top) {
+  return generalApi.getPendingTeacher(skip, top, '-password -role -__v');
+};
+
+function getBestSubmissionByAssignment(assignId, submissionProj) {
+  return apiModule
+    .getSubmissionsByAssignment(assignId, submissionProj)
+    .sort('-mark')
+    .limit(1);
+}
+
+apiModule.getStatistics = function (amount) {
+  let students;
+  return User
+    .find({ role: USER_ROLE_STUDENT }, '_id name surname')
+    .lean()
+    .then((studs) => {
+      students = studs;
+      return Promise.all(students.map(el => apiModule.getAllStudentTasks(el._id)));
+    })
+    .then((tasks) => {
+      tasks
+        .forEach((el, j) => {
+          const withSubmissions = el.filter((elem) => {
+            if (elem.submission) {
+              return true;
+            }
+            return false;
+          });
+          students[j].averageMark = withSubmissions.length ? withSubmissions.reduce(((sum, elem) => sum + elem.submission.mark), 0) : 0;
+        });
+      students.forEach((el, i) => {
+        if (!el.averageMark) {
+          students[i].averageMark = 0;
+        }
+      });
+      return students.sort((el1, el2) => el2.averageMark - el1.averageMark).slice(0, amount);
+    });
 };
 
 module.exports = apiModule;
