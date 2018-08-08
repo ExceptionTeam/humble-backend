@@ -60,8 +60,8 @@ route.post('/reset-password', (req, res) => {
 route.get('/test-statistics', (req, res) => {
   testApi
     .getStatistics(10)
-    .then(() => {
-      res.status(200).send();
+    .then((data) => {
+      res.status(200).send(data);
     })
     .catch(() => {
       res.status(500).send();
@@ -74,7 +74,7 @@ route.get('/task-statistics', (req, res) => {
     .then((data) => {
       res.status(200).send(data);
     })
-    .catch((err) => {
+    .catch(() => {
       res.status(500).send();
     });
 });
