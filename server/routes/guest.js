@@ -1,6 +1,7 @@
 const route = require('express').Router();
 const passport = require('passport');
 const generalApi = require('../db-middleware/general-api');
+const testApi = require('../db-middleware/test-api');
 const taskApi = require('../db-middleware/task-api');
 
 // route.use((req, res, next) => {
@@ -85,6 +86,17 @@ route.post('/primary-skills', (req, res) => {
     })
     .catch((err) => {
       res.status(404).json(err);
+    });
+});
+
+route.get('/rating-statistics', (req, res) => {
+  testApi
+    .getStatisticsRating(10)
+    .then((data) => {
+      res.status(200).send(data);
+    })
+    .catch((err) => {
+      res.status(500).json(err);
     });
 });
 
