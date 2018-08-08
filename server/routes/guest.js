@@ -66,7 +66,7 @@ route.post('/university', (req, res) => {
     });
 });
 
-route.post('/rating-statistics', (req, res) => {
+route.get('/rating-statistics', (req, res) => {
   testApi
     .getStatisticsRating(10)
     .then(() => {
