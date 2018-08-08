@@ -21,7 +21,7 @@ const { User, USER_ROLE_STUDENT } = require('../models/user/user');
 const generalApi = require('./general-api');
 const submissionApi = require('./submission-api');
 const checkGradeApi = require('./check-grade-api');
-const taskApi = require('../db-middleware/task-api');
+const taskApi = require('./task-api');
 
 const apiModule = {};
 
@@ -276,6 +276,35 @@ apiModule.testAssign = function (assignment) {
 apiModule.getInfoQuestion = function (id) {
   return Question.findById(id)
     .select('-__v');
+};
+
+apiModule.getStatisticsActivity = function (amount) {
+  let students;
+  return User
+    .find({ role: USER_ROLE_STUDENT }, '_id name surname')
+    .lean()
+    .then((studs) => {
+      students = studs;
+      return Promise.all(students.map(el => apiModule
+        .getStudAllAssignments(el._id, null, null, false)));
+    })
+    .then((tests) => {
+      tests.forEach((el, j) => {
+        students[j].activityIndex = el.ids.filter(elem => (!!elem.submissionMark)).length;
+      });
+      return Promise.all(students.map(el => taskApi
+        .getAllStudentTasks(el._id, false)));
+    })
+    .then((tasks) => {
+      tasks.forEach((el, j) => {
+        el
+          .filter(elem => (!!elem.submissions))
+          .forEach((element) => {
+            students[j].activityIndex += element.submissions.length;
+          });
+      });
+      return students.sort((el1, el2) => el2.activityIndex - el1.activityIndex).slice(0, amount);
+    });
 };
 
 apiModule.getStatisticsRating = function (amount) {
