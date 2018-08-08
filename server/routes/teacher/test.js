@@ -103,11 +103,11 @@ route.get('/questions-check/:teacherId', (req, res) => {
     });
 });
 
-route.get('/check-res/:checkid/:result', (req, res) => {
+route.post('/check-res/:checkid/:result', (req, res) => {
   submissionApi
     .sendCheckingResults(req.params.checkid, req.params.result)
-    .then((questions) => {
-      res.status(200).send(questions);
+    .then(() => {
+      res.status(200).send();
     })
     .catch((err) => {
       res.status(404).json(err);
@@ -149,6 +149,18 @@ route.get('/sub-of-std/:assignmentId/:studentId', (req, res) => {
 
 route.get('/full-info/question/:qId', (req, res) => {
   testApi.getInfoQuestion(req.params.qId)
+    .then((data) => {
+      res.status(200).send(data);
+    })
+    .catch((err) => {
+      res.status(404).json(err);
+    });
+});
+
+route.post('/all/questions', (req, res) => {
+  const configString = generalApi.getConfigString(req.body.filterConfig);
+
+  testApi.getAllQuestions(req.query.skip, req.query.top, configString)
     .then((data) => {
       res.status(200).send(data);
     })

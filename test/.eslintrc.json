@@ -20,10 +20,9 @@
         "no-prototype-builtins":"off",
         "no-restricted-globals":"off",
         "consistent-return":"off",
-        "no-loop-func": "off",
         "eqeqeq": ["error", "always", {"null": "ignore"}],
         "prefer-promise-reject-errors":"warn",
         "no-use-before-define":"warn",
-        "prefer-destructuring":"warn"
+        "no-loop-func":"off"
     }
 }
