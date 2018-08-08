@@ -7,6 +7,7 @@ const { University } = require('../models/others/university');
 const { Group } = require('../models/user/group');
 const generatePassword = require('password-generator');
 const mailer = require('../controllers/mailer');
+const { Skills } = require('../models/others/skills');
 
 const apiModule = {};
 
@@ -136,7 +137,7 @@ apiModule.checkEmail = function (email) {
       }
       return false;
     });
-  };
+};
 
 apiModule.updatePendingTeacher = function (teacherId, isApproved = false) {
   return apiModule.changeUserRole(
@@ -302,10 +303,18 @@ apiModule.getPersonsCategorized = function (category, skip = 0, top = 10, filter
 };
 
 apiModule.getUniversity = function (filterConfig) {
-  filterConfig = filterConfig || '';
   const configString = this.getConfigString(filterConfig);
 
   return University.find({
+    $or: [{ name: { $regex: configString, $options: 'i' } }],
+  })
+    .select('-__v');
+};
+
+apiModule.getSkills = function (filterConfig) {
+  const configString = this.getConfigString(filterConfig);
+
+  return Skills.find({
     $or: [{ name: { $regex: configString, $options: 'i' } }],
   })
     .select('-__v');

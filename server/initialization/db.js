@@ -25,4 +25,7 @@ require('../models/tasks/task-assignment');
 require('../models/tasks/task-submission');
 require('../models/tasks/task');
 
+require('../models/others/university');
+require('../models/others/skills');
+
 module.exports = mongoose;
