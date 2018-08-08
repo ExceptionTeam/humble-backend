@@ -24,6 +24,17 @@ route.get('/students', (req, res) => {
     });
 });
 
+route.post('/group/:groupId/add/:studentId', (req, res) => {
+  generalApi
+    .addStudentToGroup(req.params.studentId, req.params.groupId)
+    .then(() => {
+      res.statud(200).send(true);
+    })
+    .catch(() => {
+      res.status(400).json(false);
+    });
+});
+
 route.delete('/group/:groupId/remove/:studentId', (req, res) => {
   generalApi
     .removeStudentFromGroup(req.params.studentId, req.params.groupId)

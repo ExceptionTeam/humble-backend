@@ -146,6 +146,26 @@ apiModule.updatePendingTeacher = function (teacherId, isApproved = false) {
   );
 };
 
+apiModule.addStudentToGroup = function (studentId, groupId) {
+  return UserAssignment
+    .find()
+    .exists('studentId')
+    .exists('groupId')
+    .find({ studentId, groupId })
+    .countDocuments()
+    .then((amount) => {
+      if (!amount) {
+        console.log('!');
+        return UserAssignment
+          .create({
+            studentId,
+            groupId,
+          });
+      }
+      throw new Error('Already exists');
+    });
+};
+
 apiModule.removeStudentFromGroup = function (studentId, groupId) {
   return UserAssignment.findOneAndRemove({ studentId, groupId });
 };
