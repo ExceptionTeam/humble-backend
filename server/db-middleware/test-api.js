@@ -276,7 +276,7 @@ apiModule.testAssign = function (assignment) {
 
 apiModule.getStatistics = function (amount) {
   let students;
-  User
+  return User
     .find({ role: USER_ROLE_STUDENT }, '_id name surname')
     .lean()
     .then((studs) => {
