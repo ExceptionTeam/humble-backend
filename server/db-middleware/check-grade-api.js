@@ -55,7 +55,7 @@ const isGraidingPossibleGroup = function (assignment) {
       .countDocuments({ assignmentId: assignment._id, status: REQUEST_STATUS_CHECKED }))
     .then((submissionAmount) => {
       if ((stdAmount === submissionAmount && requestAmount) ||
-        (assignment.deadline !== undefined && assignment.deadline < new Date().getTime())
+        (assignment.deadline && assignment.deadline < new Date().getTime())
       ) return true;
       return false;
     });
@@ -67,16 +67,16 @@ const updateQuestion = function (questId) {
     .select('peopleTested peopleAnswered difficulty')
     .then((info) => {
       let diff;
-      if (+info.peopleTested !== 0) {
+      if (info.peopleTested !== 0) {
         diff = info.peopleTested - info.peopleAnswered;
-        diff /= +info.peopleTested;
+        diff /= info.peopleTested;
         diff *= 4;
         diff = Math.round(0.5 + diff);
         if (diff > 4) diff = 4;
         else if (diff < 1) diff = 1;
       }
       if ((+info.peopleTested > minToChangeMark) &&
-      (diff !== +info.difficulty)) {
+      (diff !== info.difficulty)) {
         return Question
           .findByIdAndUpdate(questId, { $set: { difficulty: diff } });
       } return true;
