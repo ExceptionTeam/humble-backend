@@ -162,18 +162,24 @@ apiModule.getAllStudentTasks = function (studId, oneSubmission = true) {
         .sort('-mark')
         .limit(1))))
     .then((submissions) => {
-      const map = {};
-      if (oneSubmission) {
-        const submitted = submissions.map(el => el[0]);
-        result.assignment.forEach((el) => { map[el._id] = el; });
-        submitted.forEach((el) => {
-          if (el) map[el.assignId].submission = el;
-        });
-      } else {
-        result.assignment.forEach((el) => { map[el._id] = el; });
-        submissions.forEach((el) => {
-          if (el && el.length) map[el[0].assignId].submissions = el;
-        });
+      if (submissions.length) {
+        const map = {};
+        if (oneSubmission) {
+          const submitted = submissions.map(el => el[0]);
+          result.assignment.forEach((el) => { map[el._id] = el; });
+          submitted.forEach((el) => {
+            if (el) {
+              map[el.assignId].submission = el;
+            }
+          });
+        } else {
+          result.assignment.forEach((el) => { map[el._id] = el; });
+          submissions.forEach((el) => {
+            if (el && el.length) {
+              map[el[0].assignId].submissions = el;
+            }
+          });
+        }
       }
     })
     .then(() => result.assignment);
