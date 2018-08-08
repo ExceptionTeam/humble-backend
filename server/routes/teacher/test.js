@@ -157,6 +157,18 @@ route.get('/full-info/question/:qId', (req, res) => {
     });
 });
 
+route.post('/all/questions', (req, res) => {
+  const configString = generalApi.getConfigString(req.body.filterConfig);
+
+  testApi.getAllQuestions(req.query.skip, req.query.top, configString)
+    .then((data) => {
+      res.status(200).send(data);
+    })
+    .catch((err) => {
+      res.status(404).json(err);
+    });
+});
+
 route.use(require('../student/'));
 
 module.exports = route;

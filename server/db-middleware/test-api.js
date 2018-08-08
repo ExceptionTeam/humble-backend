@@ -275,4 +275,29 @@ apiModule.getInfoQuestion = function (id) {
     .select('-__v');
 };
 
+apiModule.getAllQuestions = function (skip = 0, top = 10, configString = '') {
+  const resQues = {};
+
+  return Question.find({ $or: [{ question: { $regex: configString, $options: 'i' } }, { tags: { $in: configString } }] })
+    .skip(+skip < 0 ? 0 : +skip)
+    .limit(+top <= 0 ? 10 : +top)
+    .select('-category -questionAuthorId -answerOptions -correctOptions -peopleTested -peopleAnswered -__v')
+    .then((questions) => {
+      resQues.data = questions;
+      return Question
+        .find()
+        .countDocuments();
+    })
+    .then((total) => {
+      resQues.pagination = { total };
+      return Question
+        .find({ $or: [{ question: { $regex: configString, $options: 'i' } }, { tags: { $in: configString } }] })
+        .countDocuments();
+    })
+    .then((filtered) => {
+      resQues.pagination.filtered = filtered;
+      return resQues;
+    });
+};
+
 module.exports = apiModule;
