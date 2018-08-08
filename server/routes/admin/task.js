@@ -1,16 +1,6 @@
 const route = require('express').Router();
 const taskApi = require('../../db-middleware/task-api');
 
-/* route.post('/activate/:taskId', (req, res) => {
-  taskApi
-    .activateTask(req.params.taskId)
-    .then(() => {
-      res.status(200).end();
-    })
-    .catch(() => {
-      res.status(404).end();
-    });
-}); */
 
 route.post('/abbreviated-info', (req, res) => {
   taskApi
@@ -25,17 +15,7 @@ route.post('/abbreviated-info', (req, res) => {
       res.status(200).send(task);
     })
     .catch((err) => {
-      res.status(404).send(err);
-    });
-});
-
-route.get('/pending-teacher', (req, res) => {
-  taskApi.getPendingTeacher(req.query.skip, req.query.top)
-    .then((data) => {
-      res.status(200).send(data);
-    })
-    .catch((err) => {
-      res.status(404).end();
+      res.status(404).json(err);
     });
 });
 
@@ -51,8 +31,10 @@ route.get('/full-info/:taskId', (req, res) => {
       res.status(200).send(task);
     })
     .catch((err) => {
-      res.status(404).send(err);
+      res.status(404).json(err);
     });
 });
+
+route.use(require('../teacher/'));
 
 module.exports = route;

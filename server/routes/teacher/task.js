@@ -3,6 +3,17 @@ const taskApi = require('../../db-middleware/task-api');
 const controller = require('../../controllers/storage-controller');
 const Busboy = require('busboy');
 
+route.post('/activate/:taskId', (req, res) => {
+  taskApi
+    .activateTask(req.params.taskId)
+    .then(() => {
+      res.status(200).end();
+    })
+    .catch(() => {
+      res.status(404).end();
+    });
+});
+
 route.get('/full-info/:taskId', (req, res) => {
   taskApi
     .getTaskById(
@@ -15,7 +26,7 @@ route.get('/full-info/:taskId', (req, res) => {
       res.status(200).send(task);
     })
     .catch((err) => {
-      res.status(404).send(err);
+      res.status(404).json(err);
     });
 });
 
@@ -26,7 +37,7 @@ route.post('/assign', (req, res) => {
       res.status(200).end();
     })
     .catch((err) => {
-      res.status(404).send(err);
+      res.status(404).json(err);
     });
 });
 
@@ -53,7 +64,7 @@ route.post('/abbreviated-info', (req, res) => {
       res.status(200).send(task);
     })
     .catch((err) => {
-      res.status(404).send(err);
+      res.status(404).json(err);
     });
 });
 
@@ -63,7 +74,7 @@ route.post('/upload-task', (req, res) => {
     controller.createTask(req.files, req.body, req.query.length)
       .then(() => res.status(200).end())
       .catch((err) => {
-        res.status(404).end();
+        res.status(404).json(err);
       });
   });
   req.pipe(busboy);
@@ -75,10 +86,12 @@ route.post('/edit-task/:taskId/:length', (req, res) => {
     controller.editTask(req.files, req.body, req.params.taskId, req.params.length)
       .then(() => res.status(200).end())
       .catch((err) => {
-        res.status(404).end();
+        res.status(404).json(err);
       });
   });
   req.pipe(busboy);
 });
+
+route.use(require('../student/'));
 
 module.exports = route;

@@ -17,7 +17,7 @@ route.get('/full-info/:assignId', (req, res) => {
       res.status(200).send(assignment);
     })
     .catch((err) => {
-      res.status(404).send(err);
+      res.status(404).json(err);
     });
 });
 
@@ -39,7 +39,7 @@ route.get('/submissions/:assignId', (req, res) => {
       res.status(200).send(submissions);
     })
     .catch((err) => {
-      res.status(404).send(err);
+      res.status(404).json(err);
     });
 });
 
@@ -60,8 +60,7 @@ route.post('/submit/:assignId', (req, res) => {
         res.status(200).end();
       })
       .catch((err) => {
-        console.log(err);
-        res.status(404).end();
+        res.status(404).json(err);
       });
   });
   req.pipe(busboy);
@@ -78,8 +77,8 @@ route.get('/download/:submissionId', (req, res) => {
     .then((file) => {
       file.pipe(res);
     })
-    .catch(() => {
-      res.status(404).end();
+    .catch((err) => {
+      res.status(404).json(err);
     });
 });
 

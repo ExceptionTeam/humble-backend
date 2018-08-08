@@ -1,10 +1,12 @@
+const mongoose = require('mongoose');
 const UserAssignment = require('mongoose').model('UserAssignment');
 const {
   User, USER_ROLE_PENDING, USER_ROLE_STUDENT, USER_ROLE_ADMIN, USER_ROLE_TEACHER,
 } = require('../models/user/user');
+const { University } = require('../models/others/university');
+const { Group } = require('../models/user/group');
 const generatePassword = require('password-generator');
 const mailer = require('../controllers/mailer');
-
 
 const apiModule = {};
 
@@ -108,16 +110,43 @@ function validateRole(role, withPending = false) {
   return false;
 }
 
-apiModule.changeUserRole = function (userId, oldRole, newRole) {
-  if (validateRole(oldRole, true) && validateRole(newRole)) {
-    const newRoleLevel = (newRole === USER_ROLE_ADMIN || newRole === USER_ROLE_TEACHER) ? 2 : 1;
-    const oldRoleLevel = (oldRole === USER_ROLE_ADMIN || oldRole === USER_ROLE_TEACHER) ? 2 : 1;
-    if (oldRoleLevel !== newRoleLevel) {
-      return User.findByIdAndUpdate(userId, { role: newRole, account: {} });
-    }
-    return User.findByIdAndUpdate(userId, { role: newRole });
-  }
-  return Promise.reject(new Error('Incorrect role'));
+apiModule.changeUserRole = function (userId, newRole) {
+  return User
+    .findById(userId, 'role')
+    .then((user) => {
+      if (validateRole(user.role, true) && validateRole(newRole)) {
+        const newRoleLevel = (newRole === USER_ROLE_STUDENT) ? 1 : 2;
+        const oldRoleLevel = (user.role === USER_ROLE_STUDENT) ? 1 : 2;
+        if (oldRoleLevel !== newRoleLevel) {
+          return User.findByIdAndUpdate(userId, { role: newRole, account: {} });
+        }
+        return User.findByIdAndUpdate(userId, { role: newRole });
+      }
+      return Promise.reject(new Error('Incorrect role'));
+    });
+};
+
+apiModule.checkEmail = function (email) {
+  return User
+    .find({ email })
+    .countDocuments()
+    .then((amount) => {
+      if (amount) {
+        return true;
+      }
+      return false;
+    });
+  };
+
+apiModule.updatePendingTeacher = function (teacherId, isApproved = false) {
+  return apiModule.changeUserRole(
+    teacherId,
+    isApproved ? USER_ROLE_TEACHER : USER_ROLE_STUDENT,
+  );
+};
+
+apiModule.removeStudentFromGroup = function (studentId, groupId) {
+  return UserAssignment.findOneAndRemove({ studentId, groupId });
 };
 
 apiModule.getIndividualStudents = function (teachId, studProj) {
@@ -151,11 +180,20 @@ apiModule.getStudentsByTeacher = function (teacherId) {
     });
 };
 
-apiModule.getPendingTeacher = function (skip = 0, top = 10, userProj) {
+apiModule.getPendingTeachers = function (skip = 0, top = 20, userProj) {
+  const result = {};
   return User.find({ role: USER_ROLE_PENDING }, userProj)
     .skip(+skip < 0 ? 0 : +skip)
-    .limit(+top <= 0 ? 5 : +top)
-    .lean();
+    .limit(+top <= 0 ? 20 : +top)
+    .lean()
+    .then((users) => {
+      result.teachers = users;
+      return User.find({ role: USER_ROLE_PENDING }).countDocuments();
+    })
+    .then((amount) => {
+      result.total = amount;
+      return result;
+    });
 };
 
 apiModule.getGroupsByTeacher = function (teacherId, groupProj) {
@@ -209,6 +247,154 @@ apiModule.getStudentsByTeacherFlat = function (teacherId) {
       allKeys[str] = true;
     }))
     .then(() => Object.keys(allKeys));
+};
+
+apiModule.getConfigString = function (filterConfig) {
+  let configString = '';
+  filterConfig.replace(/[.,\/#!$%\^&\*;:{}=\-_`~()]/g, ' ').split(' ').forEach((el) => {
+    if (el !== '') {
+      if (configString === '') {
+        configString += el;
+      } else {
+        configString += '|' + el;
+      }
+    }
+  });
+  return configString;
+};
+
+apiModule.getPersonsCategorized = function (category, skip = 0, top = 10, filterConfig) {
+  if (!validateRole(category.toUpperCase())) {
+    return Promise.reject();
+  }
+
+  const resUsers = {};
+  const configString = this.getConfigString(filterConfig);
+
+  return User.find({ role: category.toUpperCase() })
+    .find({
+      $or: [{ name: { $regex: configString, $options: 'i' } },
+        { surname: { $regex: configString, $options: 'i' } },
+        { 'account.university': { $regex: configString, $options: 'i' } }],
+    })
+    .select('-__v -role -email -primarySkill -hash -salt')
+    .skip(+skip < 0 ? 0 : +skip)
+    .limit(+top <= 0 ? 10 : +top)
+    .then((users) => {
+      resUsers.data = users;
+      return User.find({ role: category.toUpperCase() })
+        .countDocuments();
+    })
+    .then((total) => {
+      resUsers.pagination = { total };
+      return User.find({ role: category.toUpperCase() })
+        .find({
+          $or: [{ name: { $regex: configString, $options: 'i' } },
+            { surname: { $regex: configString, $options: 'i' } },
+            { 'account.university': { $regex: configString, $options: 'i' } }],
+        })
+        .countDocuments();
+    })
+    .then((filtered) => {
+      resUsers.pagination.filtered = filtered;
+      return resUsers;
+    });
+};
+
+apiModule.getUniversity = function (filterConfig) {
+  filterConfig = filterConfig || '';
+  const configString = this.getConfigString(filterConfig);
+
+  return University.find({
+    $or: [{ name: { $regex: configString, $options: 'i' } }],
+  })
+    .select('-__v');
+};
+
+apiModule.addUserAssignment = function (params) {
+  const userAssign = new UserAssignment(params);
+  return userAssign.save();
+};
+
+apiModule.addGroup = function (params) {
+  const group = new Group(params);
+  return group.save();
+};
+
+apiModule.addIndividualStudent = function (studentId, teacherId) {
+  if (!studentId || !teacherId) {
+    return Promise.reject();
+  }
+  return UserAssignment.find({ studentId, teacherId })
+    .countDocuments()
+    .then((size) => {
+      if (size === 0) {
+        const params = {
+          studentId,
+          teacherId,
+        };
+        return this.addUserAssignment(params);
+      }
+      return Promise.reject();
+    });
+};
+
+apiModule.deleteIndividualStudent = function (studentId, teacherId) {
+  if (!studentId || !teacherId) {
+    return Promise.reject();
+  }
+  return UserAssignment.find({ studentId, teacherId })
+    .countDocuments()
+    .then((size) => {
+      if (size > 0) {
+        return UserAssignment.find({ studentId, teacherId });
+      }
+      return Promise.reject();
+    })
+    .then(assignments => Promise.all(assignments.map(el => UserAssignment.findByIdAndRemove(el._id))));
+};
+
+apiModule.addGroupToTeacher = function (name, teacherId) {
+  const groupId = new mongoose.Types.ObjectId();
+
+  return new Promise((resolve, reject) => {
+    Group.find({ name })
+      .then((data) => {
+        if (data.length !== 0) {
+          reject();
+        }
+      })
+      .then(() => {
+        resolve();
+      });
+  })
+    .then(() => {
+      const params = {
+        _id: groupId,
+        name,
+      };
+      return this.addGroup(params);
+    })
+    .then(() => {
+      const params = {
+        groupId,
+        teacherId,
+      };
+      return this.addUserAssignment(params);
+    });
+};
+
+apiModule.deleteGroupAndAssingments = function (groupId) {
+  return Group.findByIdAndRemove(groupId)
+    .then(() => UserAssignment.find({ groupId }))
+    .then(data => Promise.all(data.map(el => UserAssignment.findByIdAndRemove(el._id))));
+};
+
+apiModule.editGroup = function (groupId, name) {
+  if (!name || !groupId) {
+    return Promise.reject();
+  }
+  return Group.findByIdAndUpdate(groupId, { name });
 };
 
 module.exports = apiModule;

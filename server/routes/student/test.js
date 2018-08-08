@@ -9,7 +9,7 @@ route.get('/available-sections/:userId', (req, res) => {
       res.status(200).send(sections);
     })
     .catch((err) => {
-      res.status(404).send(err);
+      res.status(404).json(err);
     });
 });
 
@@ -20,7 +20,7 @@ route.post('/new-request/:userid', (req, res) => {
       res.status(200).send();
     })
     .catch((err) => {
-      res.status(404).send(err);
+      res.status(404).json(err);
     });
 });
 
@@ -33,7 +33,7 @@ route.get('/submission/:assignmentId/:studentId', (req, res) => {
     .catch((err) => {
       if (err.message === 'Not enough questions') {
         res.status(404).send(err.message);
-      } else res.status(404).send(err);
+      } else res.status(404).json(err);
     });
 });
 
@@ -44,18 +44,29 @@ route.get('/assignments/:studentId', (req, res) => {
       res.status(200).send(assignments);
     })
     .catch((err) => {
-      res.status(404).send(err);
+      res.status(404).json(err);
     });
 });
 
-route.post('/answers/:assignmentId', (req, res) => {
+route.post('/answers/:submissionId', (req, res) => {
   submissionApi
-    .getQuestionsAndUpdateSubmition(req.params.assignmentId, req.body)
+    .getAnswersAndUpdateSubmition(req.params.submissionId, req.body)
     .then(() => {
       res.status(200).send();
     })
     .catch((err) => {
-      res.status(404).send(err);
+      res.status(404).json(err);
+    });
+});
+
+route.get('/sudmissions/:studentId', (req, res) => {
+  submissionApi
+    .getSubmissionsByStudent(req.params.studentId, req.query.skip, req.query.top)
+    .then((assignments) => {
+      res.status(200).send(assignments);
+    })
+    .catch((err) => {
+      res.status(404).json(err);
     });
 });
 
