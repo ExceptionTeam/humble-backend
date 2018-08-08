@@ -103,7 +103,7 @@ route.get('/questions-check/:teacherId', (req, res) => {
     });
 });
 
-route.get('/check-res/:checkid/:result', (req, res) => {
+route.post('/check-res/:checkid/:result', (req, res) => {
   submissionApi
     .sendCheckingResults(req.params.checkid, req.params.result)
     .then(() => {

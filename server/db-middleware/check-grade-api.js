@@ -7,12 +7,6 @@ const {
 } = require('../models/testing/test-submission');
 const {
   Question,
-  CATEGORY_SINGLE_ANSWER,
-  CATEGORY_MULTIPLE_ANSWERS,
-  CATEGORY_WORD_ANSWER,
-  CATEGORY_SENTENCE_ANSWER,
-  TYPE_TRAINING_QUESTION,
-  TYPE_PRIMARY_QUESTION,
 } = require('../models/testing/question');
 const {
   CheckRequest,
@@ -75,7 +69,7 @@ const updateQuestion = function (questId) {
         if (diff > 4) diff = 4;
         else if (diff < 1) diff = 1;
       }
-      if ((+info.peopleTested > minToChangeMark) &&
+      if ((info.peopleTested > minToChangeMark) &&
       (diff !== info.difficulty)) {
         return Question
           .findByIdAndUpdate(questId, { $set: { difficulty: diff } });
@@ -94,13 +88,11 @@ apiModule.initGraidingSequence = function (assignId) {
           .then((shouldIGrade) => {
             if (shouldIGrade) {
               return Question
-                .find({ tags: { $in: assignToRemember.tags } })
-                .select('_id')
+                .find({ tags: { $in: assignToRemember.tags } }, '_id')
                 .then(questionsToUpdate =>
                   Promise.all(questionsToUpdate.map(el => updateQuestion(el._id))))
                 .then(() => TestSubmission
-                  .find({ assignmentId: assignId })
-                  .select('_id'))
+                  .find({ assignmentId: assignId }, '_id'))
                 .then(sub => apiModule.gradingSequence(sub[0]._id));
             }
           });
@@ -109,13 +101,11 @@ apiModule.initGraidingSequence = function (assignId) {
         .then((shouldIGrade) => {
           if (shouldIGrade) {
             return Question
-              .find({ tags: { $in: assignToRemember.tags } })
-              .select('_id')
+              .find({ tags: { $in: assignToRemember.tags } }, '_id')
               .then(questionsToUpdate =>
                 Promise.all(questionsToUpdate.map(el => updateQuestion(el._id))))
               .then(() => TestSubmission
-                .find({ assignmentId: assignId })
-                .select('_id'))
+                .find({ assignmentId: assignId }, '_id'))
               .then(sub =>
                 Promise.all(sub.map(el => apiModule.gradingSequence(el._id))));
           } return false;

@@ -755,8 +755,7 @@ apiModule.initCheckingSequence = function (subId) {
     .then((succsessfull) => {
       if (succsessfull) {
         return TestSubmission
-          .findById(subId)
-          .select('assignmentId')
+          .findById(subId, 'assignmentId')
           .then(sub => checkGradeApi.initGraidingSequence(sub.assignmentId));
       }
     });
@@ -845,18 +844,18 @@ apiModule.sendCheckingResults = function (checkingId, result) {
       question = check.questionId;
       subId = check.submissionId;
       return TestSubmission
-        .findById(check.submissionId)
-        .select('answers _id');
+        .findById(check.submissionId, 'answers _id');
     })
     .then((submission) => {
       updateQuestion(question, res);
       return Promise.all(submission.answers.map((el) => {
         if (el.questionId == question) {
-          const elReassign = {};
-          elReassign.checking = 'false';
-          elReassign.questionId = el.questionId;
-          elReassign.answ = el.answ;
-          elReassign.result = res;
+          const elReassign = {
+            checking: 'false',
+            questionId: el.questionId,
+            answ: el.answ,
+            result: res,
+          };
           return elReassign;
         }
         return el;

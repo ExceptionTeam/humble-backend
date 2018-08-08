@@ -15,17 +15,10 @@ const {
 } = require('../models/testing/test-submission');
 const {
   Question,
-  CATEGORY_SINGLE_ANSWER,
-  CATEGORY_MULTIPLE_ANSWERS,
-  CATEGORY_WORD_ANSWER,
-  CATEGORY_SENTENCE_ANSWER,
-  TYPE_TRAINING_QUESTION,
-  TYPE_PRIMARY_QUESTION,
 } = require('../models/testing/question');
 const { TagAttachment } = require('../models/testing/tag-attachment');
 const generalApi = require('./general-api');
 const submissionApi = require('./submission-api');
-const checkGradeApi = require('./check-grade-api');
 
 const apiModule = {};
 
