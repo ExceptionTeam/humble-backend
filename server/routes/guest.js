@@ -1,14 +1,15 @@
 const route = require('express').Router();
 const passport = require('passport');
 const generalApi = require('../db-middleware/general-api');
+const taskApi = require('../db-middleware/task-api');
 
-route.use((req, res, next) => {
-  if (req.isUnauthenticated()) {
-    next();
-  } else {
-    res.status(403).send();
-  }
-});
+// route.use((req, res, next) => {
+//   if (req.isUnauthenticated()) {
+//     next();
+//   } else {
+//     res.status(403).send();
+//   }
+// });
 
 route.use('/login', (req, res, next) => {
   passport.authenticate('local', (err, user) => {
@@ -52,6 +53,18 @@ route.post('/reset-password', (req, res) => {
     })
     .catch(() => {
       res.status(400).send();
+    });
+});
+
+route.get('/task-statistics', (req, res) => {
+  taskApi
+    .getStatistics(10)
+    .then((data) => {
+      res.status(200).send(data);
+    })
+    .catch((err) => {
+      console.log(err);
+      res.status(500).send();
     });
 });
 

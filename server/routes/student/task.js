@@ -9,7 +9,7 @@ route.get('/full-info/:assignId', (req, res) => {
   taskApi
     .getAssignmentById(
       req.params.assignId,
-      '-_id -studentId -__v',
+      '-studentId -__v',
       'name description weight -_id',
       'name surname -_id',
     )
@@ -28,6 +28,7 @@ route.get('/tasks-list/:studentId', (req, res) => {
       res.status(200).send(task);
     })
     .catch((err) => {
+      console.log(err);
       res.status(404).json(err);
     });
 });
