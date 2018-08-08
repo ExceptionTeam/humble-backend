@@ -103,11 +103,11 @@ route.get('/questions-check/:teacherId', (req, res) => {
     });
 });
 
-route.get('/check-res/:checkid/:result', (req, res) => {
+route.post('/check-res/:checkid/:result', (req, res) => {
   submissionApi
     .sendCheckingResults(req.params.checkid, req.params.result)
-    .then((questions) => {
-      res.status(200).send(questions);
+    .then(() => {
+      res.status(200).send();
     })
     .catch((err) => {
       res.status(404).json(err);
