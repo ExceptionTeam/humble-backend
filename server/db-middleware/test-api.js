@@ -290,7 +290,7 @@ apiModule.getStatisticsActivity = function (amount) {
     })
     .then((tests) => {
       tests.forEach((el, j) => {
-        students[j].activityIndex = el.filter(elem => (!!elem.submissionMark)).length;
+        students[j].activityIndex = el.ids.filter(elem => (!!elem.submissionMark)).length;
       });
       return Promise.all(students.map(el => taskApi
         .getAllStudentTasks(el._id, false)));
