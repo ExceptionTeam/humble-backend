@@ -3,6 +3,8 @@ const taskApi = require('../../db-middleware/task-api');
 const controller = require('../../controllers/storage-controller');
 const Busboy = require('busboy');
 
+const enqueueSubmission = require('../../../docker/api/index');
+
 route.get('/full-info/:assignId', (req, res) => {
   taskApi
     .getAssignmentById(
@@ -44,15 +46,18 @@ route.get('/submissions/:assignId', (req, res) => {
 route.post('/submit/:assignId', (req, res) => {
   const busboy = new Busboy({ headers: req.headers });
   busboy.on('finish', () => {
-    controller.createSubmission(req.files, req.params.assignId)
+    controller
+      .createSubmission(req.files, req.params.assignId)
       .then((result) => {
         const submission = {
           _id: result.submissionId,
           assignId: req.params.assignId,
           srcFileId: result.fileId,
+          submitTime: new Date().getTime(),
           tests: new Array(result.length).fill(null),
         };
-        console.log(submission); /** First part of submission Object * */
+        enqueueSubmission(submission);
+        res.status(200).end();
       })
       .catch((err) => {
         res.status(404).json(err);
