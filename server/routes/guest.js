@@ -65,4 +65,14 @@ route.post('/university', (req, res) => {
     });
 });
 
+route.post('/primarySkills', (req, res) => {
+  generalApi.getSkills(req.body.filterConfig)
+    .then((data) => {
+      res.status(200).send(data);
+    })
+    .catch((err) => {
+      res.status(404).json(err);
+    });
+});
+
 module.exports = route;
