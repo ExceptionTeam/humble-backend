@@ -26,6 +26,7 @@ route.get('/tasks-list/:studentId', (req, res) => {
       res.status(200).send(task);
     })
     .catch((err) => {
+      console.log(err);
       res.status(404).json(err);
     });
 });
