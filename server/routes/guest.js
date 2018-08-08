@@ -57,7 +57,7 @@ route.post('/reset-password', (req, res) => {
     });
 });
 
-route.post('/test-statistics', (req, res) => {
+route.get('/test-statistics', (req, res) => {
   testApi
     .getStatistics(10)
     .then(() => {
