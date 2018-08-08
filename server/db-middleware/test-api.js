@@ -87,7 +87,7 @@ apiModule.getAllTags = function (sectId, filterConfig = []) {
       return container + el;
     }
     return container + '|' + el;
-  }) : '';
+  }, '') : '';
   const map = {};
   return TagAttachment
     .find(sectId ? { sectionId: sectId } : {})
@@ -295,9 +295,9 @@ apiModule.getStatistics = function (amount) {
         .forEach((el, j) => {
           const withSubmission = el.filter(elem => (!!elem.submissionMark));
           students[j].averageMark = withSubmission.length ? withSubmission
-            .reduce((sum, elem, i) => el + (!i ? 0 : sum)) / el.length : 0;
+            .reduce(((sum, elem) => elem.submissionMark + sum), 0) / el.length : 0;
         });
-      students.sort((el1, el2) => el1.averageMark - el2.averageMark).slice(0, amount);
+      return students.sort((el1, el2) => el1.averageMark - el2.averageMark).slice(0, amount);
     });
 };
 
