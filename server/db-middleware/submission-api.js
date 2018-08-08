@@ -9,7 +9,6 @@ const {
   SUBMISSION_STATUS_PENDING,
   SUBMISSION_STATUS_ANSWERED,
   SUBMISSION_STATUS_CHECKED,
-  SUBMISSION_STATUS_EVALUATED,
 } = require('../models/testing/test-submission');
 const {
   Question,
@@ -28,6 +27,8 @@ const {
   REQUEST_STATUS_PENDING,
   REQUEST_STATUS_CHECKED,
 } = require('../models/testing/check-request');
+const checkGradeApi = require('./check-grade-api');
+const generalApi = require('./general-api');
 
 const apiModule = {};
 
@@ -606,6 +607,7 @@ apiModule.getQuestionsToSubmit = function (questionTags, testType, questionAmoun
 
 apiModule.makeTestSubmission = function (testAssignmentId, studentId) {
   let assignmentToSubmit;
+  let stdAmount;
   return TestAssignment
     .findById(testAssignmentId)
     .then((assignment) => {
@@ -640,10 +642,24 @@ apiModule.makeTestSubmission = function (testAssignmentId, studentId) {
             .populate('questionsId', '_id category difficulty question type answerOptions tags')
             .lean());
       } else if (submission !== null && assignmentToSubmit.groupId !== undefined) {
-        return TestSubmission
-          .findById(submission._id)
-          .populate('questionsId', '_id category difficulty question type answerOptions tags')
-          .lean();
+        return generalApi.getStudentsByGroup(assignmentToSubmit.groupId)
+          .then((std) => {
+            stdAmount = std.length;
+            return TestSubmission
+              .countDocuments({ assignmentId: assignmentToSubmit._id });
+          })
+          .then((subAmount) => {
+            if (subAmount === stdAmount) {
+              return TestAssignment
+                .findByIdAndUpdate(testAssignmentId, {
+                  $set: { status: ASSIGNMENT_STATUS_PASSED },
+                });
+            }
+          })
+          .then(() => TestSubmission
+            .findById(submission._id)
+            .populate('questionsId', '_id category difficulty question type answerOptions tags')
+            .lean());
       } else if (submission === null) {
         throw new Error('Empty submition');
       } else if (submission === undefined) {
@@ -709,31 +725,40 @@ const checkSub = function (subId) {
           (ans.answ.every((el, index) => {
             if (el === quest.correctOptions[index]) return true;
             return false;
-          }))) { return true; }
-        return false;
+          }))) {
+          return true;
+        } return false;
       };
       submiss.answers.forEach((ans, index) => {
-        if (submiss.questionsId.some(quest => checkIfRight(ans, quest))) {
+        if (submiss.questionsId[index].category !== CATEGORY_SENTENCE_ANSWER &&
+          submiss.questionsId.some(quest => checkIfRight(ans, quest))) {
           submiss.answers[index].result = true;
           updateQuestion(submiss.answers[index].questionId, true);
-        } else if (submiss.answers[index].category !== CATEGORY_SENTENCE_ANSWER) {
+        } else if (submiss.questionsId[index].category !== CATEGORY_SENTENCE_ANSWER) {
           submiss.answers[index].result = false;
           updateQuestion(submiss.answers[index].questionId, false);
         }
       });
+
       return submiss;
     })
-    .then(() => {
-      apiModule.getCheckingResultsAndUpdateSub(subId, submiss.answers);
-    });
+    .then(() => apiModule.getCheckingResultsAndUpdateSub(subId, submiss.answers));
 };
 
 apiModule.initCheckingSequence = function (subId) {
   return isCheckingPossible(subId)
     .then((doCheck) => {
       if (doCheck) {
-        checkSub(subId);
-      } else return false;
+        return checkSub(subId);
+      } return false;
+    })
+    .then((succsessfull) => {
+      if (succsessfull) {
+        return TestSubmission
+          .findById(subId)
+          .select('assignmentId')
+          .then(sub => checkGradeApi.initGraidingSequence(sub.assignmentId));
+      }
     });
 };
 
@@ -801,9 +826,13 @@ apiModule.getQuestionsToCheck = function (teachId, skip = 0, top = 10) {
     });
 };
 
-apiModule.sendCheckingResults = function (checkingId, res) {
+apiModule.sendCheckingResults = function (checkingId, result) {
   let question;
   let subId;
+  let res;
+  if (result === 'true') {
+    res = true;
+  } else res = false;
   return CheckRequest
     .findByIdAndUpdate(checkingId, {
       $set: {
@@ -819,21 +848,23 @@ apiModule.sendCheckingResults = function (checkingId, res) {
         .findById(check.submissionId)
         .select('answers _id');
     })
-    .then(submission => Promise.all(submission.answers.map((el) => {
-      if (el.checking && el.questionId == question) {
-        const elReassign = {};
-        elReassign.checking = 'false';
-        elReassign.questionId = el.questionId;
-        elReassign.answ = el.answ;
-        elReassign.result = res;
-        return elReassign;
-      }
-      return el;
-    })))
+    .then((submission) => {
+      updateQuestion(question, res);
+      return Promise.all(submission.answers.map((el) => {
+        if (el.questionId == question) {
+          const elReassign = {};
+          elReassign.checking = 'false';
+          elReassign.questionId = el.questionId;
+          elReassign.answ = el.answ;
+          elReassign.result = res;
+          return elReassign;
+        }
+        return el;
+      }));
+    })
     .then(answ => TestSubmission
       .findByIdAndUpdate(subId, { $set: { answers: answ } }))
     .then(submission => apiModule.initCheckingSequence(submission._id))
-    .then(() => updateQuestion(question, res))
     .then(() => true);
 };
 
