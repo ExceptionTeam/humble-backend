@@ -57,6 +57,17 @@ route.post('/reset-password', (req, res) => {
     });
 });
 
+route.get('/test-statistics', (req, res) => {
+  testApi
+    .getStatistics(10)
+    .then((data) => {
+      res.status(200).send(data);
+    })
+    .catch(() => {
+      res.status(500).send();
+    });
+});
+
 route.get('/task-statistics', (req, res) => {
   taskApi
     .getStatistics(10)
