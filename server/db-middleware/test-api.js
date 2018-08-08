@@ -297,7 +297,7 @@ apiModule.getStatistics = function (amount) {
           students[j].averageMark = withSubmission.length ? withSubmission
             .reduce(((sum, elem) => elem.submissionMark + sum), 0) / el.length : 0;
         });
-      return students.sort((el1, el2) => el1.averageMark - el2.averageMark).slice(0, amount);
+      return students.sort((el1, el2) => el2.averageMark - el1.averageMark).slice(0, amount);
     });
 };
 
