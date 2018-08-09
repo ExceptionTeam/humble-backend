@@ -12,13 +12,13 @@ const adminRoute = require('./admin');
 route.use('/guest', guestRoute);
 route.use('/util', utilRoute);
 
-// route.use((req, res, next) => {
-//   if (req.isAuthenticated()) {
-//     next();
-//   } else {
-//     res.status(401).send();
-//   }
-// });
+route.use((req, res, next) => {
+  if (req.isAuthenticated()) {
+    next();
+  } else {
+    res.status(401).send();
+  }
+});
 
 route.use('/student', studentRoute);
 route.use('/teacher', teacherRoute);

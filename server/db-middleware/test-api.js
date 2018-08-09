@@ -20,7 +20,6 @@ const { TagAttachment } = require('../models/testing/tag-attachment');
 const { User, USER_ROLE_STUDENT } = require('../models/user/user');
 const generalApi = require('./general-api');
 const submissionApi = require('./submission-api');
-const { User, USER_ROLE_STUDENT } = require('../models/user/user');
 const checkGradeApi = require('./check-grade-api');
 const taskApi = require('./task-api');
 
