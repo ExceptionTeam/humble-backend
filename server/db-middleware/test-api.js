@@ -12,6 +12,7 @@ const {
 } = require('../models/testing/test-assignment');
 const {
   TestSubmission,
+  SUBMISSION_STATUS_EVALUATED,
 } = require('../models/testing/test-submission');
 const {
   Question,
@@ -255,7 +256,16 @@ apiModule.allTeachersAssignments = function (teachId, skip = 0, top = 10) {
     .then((assignments) => {
       allAssignments.assignments = assignments;
       return allAssignments;
-    });
+    })
+    .then(() => Promise.all(allAssignments.assignments.map((el, index) => TestSubmission
+      .find({ assignmentId: el._id, status: SUBMISSION_STATUS_EVALUATED }, 'mark')
+      .lean()
+      .then((sub) => {
+        if (sub.length) {
+          allAssignments.assignments[index].mark = sub[0].mark;
+        }
+      }))))
+    .then(() => allAssignments);
 };
 
 apiModule.testAssign = function (assignment) {
