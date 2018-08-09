@@ -12,6 +12,7 @@ const {
 } = require('../models/testing/test-assignment');
 const {
   TestSubmission,
+  SUBMISSION_STATUS_EVALUATED,
 } = require('../models/testing/test-submission');
 const {
   Question,
@@ -20,7 +21,6 @@ const { TagAttachment } = require('../models/testing/tag-attachment');
 const { User, USER_ROLE_STUDENT } = require('../models/user/user');
 const generalApi = require('./general-api');
 const submissionApi = require('./submission-api');
-const { User, USER_ROLE_STUDENT } = require('../models/user/user');
 const checkGradeApi = require('./check-grade-api');
 const taskApi = require('./task-api');
 
@@ -255,8 +255,19 @@ apiModule.allTeachersAssignments = function (teachId, skip = 0, top = 10) {
     })
     .then((assignments) => {
       allAssignments.assignments = assignments;
+      console.log(assignments);
       return allAssignments;
-    });
+    })
+    .then(() => Promise.all(allAssignments.assignments.map((el, index) => TestSubmission
+      .find({ assignmentId: el._id, status: SUBMISSION_STATUS_EVALUATED }, 'mark')
+      .lean()
+      .then((sub) => {
+        console.log(sub);
+        if (sub.length) {
+          allAssignments.assignments[index].mark = sub[0].mark;
+        }
+      }))))
+    .then(() => allAssignments);
 };
 
 apiModule.testAssign = function (assignment) {
