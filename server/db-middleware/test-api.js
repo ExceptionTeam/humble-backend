@@ -255,14 +255,12 @@ apiModule.allTeachersAssignments = function (teachId, skip = 0, top = 10) {
     })
     .then((assignments) => {
       allAssignments.assignments = assignments;
-      console.log(assignments);
       return allAssignments;
     })
     .then(() => Promise.all(allAssignments.assignments.map((el, index) => TestSubmission
       .find({ assignmentId: el._id, status: SUBMISSION_STATUS_EVALUATED }, 'mark')
       .lean()
       .then((sub) => {
-        console.log(sub);
         if (sub.length) {
           allAssignments.assignments[index].mark = sub[0].mark;
         }
