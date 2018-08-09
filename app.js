@@ -49,6 +49,9 @@ const router = require('./server/routes/index');
 
 app.use(router);
 
+process.on('uncaughtException', err => console.log(err));
+process.on('unhandledRejection', err => console.log(err));
+
 const server = app.listen(port, () => {
   console.log(`Server on port ${server.address().port}`);
 });
